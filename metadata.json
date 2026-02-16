@@ -1,0 +1,8 @@
+{
+  "name": "CyberShield Repository",
+  "description": "A comprehensive cybersecurity knowledge hub for students, featuring blogs, CTF guides, career roadmaps, project showcases, and interview experiences.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
