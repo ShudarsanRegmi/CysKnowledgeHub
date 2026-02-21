@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, Search, Cpu } from 'lucide-react';
+import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, Search, Cpu, Building2 } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,6 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'achievements', label: 'Achievements', icon: Award },
     { id: 'experiments', label: 'Experiments', icon: Cpu },
     { id: 'career', label: 'Career', icon: Briefcase },
+    { id: 'companies', label: 'Companies', icon: Building2 },
   ];
 
   return (
@@ -38,9 +39,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`text-sm font-medium transition-colors hover:text-cyan-400 ${
-                  activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'
-                }`}
+                className={`text-sm font-medium transition-colors hover:text-cyan-400 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'
+                  }`}
               >
                 {item.label}
               </button>
@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
             <button className="p-2 text-gray-400 hover:text-white transition-colors">
               <Search className="w-5 h-5" />
             </button>
-            <button 
+            <button
               className="md:hidden p-2 text-gray-400 hover:text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -72,9 +72,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                   setActiveTab(item.id);
                   setIsMenuOpen(false);
                 }}
-                className={`text-2xl font-bold flex items-center gap-3 ${
-                  activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'
-                }`}
+                className={`text-2xl font-bold flex items-center gap-3 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'
+                  }`}
               >
                 <item.icon className="w-6 h-6" />
                 {item.label}
@@ -96,7 +95,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
               <span className="text-lg font-bold mono">CYBERSHIELD</span>
             </div>
             <p className="text-gray-400 max-w-sm">
-              The official knowledge repository of the Department Cybersecurity Cell. 
+              The official knowledge repository of the Department Cybersecurity Cell.
               Dedicated to building the next generation of digital defenders.
             </p>
           </div>

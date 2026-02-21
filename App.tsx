@@ -6,8 +6,9 @@ import { MOCK_CONTENT, MOCK_INTERVIEWS, ROADMAPS } from './constants';
 import { ContentType } from './types';
 import ProjectsPage from './components/ProjectsPage';
 import AchievementsPage from './components/AchievementsPage';
-import { 
-  Terminal, Shield, BookOpen, Map, Award, Briefcase, 
+import CompaniesPage from './components/CompaniesPage';
+import {
+  Terminal, Shield, BookOpen, Map, Award, Briefcase,
   ExternalLink, ArrowRight, User, Calendar, Tag, ChevronRight,
   Code, HardDrive, Cpu, Search
 } from 'lucide-react';
@@ -22,8 +23,8 @@ const App: React.FC = () => {
           <div className="space-y-16">
             {/* Hero */}
             <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-500/20 p-8 md:p-16 text-center">
-              <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" 
-                   style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #06b6d4 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+              <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
+                style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #06b6d4 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
                 Master the Art of <span className="text-cyan-500 underline decoration-cyan-500/30">Cyber Defense</span>
               </h1>
@@ -107,9 +108,9 @@ const App: React.FC = () => {
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <input 
-                  type="text" 
-                  placeholder={`Search ${activeTab}...`} 
+                <input
+                  type="text"
+                  placeholder={`Search ${activeTab}...`}
                   className="bg-gray-900 border border-gray-800 rounded-full py-2 pl-10 pr-4 w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 />
               </div>
@@ -153,6 +154,9 @@ const App: React.FC = () => {
 
       case 'achievements':
         return <AchievementsPage />;
+
+      case 'companies':
+        return <CompaniesPage />;
 
       case 'roadmaps':
         return (
@@ -227,11 +231,10 @@ const App: React.FC = () => {
                         <h4 className="text-lg font-bold">{exp.company}</h4>
                         <p className="text-cyan-500 text-sm">{exp.role}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
-                        exp.difficulty === 'Hard' ? 'bg-red-900/20 text-red-400 border border-red-500/20' :
-                        exp.difficulty === 'Medium' ? 'bg-yellow-900/20 text-yellow-400 border border-yellow-500/20' :
-                        'bg-green-900/20 text-green-400 border border-green-500/20'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${exp.difficulty === 'Hard' ? 'bg-red-900/20 text-red-400 border border-red-500/20' :
+                          exp.difficulty === 'Medium' ? 'bg-yellow-900/20 text-yellow-400 border border-yellow-500/20' :
+                            'bg-green-900/20 text-green-400 border border-green-500/20'
+                        }`}>
                         {exp.difficulty}
                       </span>
                     </div>
@@ -272,11 +275,11 @@ const App: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <button className="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-all">
+                  <button onClick={() => setActiveTab('companies')} className="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-all">
                     View Full Directory
                   </button>
                 </div>
-                
+
                 <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <Award className="text-yellow-500" /> Prep Resources

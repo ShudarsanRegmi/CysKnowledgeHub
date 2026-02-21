@@ -71,3 +71,18 @@ export interface Achievement {
   description: string;
   images: string[]; // Array of image URLs
 }
+
+export interface CompanyInfo {
+  id: string;
+  companyName: string;
+  logo: string;
+  industry: string;
+  location: string;
+  website: string;
+  roles: string[];
+  eligibilityCriteria: string;
+  salaryPackage: string;
+  selectionProcess: string[];
+  interviewExperience?: string;
+  notesTips: string;
+}
