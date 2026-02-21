@@ -60,3 +60,14 @@ export interface Project {
   imageUrl?: string;
   contributors?: string[];
 }
+
+export interface Achievement {
+  id: string;
+  title: string;
+  type: 'Hackathon' | 'CTF' | 'Coding' | 'Other';
+  result: string; // e.g., '1st Place', 'Finalist', 'Winner'
+  students: string[];
+  date: string;
+  description: string;
+  images: string[]; // Array of image URLs
+}
