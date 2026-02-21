@@ -5,6 +5,7 @@ import ChatAssistant from './components/ChatAssistant';
 import { MOCK_CONTENT, MOCK_INTERVIEWS, ROADMAPS } from './constants';
 import { ContentType } from './types';
 import ProjectsPage from './components/ProjectsPage';
+import AchievementsPage from './components/AchievementsPage';
 import { 
   Terminal, Shield, BookOpen, Map, Award, Briefcase, 
   ExternalLink, ArrowRight, User, Calendar, Tag, ChevronRight,
@@ -149,6 +150,9 @@ const App: React.FC = () => {
 
       case 'projects':
         return <ProjectsPage />;
+
+      case 'achievements':
+        return <AchievementsPage />;
 
       case 'roadmaps':
         return (
