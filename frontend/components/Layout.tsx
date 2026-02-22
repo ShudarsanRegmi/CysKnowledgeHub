@@ -1,10 +1,8 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, Users } from 'lucide-react';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare } from 'lucide-react';
+import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
-
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
