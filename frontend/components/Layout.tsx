@@ -48,13 +48,21 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
       ]
     },
     {
+      id: 'directory', label: 'Directory', icon: Users,
+      subItems: [
+        // The Constellation (Students list)
+        { id: 'students', label: 'The Constellation', icon: Users },
+        // Placeholder entries for future pages (faculty, gallery)
+        { id: 'faculty', label: 'Faculty', icon: UserCircle },
+        { id: 'gallery', label: 'Gallery', icon: Map },
+      ]
+    },
+    {
       id: 'career_hub', label: 'Career Hub', icon: Briefcase,
       subItems: [
         { id: 'career', label: 'Preparation', icon: Briefcase },
         { id: 'interviews', label: 'Experiences', icon: MessageSquare },
         { id: 'companies', label: 'Companies', icon: Building2 },
-        // Student list is intentionally kept inside Career Hub as "The Constellation"
-        { id: 'students', label: 'The Constellation', icon: Users },
       ]
     }
   ];
