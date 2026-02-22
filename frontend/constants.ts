@@ -1,5 +1,5 @@
 
-import { ContentType, ContentItem, InterviewExperience } from './types';
+import { ContentType, ContentItem, InterviewExperience, RoadmapData } from './types';
 
 export const MOCK_CONTENT: ContentItem[] = [
   {
@@ -77,10 +77,1063 @@ export const MOCK_INTERVIEWS: InterviewExperience[] = [
   }
 ];
 
-export const ROADMAPS = {
-  SOC_ANALYST: [
-    { title: 'Foundations', description: 'Network+ and Security+ level knowledge.', resources: ['Professor Messer', 'TryHackMe Pre-Security'] },
-    { title: 'Tool Mastery', description: 'Splunk, ELK Stack, and Wireshark basics.', resources: ['Splunk Training', 'Wireshark Labs'] },
-    { title: 'Blue Teaming', description: 'Incident response and threat hunting fundamentals.', resources: ['LetsDefend', 'Blue Team Level 1'] }
-  ]
+// ─── Roadmap Data ─────────────────────────────────────────────────────────────
+// Each step has:
+//   topics → 'must-know' | 'good-to-know' | 'tools'   (detailed concepts)
+//   resources → recommended courses / certs / practice platforms
+// This data is static now; swap ROADMAPS fetch with an API call for dynamic content.
+
+export const ROADMAPS: Record<string, RoadmapData> = {
+
+  // ── SOC Analyst ──────────────────────────────────────────────────────────────
+  SOC_ANALYST: {
+    id: 'SOC_ANALYST',
+    title: 'SOC Analyst',
+    subtitle: 'Master defensive operations, threat monitoring, and incident response from the ground up.',
+    steps: [
+      {
+        title: 'Networking Fundamentals',
+        description: 'Understand how data flows across networks. A SOC analyst spends their day reading network events — this foundation is non-negotiable.',
+        duration: '3–4 weeks',
+        resources: ['Professor Messer CompTIA N+', 'TryHackMe Pre-Security Path', 'Cisco Packet Tracer (free)'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'OSI Model — all 7 layers and what happens at each',
+              'TCP/IP suite: IP, TCP, UDP, ICMP — headers & flags',
+              'TCP 3-way handshake & connection teardown',
+              'DNS resolution process (recursive vs authoritative)',
+              'DHCP lease process (DORA)',
+              'ARP — how MAC addresses are resolved',
+              'HTTP/HTTPS — methods, status codes, headers',
+              'TLS/SSL — handshake, certificates, cipher suites',
+              'Subnetting & CIDR notation (/24, /16 etc.)',
+              'Common ports: 21/FTP, 22/SSH, 25/SMTP, 53/DNS, 80/HTTP, 443/HTTPS, 445/SMB, 3389/RDP',
+              'NAT — how private IPs hit the internet',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'VLANs & trunking (802.1Q)',
+              'Spanning Tree Protocol (STP)',
+              'Wireless security: WPA2-PSK vs WPA2-Enterprise, 4-way handshake',
+              'IPv6 basics & dual-stack environments',
+              'BGP & routing protocol basics',
+              'Network segmentation principles',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Wireshark — capture & filter packets (display filters: tcp, http, dns)',
+              'tcpdump — CLI packet capture on Linux',
+              'nmap — port scanning & service detection',
+              'ping, traceroute, nslookup, dig — daily CLI tools',
+              'Cisco Packet Tracer — simulate networks for free',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Operating Systems & Log Sources',
+        description: 'SOC analysts live inside Windows Event Viewer and Linux terminals. Know your log sources cold before touching a SIEM.',
+        duration: '3–4 weeks',
+        resources: ['TryHackMe — Linux Fundamentals', 'Microsoft Learn — Windows Security Events', 'Sysmon by Mark Russinovich'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Linux CLI: grep, awk, sed, find, ps, netstat/ss, cut, sort, uniq',
+              'Linux file permissions: rwx, chmod, chown, SUID/SGID bits',
+              'Linux log files: /var/log/auth.log, syslog, secure, messages',
+              'Windows Event Log structure: Security, System, Application channels',
+              'Critical Event IDs: 4624 (logon), 4625 (failed logon), 4688 (process create), 4698 (scheduled task), 4776 (NTLM auth), 4720/4732 (account changes)',
+              'Windows Registry: HKLM\\Software\\Run (persistence), SAM hive',
+              'Active Directory: users, groups, OUs, Group Policy basics',
+              'Process parent-child relationships (powershell spawned by Word = suspicious)',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'PowerShell transcript & script block logging',
+              'Windows Prefetch, Shimcache, Amcache artifacts',
+              'Linux systemd & journald (journalctl usage)',
+              'MacOS unified log basics',
+              'Container logging (Docker logs concept)',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Sysmon — deploy with SwiftOnSecurity config for rich telemetry',
+              'Windows Event Viewer — filter by Event ID',
+              'Process Hacker — inspect processes & network connections live',
+              'Autoruns (Sysinternals) — find all persistence locations',
+              'OSQuery — SQL-style querying of OS state',
+              'PowerShell: Get-WinEvent, Get-Process, Get-NetTCPConnection',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'SIEM & Log Analysis',
+        description: 'The core skill of a SOC analyst. Learn to ingest, query, correlate, and alert on logs at scale.',
+        duration: '5–6 weeks',
+        resources: ['Splunk Free Training (Splunk Fundamentals 1)', 'Microsoft SC-200 Study Guide', 'Elastic SIEM documentation'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'SIEM architecture: collectors → indexers → search heads',
+              'Log normalization & field extraction (parsing raw logs)',
+              'Log sources to ingest: firewall, endpoint (EDR), AD, web proxy, email, cloud',
+              'Splunk SPL: search, fields, stats, eval, timechart, lookup, join',
+              'KQL (Kusto): where, project, summarize, extend — for Microsoft Sentinel',
+              'Creating detection rules: threshold, aggregation, ML-based',
+              'Alert triaging: true positive vs false positive methodology',
+              'Dashboard creation for NOC/SOC visibility',
+              'Correlation rules: e.g. failed logon > 10 in 5 min from same IP',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'UEBA — detect anomalies in user/entity behavior over time',
+              'Log retention policies (PCI-DSS: 1 yr, HIPAA: 6 yrs)',
+              'SIEM tuning lifecycle — rule refinement & suppression logic',
+              'Parsing CEF, LEEF, syslog formats',
+              'Data normalization schemas (ECS for Elastic, CIM for Splunk)',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Splunk Enterprise (60-day free trial) or Splunk BOTS dataset',
+              'Microsoft Sentinel (free 90-day via Azure trial)',
+              'ELK Stack (Elasticsearch + Logstash + Kibana) — self-host free',
+              'IBM QRadar Community Edition',
+              'Graylog (open source SIEM)',
+              'LetsDefend — pre-built SOC simulations with real alert queues',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Threat Intelligence & MITRE ATT&CK',
+        description: 'Move from reactive alerting to proactive hunting. Know your adversaries, their TTPs, and how to map detections to frameworks.',
+        duration: '3–4 weeks',
+        resources: ['MITRE ATT&CK official website', 'OpenCTI Community Edition', 'SANS FOR578 course outline (free preview)'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'MITRE ATT&CK matrix — 14 Tactics, Techniques, Sub-techniques',
+              'Cyber Kill Chain — 7 stages (Reconnaissance → Actions on Objectives)',
+              'Diamond Model — Adversary, Capability, Infrastructure, Victim',
+              'IOC types: IP addresses, domains, file hashes (MD5/SHA256), URLs, email headers',
+              'IOC vs IOA — indicators of compromise vs attack behaviour patterns',
+              'Threat intelligence lifecycle: Direction → Collection → Processing → Analysis → Dissemination → Feedback',
+              'TTP mapping: link observed attacker behaviour to ATT&CK technique IDs',
+              'Pivoting from one IOC to find related infrastructure',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'STIX 2.1 / TAXII 2.1 — threat intel sharing standards',
+              'Threat actor profiling (APT groups, motivation, attribution caveats)',
+              'Dark web monitoring concepts',
+              'CTI sharing communities: ISACs, FS-ISAC',
+              'Pyramid of Pain — why hash-based IOCs are low value vs TTPs',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'MITRE ATT&CK Navigator — layer, annotate, compare TTPs',
+              'VirusTotal — hash/URL/IP reputation lookups',
+              'AlienVault OTX (Open Threat Exchange) — free community feeds',
+              'MISP — open source threat intelligence platform',
+              'Shodan — search internet-exposed services for IOC pivoting',
+              'Mandiant Advantage (free tier) — threat actor profiles',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Incident Response & Blue Teaming',
+        description: 'The end goal — detecting, containing, and recovering from real attacks. Includes basic DFIR skills.',
+        duration: '4–6 weeks',
+        resources: ['NIST SP 800-61 (free PDF)', 'Sans Incident Handler Handbook', 'CyberDefenders platform labs'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'IR lifecycle: Prepare → Identify → Contain → Eradicate → Recover → Lessons Learned',
+              'Severity classification & triage methodology (P1/P2/P3)',
+              'Containment strategies: network isolation, account lockout, snapshot',
+              'Evidence preservation: chain of custody, disk imaging (dd/FTK Imager)',
+              'Memory acquisition (why RAM is volatile & time-sensitive)',
+              'Malware triage: static (strings, PE headers, hashes) vs dynamic (sandbox)',
+              'Writing an incident report: timeline, affected systems, root cause, remediation',
+              'Escalation procedures & stakeholder communication (CISO, legal, PR)',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Memory forensics: process injection, hollow processes, Malfind plugin',
+              'Volatility framework usage (imageinfo, pslist, netscan, malfind)',
+              'Browser forensics: cookies, history, downloads',
+              'Cloud IR procedures (AWS CloudTrail analysis, S3 audit logs)',
+              'Tabletop exercise design & facilitation',
+              'SOAR playbook design (automated response steps)',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'TheHive — case management for incident tracking',
+              'Velociraptor — DFIR endpoint investigation at scale',
+              'FTK Imager — free disk imaging & evidence preservation',
+              'Autopsy — open source digital forensics platform',
+              'Hybrid Analysis / Any.run — online malware sandboxes',
+              'Volatility 3 — memory forensics framework',
+              'CyberDefenders & Blue Team Labs Online — IR scenario practice',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── Penetration Tester ───────────────────────────────────────────────────────
+  PENETRATION_TESTER: {
+    id: 'PENETRATION_TESTER',
+    title: 'Penetration Tester',
+    subtitle: 'Learn to legally break into systems and uncover vulnerabilities before attackers do.',
+    steps: [
+      {
+        title: 'Foundations: Networking & Linux',
+        description: 'Pentesting without networking fundamentals is guesswork. Build the base that every offensive technique relies on.',
+        duration: '3–4 weeks',
+        resources: ['OverTheWire Bandit (Linux wargames)', 'TryHackMe Pre-Security path', 'Professor Messer CompTIA N+'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'OSI model & TCP/IP — where each attack operates',
+              'TCP 3-way handshake & flags (SYN, ACK, RST, FIN)',
+              'Common service ports: 21/FTP, 22/SSH, 23/Telnet, 25/SMTP, 53/DNS, 80/HTTP, 135/RPC, 139-445/SMB, 3389/RDP',
+              'DNS: A, MX, CNAME, TXT records — all used in recon',
+              'HTTP: methods (GET/POST/PUT/DELETE), headers, status codes, cookies',
+              'Linux CLI: cd, ls, find, grep, chmod, curl, ssh, cp, mv, cat, less',
+              'Linux file permissions & SUID/SGID (key for privesc)',
+              'Bash scripting basics: loops, conditionals, variables',
+              'Setting up a pentest lab: VirtualBox/VMware + Kali Linux + Metasploitable',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'IPv6 attacks (link-local addressing, neighbour spoofing)',
+              'VLAN hopping concepts',
+              'PowerShell basics (important for Windows post-exploitation)',
+              'ARP spoofing & MITM attack chain',
+              'Wireless: 4-way handshake capture & cracking (WPA2)',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Kali Linux / Parrot OS — install as VM, learn the toolset layout',
+              'nmap — port scanning (-sV, -sC, -O, -A flags)',
+              'Wireshark — analyze captures during your own attacks',
+              'netcat (nc) — raw TCP connections, simple bind/reverse shells',
+              'tmux — split-pane terminal for multi-session pentesting',
+              'OverTheWire Bandit — 34 levels of Linux escalation via SSH',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Reconnaissance & OSINT',
+        description: 'Before touching a single port, gather as much intelligence as possible. Good recon often reveals the entire attack path.',
+        duration: '2–3 weeks',
+        resources: ['Michael Bazzell — OSINT Techniques book', 'theHarvester GitHub docs', 'Shodan Complete Guide'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Passive recon: WHOIS lookups, DNS records (MX, TXT, SPF, DMARC)',
+              'Google Dorking: site:, filetype:, inurl:, intitle:, cache: operators',
+              'Subdomain enumeration: brute-force, certificate transparency (crt.sh)',
+              'Active recon: port scanning, service fingerprinting, banner grabbing',
+              'Web tech fingerprinting: CMS detection (WordPress, Drupal), server headers, JS frameworks',
+              'Employee OSINT: LinkedIn, GitHub, email format patterns, breach data',
+              'ASN & IP range enumeration for large orgs',
+              'Wayback Machine — find old endpoints, hidden files, exposed configs',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Dark web OSINT (Tor, .onion directories)',
+              'Social engineering reconnaissance (building pretexts from OSINT)',
+              'Cloud asset discovery (S3 buckets, Azure blobs, GCP storage)',
+              'Job listing analysis to infer tech stack',
+              'Certificate transparency: crt.sh, censys.io for new subdomains',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'theHarvester — aggregate emails, subdomains, IPs from public sources',
+              'Amass / Subfinder — subdomain enumeration at scale',
+              'Shodan / Censys — find exposed services, IoT, industrial systems',
+              'Maltego CE — visual link analysis for OSINT',
+              'Recon-ng — modular web recon framework',
+              'DNSdumpster — DNS record visualization',
+              'crt.sh — certificate transparency search',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Web Application Hacking',
+        description: 'Web apps are the #1 attack surface. Master OWASP Top 10 and the ability to test any web target thoroughly.',
+        duration: '6–8 weeks',
+        resources: ['PortSwigger Web Security Academy (free, 200+ labs)', 'OWASP Testing Guide v4.2', 'HackTheBox Web Challenges'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'SQL Injection: Union-based, Blind Boolean, Time-based, Error-based, SQLi in ORDER BY',
+              'XSS: Reflected, Stored, DOM-based — bypass filters, CSP, HttpOnly',
+              'IDOR & Forced Browsing: access control bypass by changing IDs/paths',
+              'SSRF: reach internal services via forged server requests, cloud metadata',
+              'XXE: XML External Entity — read files, SSRF, blind XXE via DNS',
+              'Authentication attacks: brute force, credential stuffing, password spraying',
+              'Session management flaws: session fixation, insecure cookies, CSRF',
+              'JWT attacks: alg:none bypass, weak HMAC secret, kid header injection',
+              'File upload bypass: MIME sniffing, magic bytes, double extension',
+              'Directory traversal: ../../../etc/passwd patterns',
+              'OAuth 2.0 authorization code interception & state parameter bypass',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'SSTI (Server-Side Template Injection): Jinja2, Twig, Freemarker payloads',
+              'HTTP Request Smuggling: CL.TE & TE.CL desync',
+              'GraphQL introspection & injection',
+              'WebSocket security: hijacking, CSWSH',
+              'API security testing (REST & GraphQL): broken object-level auth',
+              'Deserialization attacks: Java, PHP, Python pickle',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Burp Suite Community — intercept, repeat, intruder, scanner',
+              'OWASP ZAP — open source Burp alternative',
+              'SQLmap — automated SQL injection exploitation (-u, --dbs, --dump)',
+              'ffuf / feroxbuster — directory & file fuzzing (fast)',
+              'Nikto — web server misconfiguration scanner',
+              'Wfuzz — parameter fuzzing & authentication testing',
+              'PortSwigger Web Academy — complete all 200+ labs, especially SQLi, XSS, SSRF',
+              'DVWA / bWAPP / WebGoat — local vulnerable app practice',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Network & Infrastructure Hacking',
+        description: 'Move from web apps to full network infrastructure. Learn service enumeration, exploitation, privilege escalation, and pivoting.',
+        duration: '6–8 weeks',
+        resources: ['TCM Security PEH Course', 'HackTheBox Pro Labs (Offshore, RastaLabs)', 'TryHackMe Offensive Security Path'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'SMB enumeration: null sessions, share listing, relay attacks (MS17-010 EternalBlue exploit)',
+              'FTP: anonymous login, bounce attacks, version exploits',
+              'SSH: key-based auth, weak key generation, user enumeration',
+              'SMTP: user enumeration (VRFY, EXPN), open relay testing',
+              'RDP: credential brute force, BlueKeep (CVE-2019-0708) concept',
+              'Password attacks: brute force, spraying, credential stuffing, hash cracking (NT hashes)',
+              'Linux PrivEsc: SUID binaries (GTFOBins), writable cron jobs, sudo -l misconfigs, PATH hijacking',
+              'Windows PrivEsc: unquoted service paths, weak service permissions, DLL hijacking, token impersonation (PrintSpoofer)',
+              'Pivoting: SSH tunneling (-L, -R, -D flags), SOCKS proxies, proxychains',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Active Directory attacks: Kerberoasting, AS-REP Roasting, Pass-the-Hash, DCSync, Golden/Silver Ticket',
+              'BloodHound attack path analysis — find shortest path to Domain Admin',
+              'LDAP enumeration: null bind, attribute dumping',
+              'MSSQL: xp_cmdshell, linked servers, CLR assemblies',
+              'Azure AD attacks: Device Code Phishing, PRT abuse, Illicit Consent Grant',
+              'Tunneling over DNS, ICMP for restricted networks',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Metasploit Framework — search, use, set, run — learn module structure',
+              'Impacket suite — psexec.py, secretsdump.py, GetUserSPNs.py',
+              'BloodHound / SharpHound — AD attack graph visualisation',
+              'CrackMapExec (CME) — Swiss army knife for AD, SMB, WinRM',
+              'Hashcat — GPU-accelerated hash cracking (mode -m 1000 for NTLM)',
+              'John the Ripper — CPU-based cracking, rule-based mutations',
+              'Responder — LLMNR/NBT-NS poisoning to capture NTLMv2 hashes',
+              'Rubeus — Kerberos attacks (Kerberoasting, AS-REP, ticket manipulation)',
+              'Mimikatz — credential dumping (lsadump::sam, sekurlsa::logonpasswords)',
+              'GTFOBins (web) — Linux SUID/sudo privilege escalation one-liners',
+              'PEASS-ng (linPEAS/winPEAS) — automated PrivEsc enumeration scripts',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Post-Exploitation & Evasion',
+        description: 'Getting initial access is only the beginning. Learn persistence, lateral movement, and basic AV/EDR evasion.',
+        duration: '4–5 weeks',
+        resources: ['VirtualBox lab with Windows Server 2019 + Windows 10', 'Red Team Development & Operations (Joe Vest)', 'Sektor7 Malware Development course'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Meterpreter: shell, upload/download, run post modules, migrate process',
+              'Staged vs stageless payloads (msfvenom -p, -f, LHOST/LPORT)',
+              'Persistence: registry Run keys, scheduled tasks, startup folder, services',
+              'Lateral movement: PsExec, WMI exec, WinRM (Evil-WinRM), SMB shares',
+              'Data exfiltration: archive & encrypt before exfil, DNS/HTTP channels',
+              'Log clearing basics: wevtutil cl Security, history -c',
+              'Living off the Land (LOLBins): certutil, regsvr32, mshta, wscript for payload delivery',
+              'AV evasion concepts: obfuscation, encoding (base64), in-memory execution',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'C2 framework concepts: beacons, callbacks, sleep timers, malleable profiles',
+              'Shellcode injection: process injection, DLL injection, reflective DLL',
+              'Bypass AMSI (Antimalware Scan Interface) — memory patching techniques',
+              'Container escape (docker group, privileged container misconfigs)',
+              'Serverless & cloud post-exploitation basics',
+              'Red team infrastructure: redirectors, domain fronting concepts',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'msfvenom — payload generation for dozens of formats & architectures',
+              'Evil-WinRM — lateral movement over WinRM with full shell',
+              'Havoc C2 / Sliver — open-source command & control frameworks',
+              'PowerView (PowerSploit) — AD enumeration from attacker perspective',
+              'SharpCollection — compiled C# offensive tools (SharpHound, Rubeus)',
+              'HackTheBox Pro Labs — Offshore, RastaLabs for realistic AD environments',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Reporting & Certifications',
+        description: 'A pentest is worthless without a clear, actionable report. Learn professional methodology and which certifications matter.',
+        duration: '2–3 weeks (ongoing)',
+        resources: ['TCM Security sample pentest report (GitHub)', 'PTES Technical Guidelines', 'CVSS v3.1 calculator'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'PTES methodology — 7 phases from pre-engagement to reporting',
+              'Finding documentation format: Title, Severity (CVSS), Affected Component, Description, Evidence (screenshot/output), Impact, Remediation, References',
+              'CVSS v3.1 scoring — Base, Temporal, Environmental metrics',
+              'Executive summary vs technical findings section — different audiences',
+              'Risk rating: Critical / High / Medium / Low / Informational',
+              'Remediation recommendations: specific, actionable, prioritised',
+              'Rules of Engagement (RoE) & scope of work documentation',
+              'Legal: get signed authorisation before every test — no exceptions',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Attack narrative / story-driven report formats',
+              'Debriefing the client after the engagement',
+              'Remediation validation (re-test process)',
+              'OWASP Testing Guide v4.2 as reference methodology for web pentests',
+              'Bug Bounty report writing (HackerOne, Bugcrowd platforms)',
+            ],
+          },
+          {
+            name: 'Target Certifications',
+            type: 'tools',
+            items: [
+              'eJPT (eLearnSecurity) — beginner, great first cert, practical exam',
+              'PNPT (TCM Security) — practical, report-based, highly respected',
+              'OSCP (Offensive Security) — gold standard, 24-hr practical exam',
+              'CEH (EC-Council) — MCQ-based, widely recognised by HR teams',
+              'CRTE (Altered Security) — advanced Active Directory red teaming',
+              'Practice: HackTheBox, TryHackMe, PentesterLab, VulnHub, PortSwigger Academy',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── GRC Specialist ───────────────────────────────────────────────────────────
+  GRC_SPECIALIST: {
+    id: 'GRC_SPECIALIST',
+    title: 'GRC Specialist',
+    subtitle: 'Navigate governance, risk, and compliance to protect organisations legally, strategically, and operationally.',
+    steps: [
+      {
+        title: 'Security & Risk Fundamentals',
+        description: 'Understand the language of risk. Everything in GRC — frameworks, policies, audits — is built on top of these core concepts.',
+        duration: '3–4 weeks',
+        resources: ['CompTIA Security+ study guide', 'NIST Glossary (online, free)', 'ISACA GRC Nexus resources'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'CIA Triad: Confidentiality, Integrity, Availability — with real examples',
+              'Risk terminology: asset, threat, vulnerability, likelihood, impact, residual risk, inherent risk',
+              'Risk appetite vs risk tolerance vs risk capacity',
+              'Qualitative risk assessment: 5×5 risk matrix (likelihood × impact)',
+              'Quantitative risk assessment: ALE = ARO × SLE, SLE = AV × EF',
+              'FAIR model (Factor Analysis of Information Risk) — loss exceedance curves',
+              'Control types: preventive, detective, corrective, compensating, deterrent',
+              'Control categories: administrative (policies), technical (firewalls), physical (locks)',
+              'Business Impact Analysis (BIA): RTO, RPO, MTTR, MTBF',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Third-party & supply chain risk management',
+              'Business Continuity Management (BCM) vs Disaster Recovery (DR)',
+              'Bow-tie risk analysis model',
+              'Monte Carlo simulation for quantitative risk modelling',
+              'Third-party risk frameworks: SIG Lite questionnaire, CAIQ (CSA)',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'SimpleRisk — open source risk register & management',
+              'FAIR Institute resources — free courses on FAIR methodology',
+              'Excel/Google Sheets — build your own risk register from scratch',
+              'NIST SP 800-30 Rev 1 — risk assessment guide (free PDF)',
+              'ISACA online study resources & practice questions',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Compliance Frameworks',
+        description: 'GRC professionals must map controls to multiple frameworks simultaneously. Know each framework\'s scope, requirements, and certification process.',
+        duration: '5–6 weeks',
+        resources: ['NIST CSF 2.0 (free PDF)', 'ISO/IEC 27001:2022 standard', 'GDPR.eu — official EU GDPR text', 'PCI Security Standards Council website'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'ISO/IEC 27001:2022 — ISMS scope, 93 Annex A controls (4 themes), certification process (Stage 1 & 2 audit)',
+              'NIST CSF 2.0 — 6 Functions: Govern, Identify, Protect, Detect, Respond, Recover; Tiers 1–4; Profiles',
+              'SOC 2 — Trust Services Criteria (TSC): Security, Availability, Processing Integrity, Confidentiality, Privacy; Type I vs Type II',
+              'GDPR — lawful basis for processing, data subject rights (DSAR, right to erasure), 72-hour breach notification, DPO role, Article 30 records',
+              'PCI-DSS v4.0 — 12 requirements, cardholder data environment (CDE) scoping, SAQ types, QSA role',
+              'HIPAA — PHI definition, Covered Entities vs Business Associates, 3 safeguard types (Admin, Physical, Technical)',
+              'Mapping controls across frameworks — one control can satisfy multiple requirements',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'SOX Section 404 — IT General Controls (ITGC) for public companies',
+              'NIS2 Directive — EU network & information security requirements (2024)',
+              "India's DPDP Act 2023 — Digital Personal Data Protection",
+              'FISMA & FedRAMP — US federal government cloud security authorization',
+              'CIS Controls v8 — 18 control groups, Implementation Groups 1/2/3',
+              'CMMC (Cybersecurity Maturity Model Certification) — US DoD contractors',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Vanta — automated compliance for SOC 2, ISO 27001, HIPAA',
+              'Drata — continuous compliance monitoring & evidence collection',
+              'Tugboat Logic (now OneTrust) — GRC & policy management',
+              'NIST CSF 2.0 reference tool (csrc.nist.gov)',
+              'RegScale — continuous compliance automation',
+              'Audit self-assessments: download SOC 2 Trust Service Criteria & map your controls',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Policy, Standards & Documentation',
+        description: 'Policies are the backbone of a GRC programme. Learn how to write, maintain, and enforce the documents that govern security behaviour.',
+        duration: '3–4 weeks',
+        resources: ['SANS Security Policy Templates (free)', 'ISACA Policy Framework guide', 'ISO/IEC 27002:2022 for implementation guidance'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Policy hierarchy: Policy (what/why) → Standard (specific controls) → Procedure (step-by-step) → Guideline (optional best practice)',
+              'Security policy anatomy: scope, purpose, roles & responsibilities, policy statements, enforcement, review cycle',
+              'Acceptable Use Policy (AUP) — user obligations, prohibited activities',
+              'Access Control Policy — RBAC, ABAC, least privilege, SoD (Separation of Duties)',
+              'Incident Response Policy — escalation matrix, notification requirements',
+              'Data Classification Policy — Public, Internal, Confidential, Restricted',
+              'Vendor Management Policy — third-party risk assessment requirements',
+              'Exception Request Process — documented approvals for policy deviations',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Policy version control & annual review cycle management',
+              'Security awareness training for policy rollout',
+              'KPIs for policy adherence (exception rates, training completion %)',
+              'Policy-as-code concepts (OPA, Rego language)',
+              'NIST SP 800-12 — introduction to information security policy',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'Confluence / SharePoint — policy storage & version management',
+              'Vanta / Drata — policy distribution & employee attestation tracking',
+              'SANS free policy templates — ready-made starting points',
+              'GRC Forge — open source GRC template library',
+              'Google Workspace — collaborative policy drafting',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Risk Assessment & Audit Execution',
+        description: 'Learn to execute risk assessments end-to-end and conduct internal audits that actually drive remediation.',
+        duration: '4–5 weeks',
+        resources: ['ISACA CISA Review Manual', 'IIA (Institute of Internal Auditors) standards', 'NIST SP 800-30 Rev 1'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Risk assessment process: asset inventory → threat identification → vulnerability identification → likelihood/impact scoring → risk treatment plan',
+              'STRIDE threat modelling: Spoofing, Tampering, Repudiation, Info Disclosure, Denial of Service, Elevation of Privilege',
+              'Risk register fields: Risk ID, description, owner, inherent score, controls, residual score, treatment, review date',
+              'Risk treatment options: Accept (risk appetite), Mitigate (new controls), Transfer (insurance/contract), Avoid (stop activity)',
+              'Internal audit lifecycle: planning (universe, scope, objectives) → fieldwork (evidence collection, walkthroughs, testing) → reporting (findings, observations, recommendations) → follow-up',
+              'Control testing: Design Effectiveness (does it exist?) vs Operating Effectiveness (does it work?)',
+              'Gap analysis: current state vs desired state per framework requirement',
+              'Audit finding writing: Condition, Criteria, Cause, Effect (4Cs)',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Continuous Controls Monitoring (CCM) automation',
+              'Third-party audit management & vendor risk questionnaires (SIG Lite)',
+              'Audit Committee reporting — how to present risk to the board',
+              'Statistical sampling for large control populations',
+              'IT General Controls (ITGCs): Change management, Logical access, Computer operations',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'AuditBoard — enterprise audit management (request a demo)',
+              'ServiceNow GRC module — large enterprise risk management',
+              'JIRA / Trello — lightweight remediation tracking',
+              'Vanta — automated evidence collection reduces audit prep by ~70%',
+              'Excel/Google Sheets — build a risk register & control test workpaper',
+              'ISACA practice question banks — CISA & CRISC exam prep',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Certifications & Career',
+        description: 'GRC certifications validate credibility with clients and employers. Pick your path based on where you want to specialise.',
+        duration: '8–16 weeks per cert',
+        resources: ['ISACA.org — CISA, CRISC, CISM, CDPSE', 'IIA.org — CIA certification', 'APMG-International — ISO 27001 Lead Auditor'],
+        topics: [
+          {
+            name: 'Entry-Level Certs',
+            type: 'must-know',
+            items: [
+              'CompTIA Security+ — prerequisite for most GRC roles, 90 MCQs, vendor-neutral',
+              'CC (ISC2 Certified in Cybersecurity) — free exam voucher available, excellent starting point',
+              'ISO 27001 Foundation — 2-day course, proves framework understanding',
+              'GDPR Foundation (PECB/EXIN) — if working in EU/privacy-heavy roles',
+            ],
+          },
+          {
+            name: 'Professional Certs',
+            type: 'good-to-know',
+            items: [
+              'CISA (ISACA) — gold standard for IT auditors, 5 yrs experience required',
+              'CRISC (ISACA) — risk management specialist, highly paid ($150K+ avg)',
+              'CISM (ISACA) — security management, for those moving into management',
+              'CDPSE (ISACA) — data privacy & systems engineering focus',
+              'ISO 27001 Lead Implementer / Lead Auditor — required for consulting roles',
+              'CGEIT (ISACA) — enterprise IT governance, senior/executive level',
+            ],
+          },
+          {
+            name: 'Practice Platforms',
+            type: 'tools',
+            items: [
+              'ISACA Question Database — official practice questions for all ISACA certs',
+              'Coursera — IBM & Google GRC/compliance specialisations',
+              'LinkedIn Learning — SOC 2, ISO 27001, GDPR courses',
+              'Udemy — CISA boot camps & mock exams',
+              'GRC Academy (grca.online) — GRC-focused learning platform',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── Cloud Security ───────────────────────────────────────────────────────────
+  CLOUD_SECURITY: {
+    id: 'CLOUD_SECURITY',
+    title: 'Cloud Security',
+    subtitle: 'Secure cloud environments across AWS, Azure, and GCP for real-world enterprise workloads.',
+    steps: [
+      {
+        title: 'Cloud Fundamentals',
+        description: 'You cannot secure what you don\'t understand. Start here — know the core services, shared responsibility, and mental model of each cloud provider.',
+        duration: '3–4 weeks',
+        resources: ['AWS Cloud Practitioner (CLF-C02) — free digital training', 'Azure AZ-900 — Microsoft Learn free path', 'Google Cloud Skills Boost — free tier'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Shared Responsibility Model: CSP secures "of" the cloud; customer secures "in" the cloud — know exactly where the line falls for IaaS/PaaS/SaaS',
+              'IaaS (EC2, Azure VM, GCE) vs PaaS (Elastic Beanstalk, App Service, App Engine) vs SaaS (Outlook 365, Workspace)',
+              'AWS core services: EC2, S3, VPC, IAM, RDS, Lambda, CloudTrail, CloudWatch, KMS',
+              'Azure core services: VMs, Blob Storage, VNet, Entra ID (AAD), AKS, Monitor, Sentinel, Key Vault',
+              'GCP core services: Compute Engine, Cloud Storage, VPC, Cloud IAM, BigQuery, Pub/Sub, Cloud KMS',
+              'Regions, Availability Zones, Edge Locations — why they matter for resilience',
+              'Cloud pricing model: pay-as-you-go, reserved instances, spot/preemptible',
+              'Cloud native security benefits vs risks vs on-prem',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Multi-cloud vs hybrid cloud security challenges',
+              'FinOps basics — cost governance has security implications (unauthorised resources)',
+              'Serverless architecture (Lambda, Azure Functions, Cloud Run) security model',
+              'Containerisation concepts (Docker, Kubernetes) at a high level',
+              'Cloud-native vs cloud-enabled security tools distinction',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'AWS Free Tier — 12 months, spin up EC2, S3, Lambda for free',
+              'Azure Free Account — $200 credit + 12 months of free services',
+              'GCP Free Tier — always free services + $300 credit for 90 days',
+              'AWS Cloud Practitioner Essentials (free digital course)',
+              'CloudTrail Lake — enable in AWS free tier to practice log analysis',
+              'A Cloud Guru / Pluralsight — structured cloud learning with sandbox labs',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Identity & Access Management (IAM)',
+        description: 'Misconfigured IAM is the #1 cause of cloud breaches. Master least privilege, role assumption, and federation across all three clouds.',
+        duration: '4–5 weeks',
+        resources: ['AWS IAM Best Practices (docs.aws.amazon.com)', 'Microsoft Learn — Entra ID module', 'Google IAM documentation (cloud.google.com/iam)'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'Principle of least privilege — start with zero, grant only what\'s needed',
+              'AWS IAM: users, groups, roles, inline vs managed policies, JSON policy structure (Effect, Action, Resource, Condition)',
+              'AWS STS & AssumeRole — cross-account access, role chaining, external ID',
+              'AWS SCPs (Service Control Policies) in AWS Organisations — deny inheritance',
+              'Azure RBAC: Owner/Contributor/Reader built-ins, custom role definitions, scope hierarchy (Tenant → Management Group → Subscription → Resource Group → Resource)',
+              'GCP IAM: predefined roles, custom roles, service accounts, Workload Identity Federation',
+              'Federation: SAML 2.0, OIDC, OAuth 2.0 — how SSO works with cloud platforms',
+              'MFA enforcement & Conditional Access policies (require MFA for admin actions)',
+              'Service account / IAM role key management: rotation, no long-lived keys',
+              'Permission Boundary (AWS) — guardrail on what a role can grant',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Workload Identity Federation — eliminate service account keys entirely',
+              'Azure PIM (Privileged Identity Management) — just-in-time privileged access',
+              'ABAC in cloud — tag-based access control for dynamic environments',
+              'IAM Access Advisor & Credential Reports — identify unused permissions',
+              'AWS Resource Control Policies (RCPs) — new org-level guardrail type',
+              'Cross-cloud identity attacks: leveraging cloud credentials for lateral movement',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'AWS IAM Access Analyzer — detect publicly accessible resources & unused permissions',
+              'AWS Policy Simulator — test IAM policies without live actions',
+              'ScoutSuite — multi-cloud security auditing (check IAM misconfigs)',
+              'Prowler — AWS/Azure/GCP CIS benchmark scanner, 300+ checks',
+              'Pacu (RhinoSecurity) — AWS exploitation framework for attack simulation',
+              'CloudSploit — cloud security posture assessment tool',
+              'PwnedLabs / CloudGoat — intentionally vulnerable AWS labs for attack/defend practice',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Cloud Network Security',
+        description: 'Understand cloud network primitives deeply — VPC architecture, firewall layers, and zero-trust connectivity patterns.',
+        duration: '4–5 weeks',
+        resources: ['AWS VPC Workshop (catalog.us-east-1.prod.workshops.aws)', 'Azure Network Security documentation', 'GCP VPC documentation'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'AWS VPC: public vs private subnets, Internet Gateway, NAT Gateway, Route Tables',
+              'AWS Security Groups (stateful, instance-level) vs NACLs (stateless, subnet-level) — understand the difference clearly',
+              'AWS VPC Peering, Transit Gateway — inter-VPC connectivity',
+              'AWS PrivateLink — access AWS services without internet',
+              'Azure VNet: subnets, NSGs (inbound/outbound rules), ASGs (group VMs logically)',
+              'Azure Firewall vs NSGs — when to use each; Azure Bastion for jump host replacement',
+              'GCP VPC: global vs regional resources, hierarchical firewall policies, shared VPC',
+              'WAF rules: SQL injection, XSS rules in AWS WAF, Azure WAF (Front Door), Cloud Armor',
+              'DDoS protection: AWS Shield Standard (free) vs Advanced; Azure DDoS Protection',
+              'TLS termination at load balancer — certificate management (ACM, App Service certs, Google-managed)',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'Service mesh security (Istio mTLS, Linkerd) for microservices',
+              'Network micro-segmentation beyond VPC-level controls',
+              'ZTNA (Zero Trust Network Access) replacing VPN for cloud workloads',
+              'Cloud VPN vs Direct Connect / ExpressRoute / Dedicated Interconnect',
+              'BGP routing security for hybrid connectivity',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'AWS VPC Reachability Analyzer — test whether two endpoints can communicate',
+              'Azure Network Watcher — flow logs, connection monitor, packet capture',
+              'GCP VPC Flow Logs — enable in network for traffic visibility',
+              'Palo Alto Prisma Cloud (free trial) — CNAPP with network security posture',
+              'Zscaler Internet Access — SASE/ZTNA lab environment',
+              'AWS Network Firewall — deploy & write stateful Suricata-based rules',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Data Security & Encryption',
+        description: 'Data is the crown jewel. Master key management, storage security, and preventing the misconfigurations that expose sensitive data to the internet.',
+        duration: '3–4 weeks',
+        resources: ['AWS KMS Developer Guide', 'Azure Key Vault documentation', 'Google Cloud KMS documentation', 'Prowler GitHub — run data security checks'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'AWS KMS: CMKs vs AWS-managed keys, key policies (Resource-based), grants, key rotation, cross-region replication keys',
+              'Azure Key Vault: secrets, keys, certificates; RBAC vs access policies; soft-delete & purge protection',
+              'GCP Cloud KMS: key rings, CryptoKeys, rotation schedule, CMEK for all major services',
+              'S3 security: bucket policies vs ACLs, Block Public Access (all 4 settings), Object Lock, versioning, SSE-S3 vs SSE-KMS vs SSE-C',
+              'Azure Blob: SAS tokens (account vs service vs user delegation), access tiers, private endpoints',
+              'Database encryption: AWS RDS encryption at rest (KMS), IAM authentication, parameter groups for SSL enforcement',
+              'Data classification tagging strategy — consistent tags (Sensitivity=High) enable policy enforcement',
+              'DLP concepts: what data should trigger alerts (PII, PCI, PHI patterns)',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'BYOK (Bring Your Own Key) / HYOK (Hold Your Own Key) — compliance requirements',
+              'AWS Nitro Enclaves / Azure Confidential VMs — Confidential Computing',
+              'Client-side encryption before upload to cloud storage',
+              'Data residency & sovereignty requirements for multi-region architectures',
+              'Tokenisation vs encryption for PCI-DSS compliance',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'AWS Macie — ML-based S3 sensitive data discovery (PII, credentials)',
+              'Microsoft Purview — data governance & classification across Azure + M365',
+              'Google Cloud DLP (Sensitive Data Protection) — scan storage & streaming data',
+              'Prowler — check for public S3 buckets, unencrypted volumes, exposed snapshots',
+              'ScoutSuite — multi-cloud storage & encryption posture audit',
+              'CloudSploit / Wiz (free trial) — detect storage misconfigurations',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Threat Detection & Security Posture',
+        description: 'Detect attacks in real time, manage cloud posture, and secure containers + IaC. This is where cloud security operations happen.',
+        duration: '5–6 weeks',
+        resources: ['AWS Security Hub Workshop', 'Microsoft Defender for Cloud labs (Microsoft Learn)', 'Falco documentation (falco.org)', 'Trivy quickstart guide'],
+        topics: [
+          {
+            name: 'Must Know',
+            type: 'must-know',
+            items: [
+              'AWS CloudTrail: API call logging, management vs data events, log integrity validation, multi-region trail',
+              'AWS GuardDuty: threat findings (CryptoCurrency:EC2, UnauthorizedAccess, Recon), suppression rules, multi-account via AWS Organisations',
+              'Microsoft Defender for Cloud: Secure Score, recommendations, alerts, JIT VM access, adaptive application control',
+              'GCP Security Command Center: assets, findings (vulnerability, misconfiguration, threat), Event Threat Detection',
+              'CSPM (Cloud Security Posture Management): continuous assessment vs point-in-time scans',
+              'Container security basics: image scanning (CVEs), no root in containers, read-only filesystems',
+              'Kubernetes RBAC: ClusterRoles, RoleBindings, ServiceAccounts — principle of least privilege',
+              'Kubernetes Pod Security Standards (Restricted, Baseline, Privileged)',
+              'IaC security scanning: prevent misconfigs before deployment (shift-left security)',
+              'Secrets management: never hardcode credentials — use Secrets Manager, Key Vault, Secret Manager',
+            ],
+          },
+          {
+            name: 'Good to Know',
+            type: 'good-to-know',
+            items: [
+              'CWPP (Cloud Workload Protection): runtime threat detection in VMs & containers',
+              'eBPF-based security (Falco, Tetragon, Cilium) — kernel-level container monitoring',
+              'Serverless security: Lambda IAM over-permission, event injection, dependency vulnerabilities',
+              'CIS Benchmarks for AWS/Azure/GCP/Kubernetes — scored hardening guides',
+              'NIST SP 800-190 — application container security guidelines',
+              'GitOps security — protecting CI/CD pipelines from supply chain attacks',
+            ],
+          },
+          {
+            name: 'Tools & Practice',
+            type: 'tools',
+            items: [
+              'AWS Security Hub — aggregate findings from GuardDuty, Inspector, Macie, Config',
+              'Wiz (free trial) — cloud-native CNAPP, attack path analysis',
+              'Trivy — container image & IaC scanning (docker, terraform, helm)',
+              'Falco — runtime security for Kubernetes (Syscall-based rules)',
+              'Checkov / tfsec — static analysis of Terraform/CloudFormation before deploy',
+              'CloudGoat (Rhino Security) — vulnerable-by-design AWS environment for attack simulation',
+              'flaws.cloud / flaws2.cloud — free AWS security challenge labs',
+              'PwnedLabs — cloud attack & defend scenarios',
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Certifications & Specialisation',
+        description: 'Cloud security certs are among the highest-paying in the industry. Choose based on your primary cloud and career direction.',
+        duration: '8–16 weeks per cert',
+        resources: ['AWS Skill Builder (free tier)', 'Microsoft Learn (free)', 'Google Cloud Skills Boost (free)', 'A Cloud Guru / Linux Foundation for K8s'],
+        topics: [
+          {
+            name: 'Entry-Level Certs',
+            type: 'must-know',
+            items: [
+              'AWS Cloud Practitioner (CLF-C02) — foundational, good before Security Specialty',
+              'Azure AZ-900 — Azure Fundamentals, prerequisite for AZ-500',
+              'GCP Associate Cloud Engineer (ACE) — hands-on, required before Professional level',
+              'CompTIA Cloud+ — vendor-neutral cloud security certificate',
+            ],
+          },
+          {
+            name: 'Professional Certs',
+            type: 'good-to-know',
+            items: [
+              'AWS Security Specialty (SCS-C02) — AWS\'s premier security certification',
+              'AZ-500 Microsoft Azure Security Technologies — most in-demand Azure security cert',
+              'Google Professional Cloud Security Engineer — GCP security architecture',
+              'CCSP (ISC2) — vendor-neutral cloud security, managerial + technical',
+              'CKS (Certified Kubernetes Security Specialist) — requires CKA first, DevSecOps focused',
+              'AWS SAA-C03 (Solutions Architect Associate) — strongly recommended before SCS-C02',
+            ],
+          },
+          {
+            name: 'Practice Labs',
+            type: 'tools',
+            items: [
+              'AWS Well-Architected Labs — security pillar exercises (official, free)',
+              'CloudGoat by Rhino Security — 15+ vulnerable AWS scenarios',
+              'flaws.cloud — 6 levels of S3/IAM misconfiguration challenges',
+              'flaws2.cloud — attacker & defender perspectives on same scenario',
+              'PwnedLabs.io — multi-cloud attack & defend lab environment',
+              'AWSGoat / AzureGoat / GCPGoat — vulnerable cloud apps by INE',
+              'HackTricks Cloud — attacker\'s reference for cloud exploitation techniques',
+            ],
+          },
+        ],
+      },
+    ],
+  },
 };

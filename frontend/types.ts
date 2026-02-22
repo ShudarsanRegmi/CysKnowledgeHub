@@ -23,10 +23,27 @@ export interface ContentItem {
   imageUrl?: string;
 }
 
+export type TopicType = 'must-know' | 'good-to-know' | 'tools';
+
+export interface TopicGroup {
+  name: string;
+  type: TopicType;
+  items: string[];
+}
+
 export interface RoadmapStep {
   title: string;
   description: string;
   resources: string[];
+  duration?: string;
+  topics?: TopicGroup[];
+}
+
+export interface RoadmapData {
+  id: string;
+  title: string;
+  subtitle: string;
+  steps: RoadmapStep[];
 }
 
 export interface InterviewExperience {
@@ -65,11 +82,11 @@ export interface Achievement {
   id: string;
   title: string;
   type: 'Hackathon' | 'CTF' | 'Coding' | 'Other';
-  result: string; // e.g., '1st Place', 'Finalist', 'Winner'
+  result: string;
   students: string[];
   date: string;
   description: string;
-  images: string[]; // Array of image URLs
+  images: string[];
 }
 
 export interface CompanyInfo {
