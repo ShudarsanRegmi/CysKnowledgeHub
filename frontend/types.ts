@@ -46,15 +46,49 @@ export interface RoadmapData {
   steps: RoadmapStep[];
 }
 
+export interface InterviewQuestion {
+  statement: string;
+  topic: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  followUps?: string[];
+}
+
+export interface InterviewRound {
+  name: string;
+  mode: 'Online' | 'Offline' | 'Virtual';
+  duration: string;
+  platform?: string;
+  topics: string[];
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  questions: InterviewQuestion[];
+  feedback?: string;
+  dayOffset?: number;
+}
+
+export interface InterviewInsights {
+  prepStrategy: string;
+  mistakes: string[];
+  tips: string[];
+  resources: string[];
+  timeGap: string;
+}
+
 export interface InterviewExperience {
   id: string;
   studentName: string;
   batch: string;
   company: string;
   role: string;
+  domain: string; // e.g., "Cybersecurity", "Software Engineering", "Cloud"
+  type: 'Internship' | 'Full-time' | 'On-campus' | 'Off-campus';
+  result: 'Selected' | 'Rejected' | 'Waiting';
   difficulty: 'Easy' | 'Medium' | 'Hard';
-  rounds: string[];
-  tips: string[];
+  rounds: InterviewRound[];
+  insights: InterviewInsights;
+  date: string;
+  views: number;
+  helpfulCount: number;
+  tags?: string[];
 }
 
 export interface ProjectLink {

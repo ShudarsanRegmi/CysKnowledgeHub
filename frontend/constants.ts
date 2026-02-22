@@ -54,26 +54,357 @@ export const MOCK_CONTENT: ContentItem[] = [
   }
 ];
 
+export const INTERVIEW_DOMAINS = [
+  'Application Security',
+  'Network Security',
+  'Cloud Security',
+  'Endpoint Security',
+  'Data Security',
+  'Identity & Access Management (IAM)',
+  'Security Operations (SOC)',
+  'Incident Response',
+  'Digital Forensics',
+  'Malware Analysis',
+  'Penetration Testing',
+  'Red Teaming',
+  'Vulnerability Management',
+  'Threat Intelligence',
+  'Governance, Risk & Compliance (GRC)',
+  'Security Architecture',
+  'DevSecOps',
+  'Cryptography',
+  'OT / ICS Security',
+  'IoT Security'
+];
+
 export const MOCK_INTERVIEWS: InterviewExperience[] = [
   {
     id: 'i1',
     studentName: 'Vikram Singh',
-    batch: '2023',
-    company: 'Palo Alto Networks',
-    role: 'Security Engineer intern',
+    batch: '2024',
+    company: 'Amazon',
+    role: 'SDE Intern',
+    domain: 'Software Engineering',
+    type: 'Internship',
+    result: 'Selected',
     difficulty: 'Hard',
-    rounds: ['Online Assessment', 'Technical Round 1 (Networking)', 'Technical Round 2 (System Design)', 'HR'],
-    tips: ['Focus heavily on TCP/IP stack', 'Be prepared for live coding security scripts']
+    date: 'Jan 15, 2024',
+    views: 1250,
+    helpfulCount: 340,
+    tags: ['SDE', 'Amazon', 'Internship', 'DSA'],
+    rounds: [
+      {
+        name: 'Online Assessment',
+        mode: 'Online',
+        duration: '90 mins',
+        platform: 'HackerRank',
+        topics: ['DSA', 'Problem Solving'],
+        difficulty: 'Medium',
+        dayOffset: 1,
+        feedback: 'Solved both questions completely. The first was a straightforward array manipulation, the second required Amazon-specific warehouse logic (Graphs/BFS).',
+        questions: [
+          {
+            statement: 'Given Amazon warehouse robot paths as a grid, find the shortest path from start to target considering obstacles.',
+            topic: 'Graphs (BFS)',
+            difficulty: 'Medium'
+          },
+          {
+            statement: 'Find the maximum number of consecutive packages that can be shipped given a weight limit.',
+            topic: 'Sliding Window',
+            difficulty: 'Easy'
+          }
+        ]
+      },
+      {
+        name: 'Technical Round 1',
+        mode: 'Virtual',
+        duration: '60 mins',
+        platform: 'Amazon Chime',
+        topics: ['DSA', 'Trees', 'Amazon LPs'],
+        difficulty: 'Hard',
+        dayOffset: 10,
+        feedback: 'Interviewer was focused on time complexity. Discussed two approaches for the tree problem before implementing.',
+        questions: [
+          {
+            statement: 'Tell me about a time you took ownership of a project.',
+            topic: 'HR / Behavioral',
+            difficulty: 'Easy',
+            followUps: ['What were the direct results?']
+          },
+          {
+            statement: 'Serialize and Deserialize a Binary Tree.',
+            topic: 'Trees',
+            difficulty: 'Hard',
+            followUps: ['Can you do it without extra space for null nodes?', 'Write production-ready code.']
+          }
+        ]
+      },
+      {
+        name: 'Technical Round 2 (Bar Raiser)',
+        mode: 'Virtual',
+        duration: '60 mins',
+        platform: 'Amazon Chime',
+        topics: ['System Design', 'Leadership Principles'],
+        difficulty: 'Hard',
+        dayOffset: 14,
+        feedback: 'Very intense round focusing on scale and Amazon Leadership Principles (Customer Obsession & Dive Deep).',
+        questions: [
+          {
+            statement: 'Design a scalable logging system for Amazon EC2 instances.',
+            topic: 'System Design',
+            difficulty: 'Medium',
+            followUps: ['How do you handle log parsing delays?', 'What DB do you use for text search?']
+          },
+          {
+            statement: 'Tell me about a time you made a mistake and how you recovered.',
+            topic: 'HR / Behavioral',
+            difficulty: 'Medium'
+          }
+        ]
+      }
+    ],
+    insights: {
+      prepStrategy: 'Focus on LeetCode Medium/Hard for Trees and Graphs. Prepared STAR stories for Amazon Leadership Principles.',
+      mistakes: ['Did not write tests for the graph problem in the OA, but still passed.'],
+      tips: ['Amazon LPs are just as important as the coding rounds. Start practicing them early.', 'Think out loud during the technical rounds.'],
+      resources: ['LeetCode', 'Grokking the System Design Interview', 'Amazon LP Prep Guide'],
+      timeGap: 'Approx. 2 weeks between OA and interviews.'
+    }
   },
   {
     id: 'i2',
     studentName: 'Priya Mehta',
     batch: '2024',
     company: 'CrowdStrike',
-    role: 'Threat Hunter',
+    role: 'Cloud Security Engineer',
+    domain: 'Cybersecurity',
+    type: 'Full-time',
+    result: 'Rejected',
     difficulty: 'Medium',
-    rounds: ['Resume Screening', 'Behavioral Round', 'Technical (SIEM & Logs)', 'Final Case Study'],
-    tips: ['Learn to read raw logs', 'Understand EDR architectures']
+    date: 'Dec 05, 2023',
+    views: 890,
+    helpfulCount: 215,
+    tags: ['Cybersecurity', 'SOC', 'Logs', 'Incident Response'],
+    rounds: [
+      {
+        name: 'Resume Screening',
+        mode: 'Online',
+        duration: 'N/A',
+        topics: ['Resume parsing'],
+        difficulty: 'Easy',
+        dayOffset: 1,
+        questions: []
+      },
+      {
+        name: 'Technical Round 1 (SIEM & Logs)',
+        mode: 'Virtual',
+        duration: '45 mins',
+        platform: 'Zoom',
+        topics: ['SIEM', 'Log Analysis', 'Networking'],
+        difficulty: 'Medium',
+        dayOffset: 14,
+        feedback: 'They showed raw logs and asked me to identify the attack vector. Did reasonably well but struggled with Splunk specific queries.',
+        questions: [
+          {
+            statement: 'Analyze this given Windows Security Event Log (Event ID 4688) containing obfuscated PowerShell.',
+            topic: 'Log Analysis',
+            difficulty: 'Hard',
+            followUps: ['How would you decode the base64 payload?', 'What artifacts are left behind?']
+          },
+          {
+            statement: 'Explain the difference between false positive and true positive with an example of a brute-force alert.',
+            topic: 'Incident Response',
+            difficulty: 'Easy'
+          }
+        ]
+      },
+      {
+        name: 'Final Case Study',
+        mode: 'Virtual',
+        duration: '60 mins',
+        platform: 'Zoom',
+        topics: ['Threat Hunting', 'Malware'],
+        difficulty: 'Hard',
+        dayOffset: 20,
+        feedback: 'Given a simulated environment scenario. Faltered when explaining advanced EDR architectures.',
+        questions: [
+          {
+            statement: 'A new zero-day ransomware is discovered. Walk me through your threat hunting hypothesis specifically looking for it in our environment.',
+            topic: 'Threat Hunting',
+            difficulty: 'Hard'
+          }
+        ]
+      }
+    ],
+    insights: {
+      prepStrategy: 'Focused heavily on tryhackme blue team labs and understanding Windows Event Logs.',
+      mistakes: ['Underestimated the depth of EDR architecture questions.', 'Should have practiced more Splunk SPL queries.'],
+      tips: ['Learn to read raw logs fluently without a GUI.', 'Understand the entire MITRE ATT&CK framework.'],
+      resources: ['TryHackMe SOC Analyst Path', 'Splunk BOTS datasets', 'Blue Team Handbook'],
+      timeGap: '3 weeks total process.'
+    }
+  },
+  {
+    id: 'i3',
+    studentName: 'Rahul Sharma',
+    batch: '2025',
+    company: 'Flipkart',
+    role: 'SDE Intern (FDP)',
+    domain: 'Software Engineering',
+    type: 'Internship',
+    result: 'Selected',
+    difficulty: 'Hard',
+    date: 'August 22, 2024',
+    views: 2300,
+    helpfulCount: 520,
+    tags: ['SDE', 'Flipkart', 'Machine Coding'],
+    rounds: [
+      {
+        name: 'Online Coding Test',
+        mode: 'Online',
+        duration: '90 mins',
+        platform: 'HackerRank',
+        topics: ['Dynamic Programming', 'Strings'],
+        difficulty: 'Medium',
+        dayOffset: 1,
+        feedback: 'Expected to solve both questions entirely.',
+        questions: [
+          {
+            statement: 'Variation of Longest Palindromic Substring.',
+            topic: 'DP',
+            difficulty: 'Medium'
+          },
+          {
+            statement: 'Find minimum jumps to reach end of array with changing constraints.',
+            topic: 'Greedy/DP',
+            difficulty: 'Hard'
+          }
+        ]
+      },
+      {
+        name: 'Machine Coding Round',
+        mode: 'Virtual',
+        duration: '120 mins',
+        platform: 'Google Meet',
+        topics: ['LLD', 'OOP'],
+        difficulty: 'Hard',
+        dayOffset: 5,
+        feedback: 'Was asked to build a workable command-line application in 90 mins.',
+        questions: [
+          {
+            statement: 'Design a Ride-Sharing Application (like Uber) with working code for allocating rides based on strategy patterns.',
+            topic: 'Low Level Design',
+            difficulty: 'Hard',
+            followUps: ['How do you scale matching logic?', 'Implement a new pricing strategy.']
+          }
+        ]
+      },
+      {
+        name: 'DSA & PS Round',
+        mode: 'Virtual',
+        duration: '60 mins',
+        platform: 'Google Meet',
+        topics: ['Graphs', 'Heaps'],
+        difficulty: 'Medium',
+        dayOffset: 7,
+        feedback: 'Standard DSA round. Focus on clean code.',
+        questions: [
+          {
+            statement: 'Merge K Sorted Arrays.',
+            topic: 'Heaps',
+            difficulty: 'Medium'
+          }
+        ]
+      },
+      {
+        name: 'Hiring Manager',
+        mode: 'Virtual',
+        duration: '45 mins',
+        platform: 'Google Meet',
+        topics: ['Projects', 'Behavioral'],
+        difficulty: 'Easy',
+        dayOffset: 12,
+        feedback: 'Mostly discussed my internship projects and why I want to join Flipkart.',
+        questions: [
+          {
+            statement: 'Discuss your most challenging project.',
+            topic: 'Behavioral',
+            difficulty: 'Easy'
+          }
+        ]
+      }
+    ],
+    insights: {
+      prepStrategy: 'Practiced classic LLD problems (Parking Lot, Snake & Ladder, Uber). Kept design patterns handy (Strategy, Observer, Factory).',
+      mistakes: ['Spent too much time on edge cases during Machine Coding before defining core entities.'],
+      tips: ['In machine coding, working code > perfect code. Get the core logic running first.', 'Focus on OOP principles and clean abstraction.'],
+      resources: ['Grokking the Object Oriented Design Interview', 'LeetCode Discussion tab'],
+      timeGap: 'Process finished in 2 weeks.'
+    }
+  },
+  {
+    id: 'i4',
+    studentName: 'Anita Desai',
+    batch: '2023',
+    company: 'Palo Alto Networks',
+    role: 'Security Engineer intern',
+    domain: 'Cybersecurity',
+    type: 'Off-campus',
+    result: 'Waiting',
+    difficulty: 'Medium',
+    date: 'Feb 10, 2024',
+    views: 450,
+    helpfulCount: 110,
+    tags: ['Security', 'Networking', 'Firewalls'],
+    rounds: [
+      {
+        name: 'Networking Basics',
+        mode: 'Virtual',
+        duration: '45 mins',
+        platform: 'Zoom',
+        topics: ['TCP/IP', 'DNS', 'Firewalls'],
+        difficulty: 'Medium',
+        dayOffset: 1,
+        feedback: 'In-depth networking questions.',
+        questions: [
+          {
+            statement: 'Explain the TCP 3-way handshake and how SYN floods exploit it.',
+            topic: 'Networking',
+            difficulty: 'Easy',
+            followUps: ['How do load balancers mitigate this?', 'What are SYN cookies?']
+          },
+          {
+            statement: 'Detailed walk-through of typing google.com in browser. Focus on DNS recursive vs authoritative.',
+            topic: 'DNS',
+            difficulty: 'Medium'
+          }
+        ]
+      },
+      {
+        name: 'System Design & OS',
+        mode: 'Virtual',
+        duration: '60 mins',
+        platform: 'Zoom',
+        topics: ['OS', 'Secure Design'],
+        difficulty: 'Hard',
+        dayOffset: 5,
+        feedback: 'A mix of operating systems concepts and designing a secure access gateway.',
+        questions: [
+          {
+            statement: 'Explain how virtual memory mapping works in Linux.',
+            topic: 'OS',
+            difficulty: 'Medium'
+          }
+        ]
+      }
+    ],
+    insights: {
+      prepStrategy: 'Reviewed Kurose & Ross networking textbook thoroughly. Simulated network attacks in GNS3.',
+      mistakes: ['Got confused on specific BGP configurations.'],
+      tips: ['You cannot fake deep networking knowledge. Understand the protocols down to the packet header.'],
+      resources: ['Professor Messer Network+', 'OReilly TCP/IP Guide'],
+      timeGap: 'Still waiting for results.'
+    }
   }
 ];
 

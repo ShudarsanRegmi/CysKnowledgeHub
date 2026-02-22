@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge } from 'lucide-react';
+import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
 
@@ -30,15 +30,31 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Shield },
-    { id: 'blogs', label: 'Blogs', icon: BookOpen },
-    { id: 'ctf', label: 'CTF Guides', icon: Terminal },
-    { id: 'roadmaps', label: 'Roadmaps', icon: Map },
-    { id: 'projects', label: 'Projects', icon: Github },
-    { id: 'achievements', label: 'Achievements', icon: Award },
-    { id: 'experiments', label: 'Experiments', icon: Cpu },
-    { id: 'career', label: 'Career', icon: Briefcase },
-    { id: 'companies', label: 'Companies', icon: Building2 },
-    { id: 'certifications', label: 'Certifications', icon: FileBadge },
+    {
+      id: 'learn', label: 'Learn', icon: BookOpen,
+      subItems: [
+        { id: 'blogs', label: 'Blogs', icon: BookOpen },
+        { id: 'ctf', label: 'CTF Guides', icon: Terminal },
+        { id: 'roadmaps', label: 'Roadmaps', icon: Map },
+      ]
+    },
+    {
+      id: 'showcase', label: 'Showcase', icon: Github,
+      subItems: [
+        { id: 'projects', label: 'Projects', icon: Github },
+        { id: 'achievements', label: 'Achievements', icon: Award },
+        { id: 'experiments', label: 'Experiments', icon: Cpu },
+        { id: 'certifications', label: 'Certifications', icon: FileBadge },
+      ]
+    },
+    {
+      id: 'career_hub', label: 'Career Hub', icon: Briefcase,
+      subItems: [
+        { id: 'career', label: 'Preparation', icon: Briefcase },
+        { id: 'interviews', label: 'Experiences', icon: MessageSquare },
+        { id: 'companies', label: 'Companies', icon: Building2 },
+      ]
+    }
   ];
 
   return (
@@ -52,16 +68,35 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`text-sm font-medium transition-colors hover:text-cyan-400 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'
-                  }`}
-              >
-                {item.label}
-              </button>
+              item.subItems ? (
+                <div key={item.id} className="relative group">
+                  <button className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50`}>
+                    {item.label} <ChevronDown className="w-3.5 h-3.5 opacity-70 group-hover:rotate-180 transition-transform" />
+                  </button>
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden translate-y-2 group-hover:translate-y-0">
+                    {item.subItems.map(sub => (
+                      <button
+                        key={sub.id}
+                        onClick={() => setActiveTab(sub.id)}
+                        className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-800 hover:text-cyan-400 ${activeTab === sub.id ? 'text-cyan-500 bg-gray-800/50' : 'text-gray-400'}`}
+                      >
+                        <sub.icon className="w-4 h-4" />
+                        {sub.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`px-3 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-gray-800/50 hover:text-cyan-400 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'}`}
+                >
+                  {item.label}
+                </button>
+              )
             ))}
           </nav>
 
@@ -124,21 +159,40 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-gray-950/95 pt-20">
+        <div className="md:hidden fixed inset-0 z-40 bg-gray-950/95 pt-20 overflow-y-auto pb-10">
           <nav className="flex flex-col items-center gap-8">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setIsMenuOpen(false);
-                }}
-                className={`text-2xl font-bold flex items-center gap-3 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'
-                  }`}
-              >
-                <item.icon className="w-6 h-6" />
-                {item.label}
-              </button>
+              <div key={item.id} className="w-full flex flex-col items-center gap-5">
+                {item.subItems ? (
+                  <>
+                    <div className="text-gray-600 text-[10px] font-bold uppercase tracking-widest">{item.label}</div>
+                    {item.subItems.map(sub => (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          setActiveTab(sub.id);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`text-xl font-bold flex items-center gap-3 ${activeTab === sub.id ? 'text-cyan-500' : 'text-gray-400'}`}
+                      >
+                        <sub.icon className="w-5 h-5" />
+                        {sub.label}
+                      </button>
+                    ))}
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`text-2xl font-bold flex items-center gap-3 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'}`}
+                  >
+                    <item.icon className="w-6 h-6" />
+                    {item.label}
+                  </button>
+                )}
+              </div>
             ))}
           </nav>
         </div>

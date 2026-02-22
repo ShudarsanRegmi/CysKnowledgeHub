@@ -8,6 +8,7 @@ import ProjectsPage from './components/ProjectsPage';
 import AchievementsPage from './components/AchievementsPage';
 import CertificationsPage from "./components/CertificationsPage";
 import CompaniesPage from './components/CompaniesPage';
+import InterviewExperiencesPage from './components/InterviewExperiencesPage';
 import {
   Terminal, Shield, BookOpen, Map, Award, Briefcase,
   ExternalLink, ArrowRight, User, ChevronRight,
@@ -415,9 +416,12 @@ const App: React.FC = () => {
 
       case 'companies':
         return <CompaniesPage />;
-        
+
       case 'certifications':
         return <CertificationsPage />;
+
+      case 'interviews':
+        return <InterviewExperiencesPage />;
 
       case 'roadmaps':
         // Individual roadmap detail view
@@ -469,10 +473,15 @@ const App: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <Briefcase className="text-cyan-500" /> Senior Interview Experiences
-                </h3>
-                {MOCK_INTERVIEWS.map(exp => (
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Briefcase className="text-cyan-500" /> Senior Interview Experiences
+                  </h3>
+                  <button onClick={() => setActiveTab('interviews')} className="text-cyan-400 text-sm font-semibold hover:underline flex items-center gap-1">
+                    View All <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+                {MOCK_INTERVIEWS.slice(0, 2).map(exp => (
                   <div key={exp.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-700 transition-all">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -500,7 +509,7 @@ const App: React.FC = () => {
                       <div>
                         <span className="text-xs font-bold text-gray-500 uppercase">Top Tips:</span>
                         <ul className="mt-2 space-y-1">
-                          {exp.tips.map((tip, i) => (
+                          {exp.insights?.tips?.map((tip, i) => (
                             <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
                               <span className="text-cyan-500">•</span> {tip}
                             </li>
@@ -508,6 +517,10 @@ const App: React.FC = () => {
                         </ul>
                       </div>
                     </div>
+
+                    <button onClick={() => setActiveTab('interviews')} className="mt-6 w-full py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-bold transition-all border border-gray-700">
+                      Read Full Experience
+                    </button>
                   </div>
                 ))}
               </div>
