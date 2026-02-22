@@ -1,12 +1,15 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, 'frontend'), '');
+  const env = loadEnv(mode, __dirname, '');
   return {
-    root: path.resolve(__dirname, 'frontend'),
-    envDir: path.resolve(__dirname, 'frontend'),
+    root: __dirname,
+    envDir: __dirname,
     build: {
       outDir: path.resolve(__dirname, 'dist'),
       emptyOutDir: true,
@@ -18,7 +21,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'frontend'),
+        '@': __dirname,
       }
     }
   };
