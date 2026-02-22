@@ -23,11 +23,20 @@ export interface ContentItem {
   imageUrl?: string;
 }
 
+export type TopicType = 'must-know' | 'good-to-know' | 'tools';
+
+export interface TopicGroup {
+  name: string;
+  type: TopicType;
+  items: string[];
+}
+
 export interface RoadmapStep {
   title: string;
   description: string;
   resources: string[];
   duration?: string;
+  topics?: TopicGroup[];
 }
 
 export interface RoadmapData {

@@ -8,10 +8,10 @@ import ProjectsPage from './components/ProjectsPage';
 import {
   Terminal, Shield, BookOpen, Map, Award, Briefcase,
   ExternalLink, ArrowRight, User, ChevronRight,
-  Code, HardDrive, Search, Clock, ArrowLeft
+  Code, HardDrive, Search, Clock, ArrowLeft, Check
 } from 'lucide-react';
 
-// ─── Roadmap detail page ────────────────────────────────────────────────────
+// ─── Roadmap detail page ──────────────────────────────────────────────────────
 
 const roleConfig: Record<string, { icon: React.FC<{ className?: string }>, accent: string }> = {
   SOC_ANALYST: { icon: Shield, accent: 'from-cyan-900/30 to-blue-900/20' },
@@ -19,6 +19,9 @@ const roleConfig: Record<string, { icon: React.FC<{ className?: string }>, accen
   GRC_SPECIALIST: { icon: Award, accent: 'from-indigo-900/20 to-cyan-900/20' },
   CLOUD_SECURITY: { icon: HardDrive, accent: 'from-sky-900/20 to-cyan-900/20' },
 };
+
+// Trim long topic strings to a short label (stops at — or :)
+const shortLabel = (item: string) => item.split(/\s*[—:]\s*/)[0].trim();
 
 interface RoadmapDetailPageProps {
   roadmap: RoadmapData;
@@ -29,8 +32,31 @@ const RoadmapDetailPage: React.FC<RoadmapDetailPageProps> = ({ roadmap, onBack }
   const cfg = roleConfig[roadmap.id] || roleConfig.SOC_ANALYST;
   const Icon = cfg.icon;
 
+  // ── Checklist state (persisted to localStorage) ──────────────────────────
+  const storageKey = `ckh_rm_${roadmap.id}`;
+  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
+    try { const s = localStorage.getItem(storageKey); return s ? JSON.parse(s) : {}; }
+    catch { return {}; }
+  });
+
+  const toggle = (key: string) => {
+    const next = { ...checked, [key]: !checked[key] };
+    setChecked(next);
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch { }
+  };
+
+  // ── Progress calculation ──────────────────────────────────────────────────
+  const allKeys = roadmap.steps.flatMap((step, si) =>
+    (step.topics ?? []).flatMap((group, gi) =>
+      group.items.map((_, ii) => `${si}.${gi}.${ii}`)
+    )
+  );
+  const doneCount = allKeys.filter(k => checked[k]).length;
+  const pct = allKeys.length ? Math.round((doneCount / allKeys.length) * 100) : 0;
+
   return (
-    <div className="max-w-3xl mx-auto space-y-10">
+    <div className="max-w-6xl mx-auto space-y-6">
+
       {/* Back button */}
       <button
         onClick={onBack}
@@ -40,64 +66,196 @@ const RoadmapDetailPage: React.FC<RoadmapDetailPageProps> = ({ roadmap, onBack }
         Back to Roadmaps
       </button>
 
-      {/* Header */}
-      <div className={`bg-gradient-to-br ${cfg.accent} border border-cyan-500/20 rounded-3xl p-8`}>
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-            <Icon className="w-6 h-6 text-cyan-400" />
+      {/* Header bar */}
+      <div className={`bg-gradient-to-br ${cfg.accent} border border-cyan-500/20 rounded-2xl p-6`}>
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+            <Icon className="w-5 h-5 text-cyan-400" />
           </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{roadmap.title} Path</h1>
-            <p className="text-gray-400 mt-1">{roadmap.subtitle}</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold">{roadmap.title} Path</h1>
+            <p className="text-sm text-gray-400 mt-0.5">{roadmap.subtitle}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-cyan-400/70 font-medium bg-cyan-900/20 border border-cyan-500/10 rounded-full px-3 py-1 w-fit">
-          <Map className="w-3.5 h-3.5" />
-          {roadmap.steps.length} stages · Structured learning path
+          {/* Progress display (desktop) */}
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div className="text-right">
+              <div className="text-lg font-bold">{pct}%</div>
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider">complete</div>
+            </div>
+            <div className="w-24 h-2 bg-gray-800/60 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-cyan-500 rounded-full transition-all duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Timeline */}
-      <div className="relative space-y-0">
-        {/* Vertical line */}
-        <div className="absolute left-[19px] top-5 bottom-5 w-0.5 bg-gradient-to-b from-cyan-500/60 via-cyan-500/20 to-transparent" />
+      {/* ── Two-panel body ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[270px_1fr] gap-6 items-start">
 
-        {roadmap.steps.map((step, i) => (
-          <div key={i} className="relative pl-14 pb-8 last:pb-0">
-            {/* Step number circle */}
-            <div className="absolute left-0 top-0 w-10 h-10 rounded-full bg-gray-900 border-2 border-cyan-500 flex items-center justify-center font-bold text-cyan-400 text-sm z-10 shadow-lg shadow-cyan-500/10">
-              {i + 1}
+        {/* ── LEFT: Sticky learning checklist ── */}
+        <div className="lg:sticky lg:top-20 space-y-0">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+
+            {/* Panel header */}
+            <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between sticky top-0 bg-gray-900 z-10">
+              <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Checklist</span>
+              <div className="flex items-center gap-2">
+                <div className="w-20 h-1 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-cyan-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="text-[10px] font-bold text-cyan-400 tabular-nums w-7 text-right">{pct}%</span>
+              </div>
             </div>
 
-            {/* Card */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-cyan-500/40 transition-all duration-200 group">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                <h3 className="text-lg font-bold group-hover:text-cyan-400 transition-colors">{step.title}</h3>
-                {step.duration && (
-                  <span className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
-                    <Clock className="w-3.5 h-3.5" />
-                    {step.duration}
-                  </span>
-                )}
-              </div>
-              <p className="text-gray-400 text-sm mb-4 leading-relaxed">{step.description}</p>
-              <div className="flex flex-wrap gap-2">
-                {step.resources.map(r => (
-                  <span
-                    key={r}
-                    className="text-[11px] bg-cyan-900/30 text-cyan-300 px-2.5 py-1 rounded-full border border-cyan-500/20 font-medium"
-                  >
-                    {r}
-                  </span>
-                ))}
-              </div>
+            {/* Checklist body — scrollable */}
+            <div className="overflow-y-auto max-h-[70vh] p-2 space-y-1">
+              {roadmap.steps.map((step, si) => (
+                <div key={si}>
+                  {/* Phase header */}
+                  <div className="flex items-center gap-2 px-2 pt-3 pb-1">
+                    <span className="text-[9px] font-bold text-cyan-500 uppercase tracking-widest whitespace-nowrap">
+                      Phase {si + 1}
+                    </span>
+                    <div className="flex-1 h-px bg-gray-800" />
+                  </div>
+                  <div className="px-2 pb-1.5 text-[11px] font-semibold text-gray-300">{step.title}</div>
+
+                  {/* Topic checkboxes */}
+                  {(step.topics ?? []).flatMap((group, gi) =>
+                    group.items.map((item, ii) => {
+                      const key = `${si}.${gi}.${ii}`;
+                      const done = !!checked[key];
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => toggle(key)}
+                          className="w-full flex items-start gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-800/60 text-left transition-colors group"
+                        >
+                          {/* Checkbox */}
+                          <div className={`w-3.5 h-3.5 mt-0.5 rounded border flex-shrink-0 flex items-center justify-center transition-all ${done ? 'bg-cyan-500 border-cyan-500' : 'border-gray-600 group-hover:border-cyan-500/60'}`}>
+                            {done && <Check className="w-2.5 h-2.5 text-white" />}
+                          </div>
+                          {/* Label */}
+                          <span className={`text-[11px] leading-relaxed transition-colors ${done ? 'line-through text-gray-600' : 'text-gray-400 group-hover:text-gray-200'}`}>
+                            {shortLabel(item)}
+                          </span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* ── RIGHT: Vertical node-flow diagram ── */}
+        <div className="relative">
+          {/* Vertical dashed guide line */}
+          <div className="absolute left-[5px] top-3 bottom-3 w-px border-l-2 border-dashed border-cyan-500/20 pointer-events-none" />
+
+          {roadmap.steps.map((step, si) => {
+            const stepKeys = (step.topics ?? []).flatMap((g, gi) =>
+              g.items.map((_, ii) => `${si}.${gi}.${ii}`)
+            );
+            const stepDone = stepKeys.filter(k => checked[k]).length;
+            const allDone = stepKeys.length > 0 && stepDone === stepKeys.length;
+
+            return (
+              <div key={si} className="relative flex gap-5 mb-8 last:mb-0">
+                {/* Dot on the guideline */}
+                <div className={`flex-shrink-0 w-2.5 h-2.5 rounded-full mt-[14px] z-10 border-2 transition-colors ${allDone ? 'bg-cyan-500 border-cyan-500' : 'bg-gray-950 border-cyan-500/50'}`} />
+
+                {/* Content card */}
+                <div className="flex-1 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-colors duration-200">
+
+                  {/* Node header */}
+                  <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-gray-800/60">
+                    <div>
+                      <div className="text-[9px] font-bold text-cyan-500/70 uppercase tracking-widest mb-0.5">Stage {si + 1}</div>
+                      <h3 className={`text-base font-bold leading-tight ${allDone ? 'text-cyan-400' : 'text-white'}`}>
+                        {step.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 leading-relaxed">{step.description}</p>
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      {step.duration && (
+                        <span className="flex items-center gap-1 text-[10px] text-gray-600 border border-gray-800 rounded-full px-2 py-0.5 whitespace-nowrap">
+                          <Clock className="w-2.5 h-2.5" />{step.duration}
+                        </span>
+                      )}
+                      {stepKeys.length > 0 && (
+                        <div className="text-[10px] text-gray-600 mt-1.5">{stepDone}/{stepKeys.length} done</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Topic groups */}
+                  {(step.topics ?? []).length > 0 && (
+                    <div className="px-5 py-4 space-y-3">
+                      {(step.topics ?? []).map((group, gi) => (
+                        <div key={gi}>
+                          {/* Group label */}
+                          <div className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${group.type === 'must-know' ? 'text-cyan-500/70' : group.type === 'good-to-know' ? 'text-indigo-400/60' : 'text-gray-500'}`}>
+                            {group.name}
+                          </div>
+                          {/* Topic pills — short labels, click to check */}
+                          <div className="flex flex-wrap gap-1.5">
+                            {group.items.map((item, ii) => {
+                              const key = `${si}.${gi}.${ii}`;
+                              const done = !!checked[key];
+                              const base =
+                                group.type === 'must-know'
+                                  ? 'border-gray-700 text-gray-200 hover:border-cyan-500/60 hover:text-cyan-300'
+                                  : group.type === 'good-to-know'
+                                    ? 'border-gray-800 text-gray-500 hover:border-gray-600 hover:text-gray-400'
+                                    : 'border-cyan-500/15 text-cyan-400/60 hover:border-cyan-500/40 hover:text-cyan-300';
+                              return (
+                                <span
+                                  key={ii}
+                                  title={item}
+                                  onClick={() => toggle(key)}
+                                  className={`text-[11px] px-2 py-0.5 rounded border bg-gray-950 cursor-pointer select-none transition-all duration-150 ${done ? 'line-through opacity-30 border-gray-800 text-gray-600' : base}`}
+                                >
+                                  {shortLabel(item)}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Resources */}
+                  {step.resources.length > 0 && (
+                    <div className="px-5 pb-4 pt-0 border-t border-gray-800/40">
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-2 pt-3">Resources</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {step.resources.map(r => (
+                          <span key={r} className="text-[11px] bg-cyan-900/20 text-cyan-400/80 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
       </div>
     </div>
   );
 };
+
+
 
 // ─── Main App ────────────────────────────────────────────────────────────────
 
