@@ -1,0 +1,71 @@
+[
+    {
+        "id": "1",
+        "companyName": "Google Cloud Security",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+        "industry": "Cybersecurity / Cloud Services",
+        "location": "Bangalore / Hyderabad / Pune, India",
+        "website": "https://cloud.google.com/security",
+        "roles": [
+            "Security Engineer",
+            "Cloud Security Analyst",
+            "Security Researcher"
+        ],
+        "eligibilityCriteria": "B.Tech/M.Tech (CS/IT/Cybersecurity) with min. 7.5 CGPA. No active backlogs.",
+        "salaryPackage": "25 - 40 LPA (CTC)",
+        "selectionProcess": [
+            "Online Assessment (Coding & Security Fundamentals)",
+            "Technical Interview 1 (DSA & Networking)",
+            "Technical Interview 2 (Cloud & Security)",
+            "Googlyness / HR Round"
+        ],
+        "interviewExperience": "Focuses heavily on core CS fundamentals, OS internals, cloud architecture, and scenario-based security questions.",
+        "notesTips": "Ensure strong proficiency in Python/Go, understand IAM principles, and be prepared to discuss recent security vulnerabilities."
+    },
+    {
+        "id": "2",
+        "companyName": "Zscaler",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Zscaler_logo.svg",
+        "industry": "Cloud Security",
+        "location": "Bangalore / Pune / Chandigarh, India",
+        "website": "https://www.zscaler.com/",
+        "roles": [
+            "Software Engineer - Security",
+            "Security Research Engineer",
+            "SRE"
+        ],
+        "eligibilityCriteria": "B.Tech (CS/IT) with min. 7.0 CGPA.",
+        "salaryPackage": "18 - 25 LPA (CTC)",
+        "selectionProcess": [
+            "Resume Screening",
+            "Online Technical Test (C/C++ & Networking)",
+            "Technical Round (TCP/IP, Firewalls, Proxies)",
+            "Managerial Round"
+        ],
+        "interviewExperience": "Extremely thorough on networking concepts. Be prepared for in-depth questions on how DNS, HTTP/S, and TLS handshake work.",
+        "notesTips": "Familiarity with network packets and Wireshark is a huge plus. Read about Zero Trust architecture."
+    },
+    {
+        "id": "3",
+        "companyName": "Cloudflare",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Cloudflare_Logo.svg",
+        "industry": "Web Performance & Security",
+        "location": "Remote / Various hubs",
+        "website": "https://www.cloudflare.com/",
+        "roles": [
+            "Systems Engineer",
+            "Security Operations",
+            "Product Security Engineer"
+        ],
+        "eligibilityCriteria": "Open to all branches with strong systems programming background.",
+        "salaryPackage": "30 - 50 LPA (CTC)",
+        "selectionProcess": [
+            "Initial Recruiter Screen",
+            "Take-home Assignment (Systems/Network)",
+            "Technical Interview (Architecture & Systems)",
+            "Final Team Fitment"
+        ],
+        "interviewExperience": "Less focus on competitive programming, more on practical systems design, Linux kernel networking, and performance optimization.",
+        "notesTips": "Deep knowledge of Rust/C/Go, Linux fundamentals, BGP, and edge computing will set you apart."
+    }
+]

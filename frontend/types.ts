@@ -77,3 +77,29 @@ export interface Project {
   imageUrl?: string;
   contributors?: string[];
 }
+
+export interface Achievement {
+  id: string;
+  title: string;
+  type: 'Hackathon' | 'CTF' | 'Coding' | 'Other';
+  result: string;
+  students: string[];
+  date: string;
+  description: string;
+  images: string[];
+}
+
+export interface CompanyInfo {
+  id: string;
+  companyName: string;
+  logo: string;
+  industry: string;
+  location: string;
+  website: string;
+  roles: string[];
+  eligibilityCriteria: string;
+  salaryPackage: string;
+  selectionProcess: string[];
+  interviewExperience?: string;
+  notesTips: string;
+}
