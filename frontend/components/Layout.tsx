@@ -37,8 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'experiments', label: 'Experiments', icon: Cpu },
     { id: 'career', label: 'Career', icon: Briefcase },
     { id: 'companies', label: 'Companies', icon: Building2 },
-    { id: 'certifications', label: 'Certifications', icon: FileBadge },
-    { id: 'students', label: 'The Constellation', icon: Users },
+  { id: 'certifications', label: 'Certifications', icon: FileBadge },
     {
       id: 'learn', label: 'Learn', icon: BookOpen,
       subItems: [
@@ -62,6 +61,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         { id: 'career', label: 'Preparation', icon: Briefcase },
         { id: 'interviews', label: 'Experiences', icon: MessageSquare },
         { id: 'companies', label: 'Companies', icon: Building2 },
+        // Student list moved under Career Hub as "The Constellation"
+        { id: 'students', label: 'The Constellation', icon: Users },
       ]
     }
   ];
