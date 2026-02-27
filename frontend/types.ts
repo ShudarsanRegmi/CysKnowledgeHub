@@ -139,6 +139,8 @@ export interface CompanyInfo {
   roles: string[];
   eligibilityCriteria: string;
   salaryPackage: string;
+  ctc?: number;
+  opportunityType?: ('Internship' | 'Placement')[];
   selectionProcess: string[];
   interviewExperience?: string;
   notesTips: string;

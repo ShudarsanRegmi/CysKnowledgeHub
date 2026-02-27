@@ -13,6 +13,8 @@
         ],
         "eligibilityCriteria": "B.Tech/M.Tech (CS/IT/Cybersecurity) with min. 7.5 CGPA. No active backlogs.",
         "salaryPackage": "25 - 40 LPA (CTC)",
+        "ctc": 30,
+        "opportunityType": ["Internship", "Placement"],
         "selectionProcess": [
             "Online Assessment (Coding & Security Fundamentals)",
             "Technical Interview 1 (DSA & Networking)",
@@ -36,6 +38,8 @@
         ],
         "eligibilityCriteria": "B.Tech (CS/IT) with min. 7.0 CGPA.",
         "salaryPackage": "18 - 25 LPA (CTC)",
+        "ctc": 22,
+        "opportunityType": ["Placement"],
         "selectionProcess": [
             "Resume Screening",
             "Online Technical Test (C/C++ & Networking)",
@@ -59,6 +63,8 @@
         ],
         "eligibilityCriteria": "Open to all branches with strong systems programming background.",
         "salaryPackage": "30 - 50 LPA (CTC)",
+        "ctc": 40,
+        "opportunityType": ["Internship", "Placement"],
         "selectionProcess": [
             "Initial Recruiter Screen",
             "Take-home Assignment (Systems/Network)",
