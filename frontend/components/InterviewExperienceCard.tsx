@@ -3,10 +3,10 @@ import {
     Building2, Calendar, Clock, Award, ChevronDown, ChevronUp,
     ThumbsUp, Bookmark, Users, ExternalLink, PlayCircle
 } from 'lucide-react';
-import { InterviewExperience, InterviewRound, InterviewQuestion } from '../types';
+import { ApiInterview } from '../services/ctfApi';
 
 interface InterviewExperienceCardProps {
-    experience: InterviewExperience;
+    experience: ApiInterview;
 }
 
 const getDifficultyColor = (difficulty: string) => {

@@ -101,7 +101,7 @@ const CTFWriteupsPage: React.FC = () => {
 
   // Fetch topics on mount
   useEffect(() => {
-    getTopics()
+    getTopics('ctf')
       .then(({ topics }) => {
         setTopics(topics);
         if (topics.length > 0) setActiveTopic(topics[0]);

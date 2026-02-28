@@ -1,15 +1,20 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import ProjectCard from './ProjectCard';
 import ProjectDetail from './ProjectDetail';
-import { PROJECTS } from '../projectsData';
-import { Project } from '../types';
+import { getProjects, ApiProject } from '../services/ctfApi';
 import { Search, Filter } from 'lucide-react';
 
 const ProjectsPage: React.FC = () => {
+  const [projects, setProjects] = useState<ApiProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('All');
-  const [selected, setSelected] = useState<Project | null>(null);
+  const [selected, setSelected] = useState<ApiProject | null>(null);
   const [debounced, setDebounced] = useState(query);
+
+  useEffect(() => {
+    getProjects().then(setProjects).catch(console.error).finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query), 250);
@@ -18,11 +23,11 @@ const ProjectsPage: React.FC = () => {
 
   const categories = useMemo(() => {
     const s = new Set<string>();
-    PROJECTS.forEach(p => p.categories.forEach(c => s.add(c)));
+    projects.forEach(p => p.categories.forEach(c => s.add(c)));
     return ['All', ...Array.from(s).sort()];
-  }, []);
+  }, [projects]);
 
-  const featured = useMemo(() => PROJECTS.filter(p => p.featured).slice(0, 5), []);
+  const featured = useMemo(() => projects.filter(p => p.featured).slice(0, 5), [projects]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
   function prevFeatured() {
@@ -34,7 +39,7 @@ const ProjectsPage: React.FC = () => {
   }
 
   const filtered = useMemo(() => {
-    return PROJECTS.filter(p => {
+    return projects.filter(p => {
       if (category !== 'All' && !p.categories.includes(category)) return false;
       const q = debounced.trim().toLowerCase();
       if (!q) return true;
@@ -43,11 +48,11 @@ const ProjectsPage: React.FC = () => {
       const inTags = (p.tags || []).some(t => t.toLowerCase().includes(q));
       return inTitle || inAbstract || inTags;
     });
-  }, [debounced, category]);
+  }, [debounced, category, projects]);
 
   // Group by category for comprehensive section
   const grouped = useMemo(() => {
-    const map = new Map<string, Project[]>();
+    const map = new Map<string, ApiProject[]>();
     filtered.forEach(p => {
       p.categories.forEach(c => {
         if (!map.has(c)) map.set(c, []);
@@ -57,12 +62,13 @@ const ProjectsPage: React.FC = () => {
     return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
   }, [filtered]);
 
-  function openProject(p: Project) {
+  function openProject(p: ApiProject) {
     setSelected(p);
   }
 
   return (
     <div className="space-y-10">
+      {loading && <div className="text-center text-gray-400 py-10">Loading projects…</div>}  
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Projects</h1>
@@ -165,15 +171,15 @@ const ProjectsPage: React.FC = () => {
             </div>
 
             {/* Secondary featured items (if any) shown below as smaller cards */}
-            {featured.length > 1 && (
-              <div className="flex justify-center gap-6">
-                {featured.map((p, idx) => (
-                  <div key={p.id} className={`w-44 transition-transform duration-300 ${idx === featuredIndex ? 'scale-105' : 'opacity-60 scale-95'}`}>
-                    <ProjectCard project={p} onClick={openProject} variant="showcase" />
-                  </div>
-                ))}
-              </div>
-            )}
+                  {featured.length > 1 && (
+                    <div className="flex justify-center gap-6">
+                      {featured.map((p, idx) => (
+                        <div key={p._id} className={`w-44 transition-transform duration-300 ${idx === featuredIndex ? 'scale-105' : 'opacity-60 scale-95'}`}>
+                          <ProjectCard project={p} onClick={openProject} variant="showcase" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
           </div>
         )}
       </section>
@@ -195,7 +201,7 @@ const ProjectsPage: React.FC = () => {
               <div key={cat} className="space-y-4">
                 <h3 className="text-xl font-bold">{cat} <span className="text-sm text-gray-400">({items.length})</span></h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {items.map(p => <ProjectCard key={p.id} project={p} onClick={openProject} />)}
+                  {items.map(p => <ProjectCard key={p._id} project={p} onClick={openProject} />)}
                 </div>
               </div>
             ))}

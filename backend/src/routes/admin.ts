@@ -61,9 +61,15 @@ router.get('/topics', async (_req, res: Response): Promise<void> => {
 
 /** POST /api/admin/topics — create a topic */
 router.post('/topics', async (req: AuthRequest, res: Response): Promise<void> => {
-  const { title, description } = req.body;
+  const { title, description, type } = req.body;
   if (!title?.trim()) {
     res.status(400).json({ message: 'Title is required' });
+    return;
+  }
+
+  const allowedTypes = ['ctf', 'blog', 'experiment'];
+  if (type && !allowedTypes.includes(type)) {
+    res.status(400).json({ message: `Invalid type. Must be one of: ${allowedTypes.join(', ')}` });
     return;
   }
 
@@ -75,6 +81,7 @@ router.post('/topics', async (req: AuthRequest, res: Response): Promise<void> =>
     const topic = await Topic.create({
       title: title.trim(),
       description: description?.trim(),
+      type: type ?? 'ctf',
       createdBy: req.user!.uid,
       order,
     });
@@ -90,11 +97,21 @@ router.post('/topics', async (req: AuthRequest, res: Response): Promise<void> =>
 
 /** PATCH /api/admin/topics/:id — update a topic */
 router.patch('/topics/:id', async (req, res: Response): Promise<void> => {
-  const { title, description, order } = req.body;
+  const { title, description, order, type } = req.body;
+  const allowedTypes = ['ctf', 'blog', 'experiment'];
+  if (type && !allowedTypes.includes(type)) {
+    res.status(400).json({ message: `Invalid type. Must be one of: ${allowedTypes.join(', ')}` });
+    return;
+  }
   try {
     const topic = await Topic.findByIdAndUpdate(
       req.params.id,
-      { ...(title && { title }), ...(description !== undefined && { description }), ...(order !== undefined && { order }) },
+      {
+        ...(title && { title }),
+        ...(description !== undefined && { description }),
+        ...(order !== undefined && { order }),
+        ...(type && { type }),
+      },
       { new: true, runValidators: true }
     );
     if (!topic) { res.status(404).json({ message: 'Topic not found' }); return; }

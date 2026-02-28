@@ -1,13 +1,20 @@
-import React, { useState, useMemo } from 'react';
-import { Building2, MapPin, Globe, DollarSign, Briefcase, GraduationCap, ClipboardList, MessageSquare, Lightbulb, Search, ExternalLink, ChevronRight, Filter, SlidersHorizontal, Check } from 'lucide-react';
-import companiesData from '../companiesData.json';
-import { CompanyInfo } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Building2, MapPin, Globe, DollarSign, Briefcase, GraduationCap, ClipboardList, MessageSquare, Lightbulb, Search, ExternalLink, ChevronRight, Filter, SlidersHorizontal, Check, Loader2 } from 'lucide-react';
+import { getCompanies, ApiCompany } from '../services/ctfApi';
 import { CompanyDetailsModal } from './CompanyDetailsModal';
 
 const CompaniesPage: React.FC = () => {
+    const [companies, setCompanies] = useState<ApiCompany[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCompany, setSelectedCompany] = useState<CompanyInfo | null>(null);
-    const companies: CompanyInfo[] = companiesData as CompanyInfo[];
+    const [selectedCompany, setSelectedCompany] = useState<ApiCompany | null>(null);
+
+    useEffect(() => {
+        getCompanies()
+            .then(setCompanies)
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
 
     // Filter States
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -164,10 +171,15 @@ const CompaniesPage: React.FC = () => {
                         Showing <span className="text-white">{filteredCompanies.length}</span> companies
                     </div>
 
+                    {loading ? (
+                        <div className="flex justify-center items-center py-24">
+                            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+                        </div>
+                    ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredCompanies.map((company) => (
                             <div
-                                key={company.id}
+                                key={company._id}
                                 onClick={() => setSelectedCompany(company)}
                                 className="bg-gray-900 border border-gray-800 rounded-3xl p-6 hover:border-cyan-500/50 transition-all cursor-pointer flex flex-col hover:shadow-xl hover:shadow-cyan-900/10 group h-full"
                             >
@@ -222,8 +234,9 @@ const CompaniesPage: React.FC = () => {
                             </div>
                         ))}
                     </div>
+                    )}
 
-                    {filteredCompanies.length === 0 && (
+                    {!loading && filteredCompanies.length === 0 && (
                         <div className="py-12 mt-4 text-center text-gray-500 border border-gray-800 rounded-3xl bg-gray-900/50">
                             No companies found matching your filters.
                         </div>

@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import ChatAssistant from './components/ChatAssistant';
-import { MOCK_CONTENT, MOCK_INTERVIEWS, ROADMAPS } from './constants';
-import { ContentType, RoadmapData } from './types';
+import { MOCK_CONTENT } from './constants';
+import { ContentType } from './types';
 import ProjectsPage from './components/ProjectsPage';
 import AchievementsPage from './components/AchievementsPage';
 import CertificationsPage from "./components/CertificationsPage";
@@ -18,10 +18,13 @@ import AuthorDashboard from './components/AuthorDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import ProjectDetailPage from './components/ProjectDetailPage';
 import { useAuth } from './contexts/AuthContext';
+import { getArticle, getFeedByType, ApiRoadmap, ApiInterview, getRoadmaps, getRoadmap, getInterviews } from './services/ctfApi';
+import MDEditor from '@uiw/react-md-editor';
 import {
   Terminal, Shield, BookOpen, Map, Award, Briefcase,
   ExternalLink, ArrowRight, User, ChevronRight,
   Code, HardDrive, Search, Clock, ArrowLeft, Check, Lock,
+  Calendar, AlertCircle, Loader2,
 } from 'lucide-react';
 
 // ─── Roadmap detail page ──────────────────────────────────────────────────────
@@ -37,7 +40,7 @@ const roleConfig: Record<string, { icon: React.FC<{ className?: string }>, accen
 const shortLabel = (item: string) => item.split(/\s*[—:]\s*/)[0].trim();
 
 interface RoadmapDetailPageProps {
-  roadmap: RoadmapData;
+  roadmap: ApiRoadmap;
   onBack: () => void;
 }
 
@@ -346,8 +349,135 @@ const HomePage: React.FC = () => {
   );
 };
 
+// ─── Shared article types for feed pages ──────────────────────────────────────
+interface FeedArticle {
+  _id: string;
+  title: string;
+  slug: string;
+  topicId: { _id: string; title: string; slug: string; type: string };
+  coverImage?: string;
+  authorName: string;
+  tags: string[];
+  publishedAt?: string;
+}
+
+// ─── Inline article viewer (used by Blogs & Experiments pages) ────────────────
+const FeedArticleDetail: React.FC<{
+  topicSlug: string;
+  articleSlug: string;
+  onBack: () => void;
+}> = ({ topicSlug, articleSlug, onBack }) => {
+  const [article, setArticle] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    getArticle(topicSlug, articleSlug)
+      .then(({ article }) => setArticle(article))
+      .catch((err: any) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [topicSlug, articleSlug]);
+
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+    </div>
+  );
+
+  if (error || !article) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-gray-500">
+      <AlertCircle className="w-8 h-8 text-red-400" />
+      <p>{error ?? 'Article not found'}</p>
+      <button onClick={onBack} className="text-cyan-500 hover:underline text-sm">Go back</button>
+    </div>
+  );
+
+  return (
+    <div className="max-w-3xl mx-auto" data-color-mode="dark">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors text-sm mb-6 group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        Back to list
+      </button>
+
+      {article.coverImage && (
+        <img
+          src={article.coverImage}
+          alt={article.title}
+          className="w-full h-64 object-cover rounded-2xl mb-8 border border-gray-800"
+        />
+      )}
+
+      <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
+
+      <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <User className="w-3.5 h-3.5 text-cyan-500" />
+          {article.authorName}
+        </span>
+        {article.publishedAt && (
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            {new Date(article.publishedAt).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'short', day: 'numeric',
+            })}
+          </span>
+        )}
+        {article.tags.map((tag: string) => (
+          <span key={tag} className="text-xs bg-gray-800/80 px-2 py-0.5 rounded-full text-cyan-400/80 border border-cyan-500/20">
+            #{tag}
+          </span>
+        ))}
+      </div>
+
+      <div className="prose prose-invert max-w-none">
+        <MDEditor.Markdown
+          source={article.content}
+          style={{ background: 'transparent', color: '#e5e7eb', fontSize: 15, lineHeight: 1.7 }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// ─── Content list page (Blogs / Experiments) — live from API ─────────────────
 const ContentListPage: React.FC<{ type: ContentType; label: string }> = ({ type, label }) => {
-  const filtered = MOCK_CONTENT.filter(c => c.type === type);
+  const topicType = type === ContentType.BLOG ? 'blog' : 'experiment';
+  const [articles, setArticles] = useState<FeedArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<{ topicSlug: string; articleSlug: string } | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    getFeedByType(topicType)
+      .then(({ articles }) => setArticles(articles as FeedArticle[]))
+      .catch((err: any) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [topicType]);
+
+  if (selected) {
+    return (
+      <FeedArticleDetail
+        topicSlug={selected.topicSlug}
+        articleSlug={selected.articleSlug}
+        onBack={() => setSelected(null)}
+      />
+    );
+  }
+
+  const filtered = articles.filter(
+    (a) =>
+      a.title.toLowerCase().includes(search.toLowerCase()) ||
+      a.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -359,78 +489,120 @@ const ContentListPage: React.FC<{ type: ContentType; label: string }> = ({ type,
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder={`Search ${label}...`}
             className="bg-gray-900 border border-gray-800 rounded-full py-2 pl-10 pr-4 w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
       </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filtered.length > 0 ? filtered.map((item) => (
-                <div key={item.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-cyan-500" />
-                        <span className="text-xs text-gray-400">{item.author}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">{item.date}</span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                    <p className="text-gray-400 text-sm mb-6">{item.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {item.tags.map(t => (
-                        <span key={t} className="text-[10px] bg-gray-800 text-gray-400 px-2 py-1 rounded">#{t}</span>
-                      ))}
-                    </div>
-                    <button className="w-full py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl font-semibold text-sm transition-colors border border-gray-700">
-                      Explore Content
-                    </button>
-                  </div>
-                </div>
-              )) : (
-                <div className="col-span-full py-20 text-center">
-                  <div className="text-gray-500 mb-2">No items found in this category yet.</div>
-                  <button className="text-cyan-500 hover:underline">Contribute your first {label.slice(0, -1)}?</button>
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center gap-3 py-20 text-gray-500">
+          <AlertCircle className="w-8 h-8 text-red-400" />
+          <p>{error}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filtered.length > 0 ? filtered.map((item) => (
+            <div
+              key={item._id}
+              className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all cursor-pointer group"
+              onClick={() => setSelected({ topicSlug: item.topicId.slug, articleSlug: item.slug })}
+            >
+              {item.coverImage ? (
+                <img src={item.coverImage} alt={item.title} className="w-full h-40 object-cover" />
+              ) : (
+                <div className="w-full h-40 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                  <BookOpen className="w-10 h-10 text-gray-700" />
                 </div>
               )}
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3 h-3 text-cyan-500" />{item.authorName}
+                  </span>
+                  {item.publishedAt && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(item.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-lg font-bold mb-2 group-hover:text-cyan-400 transition-colors line-clamp-2">{item.title}</h3>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {item.tags.slice(0, 3).map((t) => (
+                    <span key={t} className="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded">#{t}</span>
+                  ))}
+                </div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-cyan-500 group-hover:gap-2 transition-all">
+                  Read Article <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
             </div>
+          )) : (
+            <div className="col-span-full py-20 text-center">
+              <div className="text-gray-500 mb-2">
+                {search ? `No ${label} match your search.` : `No ${label} published yet.`}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
 const RoadmapsPage: React.FC = () => {
   const navigate = useNavigate();
-  const roadmapCards = [
-    { id: 'SOC_ANALYST', title: 'SOC Analyst', desc: 'Focus on defensive operations and monitoring.', icon: Shield },
-    { id: 'PENETRATION_TESTER', title: 'Penetration Tester', desc: 'Ethical hacking and offensive security.', icon: Terminal },
-    { id: 'GRC_SPECIALIST', title: 'GRC Specialist', desc: 'Governance, risk, and compliance.', icon: Award },
-    { id: 'CLOUD_SECURITY', title: 'Cloud Security', desc: 'Securing AWS, Azure, and GCP environments.', icon: HardDrive },
-  ];
+  const [roadmapList, setRoadmapList] = useState<Pick<ApiRoadmap, '_id' | 'id' | 'title' | 'subtitle'>[]>([]);
+  const [loadingRMs, setLoadingRMs] = useState(true);
+
+  useEffect(() => {
+    getRoadmaps()
+      .then(setRoadmapList)
+      .catch(console.error)
+      .finally(() => setLoadingRMs(false));
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">Cybersecurity Roadmaps</h1>
         <p className="text-gray-400">Step-by-step guides to land your dream role in infosec.</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {roadmapCards.map((r) => (
-          <button
-            key={r.id}
-            onClick={() => navigate(`/roadmaps/${r.id}`)}
-            className="bg-gray-900 border border-gray-800 p-6 rounded-2xl hover:border-cyan-500/50 transition-all duration-200 group cursor-pointer text-left w-full focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-          >
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/20 transition-colors">
-              <r.icon className="w-5 h-5 text-cyan-400" />
-            </div>
-            <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">{r.title}</h3>
-            <p className="text-gray-400 text-sm mb-6">{r.desc}</p>
-            <span className="flex items-center gap-2 text-sm font-semibold text-cyan-500 group-hover:gap-3 transition-all">
-              View Interactive Roadmap <ChevronRight className="w-4 h-4" />
-            </span>
-          </button>
-        ))}
-      </div>
+      {loadingRMs ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {roadmapList.map((r) => {
+            const cfg = roleConfig[r.id] ?? roleConfig.SOC_ANALYST;
+            const Icon = cfg.icon;
+            return (
+              <button
+                key={r._id}
+                onClick={() => navigate(`/roadmaps/${r.id}`)}
+                className="bg-gray-900 border border-gray-800 p-6 rounded-2xl hover:border-cyan-500/50 transition-all duration-200 group cursor-pointer text-left w-full focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+              >
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4 group-hover:bg-cyan-500/20 transition-colors">
+                  <Icon className="w-5 h-5 text-cyan-400" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">{r.title}</h3>
+                <p className="text-gray-400 text-sm mb-6">{r.subtitle}</p>
+                <span className="flex items-center gap-2 text-sm font-semibold text-cyan-500 group-hover:gap-3 transition-all">
+                  View Interactive Roadmap <ChevronRight className="w-4 h-4" />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
@@ -438,13 +610,37 @@ const RoadmapsPage: React.FC = () => {
 const RoadmapDetailRoute: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const roadmap = id ? ROADMAPS[id] : null;
-  if (!roadmap) return <Navigate to="/roadmaps" replace />;
+  const [roadmap, setRoadmap] = useState<ApiRoadmap | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (!id) { setNotFound(true); setLoading(false); return; }
+    getRoadmap(id)
+      .then(setRoadmap)
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return (
+    <div className="flex justify-center py-24">
+      <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+    </div>
+  );
+  if (notFound || !roadmap) return <Navigate to="/roadmaps" replace />;
   return <RoadmapDetailPage roadmap={roadmap} onBack={() => navigate('/roadmaps')} />;
 };
 
 const CareerPage: React.FC = () => {
   const navigate = useNavigate();
+  const [previewInterviews, setPreviewInterviews] = useState<ApiInterview[]>([]);
+
+  useEffect(() => {
+    getInterviews({ limit: 2 })
+      .then(setPreviewInterviews)
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="space-y-12">
             <div>
@@ -462,8 +658,8 @@ const CareerPage: React.FC = () => {
               View All <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          {MOCK_INTERVIEWS.slice(0, 2).map(exp => (
-            <div key={exp.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-700 transition-all">
+          {previewInterviews.map(exp => (
+            <div key={exp._id} className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-700 transition-all">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h4 className="text-lg font-bold">{exp.company}</h4>

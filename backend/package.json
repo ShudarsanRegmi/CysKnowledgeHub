@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed:test-users": "ts-node-dev --transpile-only scripts/seed-test-users.ts",
-    "clear:test-users": "ts-node-dev --transpile-only scripts/clear-test-users.ts"
+    "clear:test-users": "ts-node-dev --transpile-only scripts/clear-test-users.ts",
+    "seed:content": "ts-node-dev --transpile-only scripts/seed-content.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

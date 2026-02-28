@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Achievement } from '../types';
+import { ApiAchievement } from '../services/ctfApi';
 import { Trophy, Users, ExternalLink, Calendar, Shield } from 'lucide-react';
 
 interface Props {
-  achievement: Achievement;
+  achievement: ApiAchievement;
   variant?: 'default' | 'podium';
   colSpan?: number;
   rowSpan?: number;

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Project } from '../types';
+import { ApiProject } from '../services/ctfApi';
 import { ExternalLink, Github, Users } from 'lucide-react';
 
 interface Props {
-  project: Project;
-  onClick?: (p: Project) => void;
+  project: ApiProject;
+  onClick?: (p: ApiProject) => void;
   variant?: 'default' | 'showcase';
   highlight?: boolean;
 }

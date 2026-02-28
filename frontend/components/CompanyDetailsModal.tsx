@@ -1,9 +1,9 @@
 import React from 'react';
 import { X, GraduationCap, ClipboardList, MessageSquare, Lightbulb } from 'lucide-react';
-import { CompanyInfo } from '../types';
+import { ApiCompany } from '../services/ctfApi';
 
 interface CompanyDetailsModalProps {
-    company: CompanyInfo;
+    company: ApiCompany;
     onClose: () => void;
 }
 

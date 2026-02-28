@@ -118,7 +118,7 @@ const TopicsPanel: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
-  const [form, setForm] = useState({ title: '', description: '' });
+  const [form, setForm] = useState({ title: '', description: '', type: 'ctf' as 'ctf' | 'blog' | 'experiment' });
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -134,18 +134,18 @@ const TopicsPanel: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { setForm({ title: '', description: '' }); setEditingTopic(null); setShowForm(true); };
-  const openEdit = (t: Topic) => { setForm({ title: t.title, description: t.description ?? '' }); setEditingTopic(t); setShowForm(true); };
+  const openCreate = () => { setForm({ title: '', description: '', type: 'ctf' }); setEditingTopic(null); setShowForm(true); };
+  const openEdit = (t: Topic) => { setForm({ title: t.title, description: t.description ?? '', type: t.type ?? 'ctf' }); setEditingTopic(t); setShowForm(true); };
 
   const handleSave = async () => {
     if (!form.title.trim()) return;
     setSaving(true);
     try {
       if (editingTopic) {
-        await adminUpdateTopic(editingTopic._id, { title: form.title, description: form.description });
+        await adminUpdateTopic(editingTopic._id, { title: form.title, description: form.description, type: form.type });
         flash('Topic updated.');
       } else {
-        await adminCreateTopic({ title: form.title, description: form.description });
+        await adminCreateTopic({ title: form.title, description: form.description, type: form.type });
         flash('Topic created.');
       }
       setShowForm(false);
@@ -202,6 +202,18 @@ const TopicsPanel: React.FC = () => {
             rows={2}
             className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
           />
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Section type</label>
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value as 'ctf' | 'blog' | 'experiment' })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+            >
+              <option value="ctf">CTF Writeup</option>
+              <option value="blog">Blog</option>
+              <option value="experiment">Experiment</option>
+            </select>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={handleSave}
@@ -228,7 +240,14 @@ const TopicsPanel: React.FC = () => {
                 <button disabled={idx === topics.length - 1} onClick={() => moveOrder(t, 'down')} className="text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><ChevronDown className="w-3.5 h-3.5" /></button>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white">{t.title}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-white">{t.title}</p>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    t.type === 'blog' ? 'text-emerald-400 bg-emerald-900/30 border-emerald-700/40' :
+                    t.type === 'experiment' ? 'text-purple-400 bg-purple-900/30 border-purple-700/40' :
+                    'text-cyan-400 bg-cyan-900/30 border-cyan-700/40'
+                  }`}>{t.type ?? 'ctf'}</span>
+                </div>
                 {t.description && <p className="text-xs text-gray-500 truncate">{t.description}</p>}
               </div>
               <div className="flex items-center gap-2">

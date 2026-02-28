@@ -1,26 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import AchievementCard from './AchievementCard';
 import AchievementDetailModal from './AchievementDetailModal';
-import { ACHIEVEMENTS } from '../achievementsData';
-import { Achievement } from '../types';
+import { getAchievements, ApiAchievement } from '../services/ctfApi';
 import { Shield } from 'lucide-react';
 
 type TypeFilter = 'All' | 'Hackathon' | 'CTF' | 'Coding' | 'Other';
 
 const AchievementsPage: React.FC = () => {
+  const [achievements, setAchievements] = useState<ApiAchievement[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<TypeFilter>('All');
-  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<ApiAchievement | null>(null);
+
+  useEffect(() => {
+    getAchievements().then(setAchievements).catch(console.error).finally(() => setLoading(false));
+  }, []);
 
   const types: TypeFilter[] = ['All', 'Hackathon', 'CTF', 'Coding', 'Other'];
 
   const filteredAchievements = useMemo(() => {
-    if (selectedType === 'All') {
-      return ACHIEVEMENTS;
-    }
-    return ACHIEVEMENTS.filter((ach) => ach.type === selectedType);
-  }, [selectedType]);
+    if (selectedType === 'All') return achievements;
+    return achievements.filter((ach) => ach.type === selectedType);
+  }, [selectedType, achievements]);
 
-  const handleAchievementClick = (achievement: Achievement) => {
+  const handleAchievementClick = (achievement: ApiAchievement) => {
     setSelectedAchievement(achievement);
   };
 
@@ -30,6 +33,7 @@ const AchievementsPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
+      {loading && <div className="text-center text-gray-400 py-10">Loading achievements…</div>}
       {/* Header */}
       <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-700">
         <h1 className="text-4xl font-bold text-white transition-all duration-500 hover:text-cyan-400">
@@ -63,7 +67,7 @@ const AchievementsPage: React.FC = () => {
         {filteredAchievements.length > 0 ? (
           filteredAchievements.map((achievement, index) => (
             <div
-              key={achievement.id}
+              key={achievement._id}
               className="animate-in fade-in slide-in-from-bottom-4 duration-500"
               style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}
             >
