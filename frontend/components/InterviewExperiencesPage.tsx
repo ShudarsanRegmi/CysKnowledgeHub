@@ -1,13 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, SortDesc, SlidersHorizontal, AlertCircle, ChevronDown, Check } from 'lucide-react';
-import { MOCK_INTERVIEWS, INTERVIEW_DOMAINS } from '../constants';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, Filter, SortDesc, SlidersHorizontal, AlertCircle, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { INTERVIEW_DOMAINS } from '../constants';
+import { getInterviews, ApiInterview } from '../services/ctfApi';
 import { InterviewExperienceCard } from './InterviewExperienceCard';
 import { ContributeExperienceModal } from './ContributeExperienceModal';
-import { InterviewExperience } from '../types';
 
 export const InterviewExperiencesPage: React.FC = () => {
+    const [interviews, setInterviews] = useState<ApiInterview[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        getInterviews()
+            .then(setInterviews)
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
 
     // Filter States
     const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
@@ -18,8 +27,8 @@ export const InterviewExperiencesPage: React.FC = () => {
     const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'views'>('helpful');
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-    // Derive unique options from mock data
-    const companies = Array.from(new Set(MOCK_INTERVIEWS.map(i => i.company)));
+    // Derive unique companies from fetched data; keep domain list as static labels
+    const companies = useMemo(() => Array.from(new Set(interviews.map(i => i.company))), [interviews]);
     const domains = INTERVIEW_DOMAINS;
     const results = ['Selected', 'Rejected', 'Waiting'];
     const difficulties = ['Easy', 'Medium', 'Hard'];
@@ -31,7 +40,7 @@ export const InterviewExperiencesPage: React.FC = () => {
     };
 
     const filteredAndSortedExperiences = useMemo(() => {
-        let result = [...MOCK_INTERVIEWS];
+        let result = [...interviews];
 
         // Search filter
         if (searchTerm) {
@@ -69,7 +78,7 @@ export const InterviewExperiencesPage: React.FC = () => {
         }
 
         return result;
-    }, [searchTerm, selectedCompanies, selectedDomains, selectedResults, selectedDifficulties, sortBy]);
+    }, [interviews, searchTerm, selectedCompanies, selectedDomains, selectedResults, selectedDifficulties, sortBy]);
 
     return (
         <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 animate-fade-in">
@@ -236,9 +245,13 @@ export const InterviewExperiencesPage: React.FC = () => {
 
                     {/* Cards Grid */}
                     <div className="space-y-6">
-                        {filteredAndSortedExperiences.length > 0 ? (
-                            filteredAndSortedExperiences.map((exp: InterviewExperience) => (
-                                <InterviewExperienceCard key={exp.id} experience={exp} />
+                        {loading ? (
+                            <div className="flex justify-center items-center py-24">
+                                <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+                            </div>
+                        ) : filteredAndSortedExperiences.length > 0 ? (
+                            filteredAndSortedExperiences.map((exp: ApiInterview) => (
+                                <InterviewExperienceCard key={exp._id} experience={exp} />
                             ))
                         ) : (
                             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center shadow-lg">

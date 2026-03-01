@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Achievement } from '../types';
+import { ApiAchievement } from '../services/ctfApi';
 import { X, ChevronLeft, ChevronRight, Users, Calendar, Award, Shield, Zap } from 'lucide-react';
 
 interface Props {
-  achievement: Achievement | null;
+  achievement: ApiAchievement | null;
   onClose: () => void;
 }
 

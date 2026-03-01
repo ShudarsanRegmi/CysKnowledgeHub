@@ -1,10 +1,10 @@
 import React from 'react';
-import { Achievement } from '../types';
+import { ApiAchievement } from '../services/ctfApi';
 import { Users, Shield, Zap, ExternalLink } from 'lucide-react';
 
 interface Props {
-  achievement: Achievement;
-  onClick?: (achievement: Achievement) => void;
+  achievement: ApiAchievement;
+  onClick?: (achievement: ApiAchievement) => void;
 }
 
 const AchievementCard: React.FC<Props> = ({ achievement, onClick }) => {

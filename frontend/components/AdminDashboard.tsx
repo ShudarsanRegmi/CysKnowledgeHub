@@ -118,7 +118,7 @@ const TopicsPanel: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
-  const [form, setForm] = useState({ title: '', description: '' });
+  const [form, setForm] = useState({ title: '', description: '', type: 'ctf' as 'ctf' | 'blog' | 'experiment' });
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -134,18 +134,18 @@ const TopicsPanel: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { setForm({ title: '', description: '' }); setEditingTopic(null); setShowForm(true); };
-  const openEdit = (t: Topic) => { setForm({ title: t.title, description: t.description ?? '' }); setEditingTopic(t); setShowForm(true); };
+  const openCreate = () => { setForm({ title: '', description: '', type: 'ctf' }); setEditingTopic(null); setShowForm(true); };
+  const openEdit = (t: Topic) => { setForm({ title: t.title, description: t.description ?? '', type: t.type ?? 'ctf' }); setEditingTopic(t); setShowForm(true); };
 
   const handleSave = async () => {
     if (!form.title.trim()) return;
     setSaving(true);
     try {
       if (editingTopic) {
-        await adminUpdateTopic(editingTopic._id, { title: form.title, description: form.description });
+        await adminUpdateTopic(editingTopic._id, { title: form.title, description: form.description, type: form.type });
         flash('Topic updated.');
       } else {
-        await adminCreateTopic({ title: form.title, description: form.description });
+        await adminCreateTopic({ title: form.title, description: form.description, type: form.type });
         flash('Topic created.');
       }
       setShowForm(false);
@@ -202,6 +202,18 @@ const TopicsPanel: React.FC = () => {
             rows={2}
             className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
           />
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Section type</label>
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value as 'ctf' | 'blog' | 'experiment' })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+            >
+              <option value="ctf">CTF Writeup</option>
+              <option value="blog">Blog</option>
+              <option value="experiment">Experiment</option>
+            </select>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={handleSave}
@@ -228,7 +240,14 @@ const TopicsPanel: React.FC = () => {
                 <button disabled={idx === topics.length - 1} onClick={() => moveOrder(t, 'down')} className="text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><ChevronDown className="w-3.5 h-3.5" /></button>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white">{t.title}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-white">{t.title}</p>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    t.type === 'blog' ? 'text-emerald-400 bg-emerald-900/30 border-emerald-700/40' :
+                    t.type === 'experiment' ? 'text-purple-400 bg-purple-900/30 border-purple-700/40' :
+                    'text-cyan-400 bg-cyan-900/30 border-cyan-700/40'
+                  }`}>{t.type ?? 'ctf'}</span>
+                </div>
                 {t.description && <p className="text-xs text-gray-500 truncate">{t.description}</p>}
               </div>
               <div className="flex items-center gap-2">
@@ -261,27 +280,64 @@ const ArticlePreviewModal: React.FC<{ article: Article; onClose: () => void }> =
   </div>
 );
 
+// Time-range helpers
+const TIME_RANGES = [
+  { label: 'All time',    value: '' },
+  { label: 'Today',       value: 'today' },
+  { label: 'Last 7 days', value: '7d' },
+  { label: 'Last 30 days',value: '30d' },
+  { label: 'Last 90 days',value: '90d' },
+];
+
+function inRange(dateStr: string, range: string): boolean {
+  if (!range) return true;
+  const now = Date.now();
+  const d = new Date(dateStr).getTime();
+  if (range === 'today') {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    return d >= start.getTime();
+  }
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
+  return d >= now - days * 24 * 60 * 60 * 1000;
+}
+
 const ArticlesReviewPanel: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('pending');
+  const [topicFilter, setTopicFilter] = useState('');
+  const [timeFilter, setTimeFilter] = useState('');
   const [previewArticle, setPreviewArticle] = useState<Article | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const [rejectForm, setRejectForm] = useState<{ id: string; reason: string } | null>(null);
 
   const flash = (msg: string) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(null), 3000); };
 
+  // Load topics once for the filter dropdown
+  useEffect(() => {
+    adminGetTopics().then(({ topics }) => setTopics(topics)).catch(() => {});
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const { articles } = await adminGetArticles({ status: statusFilter || undefined });
+      const { articles } = await adminGetArticles({
+        status: statusFilter || undefined,
+        topicId: topicFilter || undefined,
+      });
       setArticles(articles);
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
-  }, [statusFilter]);
+  }, [statusFilter, topicFilter]);
+
+  // Client-side time filter applied to fetched articles
+  const visibleArticles = timeFilter
+    ? articles.filter((a) => inRange(a.updatedAt, timeFilter))
+    : articles;
 
   useEffect(() => { load(); }, [load]);
 
@@ -289,7 +345,7 @@ const ArticlesReviewPanel: React.FC = () => {
     setActionId(id);
     try {
       await adminSetArticleStatus(id, status, rejectionReason);
-      flash(`Article ${status}.`);
+      flash(status === 'approved' ? 'Article approved and published.' : `Article ${status}.`);
       await load();
     } catch (err: any) { setError(err.message); }
     finally { setActionId(null); setRejectForm(null); }
@@ -308,8 +364,14 @@ const ArticlesReviewPanel: React.FC = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-lg font-bold flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-cyan-500" />Article Review
+          {!loading && (
+            <span className="text-sm font-normal text-gray-500">
+              ({visibleArticles.length}{timeFilter || topicFilter ? ` of ${articles.length}` : ''})
+            </span>
+          )}
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Status filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -322,6 +384,30 @@ const ArticlesReviewPanel: React.FC = () => {
             <option value="rejected">Rejected</option>
             <option value="draft">Draft</option>
           </select>
+
+          {/* Topic filter */}
+          <select
+            value={topicFilter}
+            onChange={(e) => setTopicFilter(e.target.value)}
+            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+          >
+            <option value="">All topics</option>
+            {topics.map((t) => (
+              <option key={t._id} value={t._id}>{t.title}</option>
+            ))}
+          </select>
+
+          {/* Submitted time filter */}
+          <select
+            value={timeFilter}
+            onChange={(e) => setTimeFilter(e.target.value)}
+            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+          >
+            {TIME_RANGES.map(({ label, value }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+
           <button onClick={load} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><RefreshCw className="w-4 h-4" /></button>
         </div>
       </div>
@@ -329,11 +415,13 @@ const ArticlesReviewPanel: React.FC = () => {
       {error && <ErrorBanner msg={error} onDismiss={() => setError(null)} />}
       {successMsg && <SuccessBanner msg={successMsg} />}
 
-      {loading ? <LoadingSpinner /> : articles.length === 0 ? (
-        <p className="text-center text-gray-600 py-12">No articles in this state.</p>
+      {loading ? <LoadingSpinner /> : visibleArticles.length === 0 ? (
+        <p className="text-center text-gray-600 py-12">
+          {articles.length === 0 ? 'No articles in this state.' : 'No articles match the selected filters.'}
+        </p>
       ) : (
         <div className="space-y-3">
-          {articles.map((a, idx) => {
+          {visibleArticles.map((a, idx) => {
             const topicTitle = typeof a.topicId === 'object' ? (a.topicId as any).title : '—';
             const canReorder = a.status === 'published';
 
@@ -344,7 +432,7 @@ const ArticlesReviewPanel: React.FC = () => {
                   {canReorder && (
                     <div className="flex flex-col gap-0.5 mt-0.5">
                       <button disabled={idx === 0} onClick={() => moveOrder(a, 'up')} className="text-gray-600 hover:text-white disabled:opacity-20"><ChevronUp className="w-3.5 h-3.5" /></button>
-                      <button disabled={idx === articles.length - 1} onClick={() => moveOrder(a, 'down')} className="text-gray-600 hover:text-white disabled:opacity-20"><ChevronDown className="w-3.5 h-3.5" /></button>
+                      <button disabled={idx === visibleArticles.length - 1} onClick={() => moveOrder(a, 'down')} className="text-gray-600 hover:text-white disabled:opacity-20"><ChevronDown className="w-3.5 h-3.5" /></button>
                     </div>
                   )}
 
@@ -377,9 +465,9 @@ const ArticlesReviewPanel: React.FC = () => {
                   {a.status === 'pending' && (
                     <>
                       <ActionButton
-                        label="Approve"
-                        color="text-indigo-400 border-indigo-700/40 hover:bg-indigo-900/30"
-                        icon={<Check className="w-3 h-3" />}
+                        label="Approve & Publish"
+                        color="text-cyan-400 border-cyan-700/40 hover:bg-cyan-900/20"
+                        icon={<BookOpen className="w-3 h-3" />}
                         loading={actionId === a._id}
                         onClick={() => handleStatus(a._id, 'approved')}
                       />
@@ -391,15 +479,6 @@ const ArticlesReviewPanel: React.FC = () => {
                         onClick={() => setRejectForm({ id: a._id, reason: '' })}
                       />
                     </>
-                  )}
-                  {a.status === 'approved' && (
-                    <ActionButton
-                      label="Publish"
-                      color="text-cyan-400 border-cyan-700/40 hover:bg-cyan-900/20"
-                      icon={<BookOpen className="w-3 h-3" />}
-                      loading={actionId === a._id}
-                      onClick={() => handleStatus(a._id, 'published')}
-                    />
                   )}
                   {a.status === 'published' && (
                     <ActionButton

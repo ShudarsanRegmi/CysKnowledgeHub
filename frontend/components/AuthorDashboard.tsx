@@ -92,11 +92,21 @@ const AuthorDashboard: React.FC = () => {
   };
 
   // ── Submit for review ──────────────────────────────────────────────────────
-  const handleSubmit = async () => {
-    if (!editingArticle) return;
+  // Works in both "edit" mode (already has a draft) and "new" mode (no draft yet).
+  // In new mode the article is created first, then immediately submitted.
+  const handleSubmit = async (data: {
+    title: string; topicId: string; content: string; coverImage: string; tags: string[];
+  }) => {
     setIsSubmitting(true);
     try {
-      await submitArticle(editingArticle._id);
+      let articleId = editingArticle?._id;
+      if (!articleId) {
+        // No draft exists yet — create it silently, then submit
+        const { article: created } = await createArticle(data);
+        articleId = created._id;
+        setEditingArticle(created);
+      }
+      await submitArticle(articleId);
       flash('Article submitted for review.');
       await loadData();
       setView('list');

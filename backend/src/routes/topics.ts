@@ -6,13 +6,41 @@ const router = Router();
 
 // ─── Public: list all topics ──────────────────────────────────────────────────
 
-/** GET /api/topics — list topics (public) */
-router.get('/', async (_req: Request, res: Response): Promise<void> => {
+/** GET /api/topics?type=ctf|blog|experiment — list topics (public), optionally filtered by type */
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const topics = await Topic.find().sort({ order: 1, createdAt: 1 }).select('-__v');
+    const filter: any = {};
+    if (req.query.type) filter.type = req.query.type;
+    const topics = await Topic.find(filter).sort({ order: 1, createdAt: 1 }).select('-__v');
     res.json({ topics });
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch topics', error: String(err) });
+  }
+});
+
+/**
+ * GET /api/topics/feed?type=blog|experiment|ctf
+ * Flat list of all published articles across topics of a given type.
+ * Returned articles include populated topicId (title, slug, type).
+ */
+router.get('/feed', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { type } = req.query;
+    const articleFilter: any = { status: 'published' };
+
+    if (type) {
+      const matchingTopics = await Topic.find({ type }).select('_id');
+      articleFilter.topicId = { $in: matchingTopics.map((t) => t._id) };
+    }
+
+    const articles = await Article.find(articleFilter)
+      .populate('topicId', 'title slug type')
+      .select('title slug coverImage authorName tags publishedAt topicId order')
+      .sort({ publishedAt: -1 });
+
+    res.json({ articles });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch feed', error: String(err) });
   }
 });
 

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Project } from '../types';
+import { ApiProject } from '../services/ctfApi';
 import { X, ExternalLink, Github } from 'lucide-react';
 
 interface Props {
-  project: Project | null;
+  project: ApiProject | null;
   onClose: () => void;
 }
 

@@ -23,8 +23,15 @@ interface ArticleEditorProps {
     tags: string[];
   }) => Promise<void>;
 
-  /** Called when user clicks "Submit for Review" */
-  onSubmit?: () => Promise<void>;
+  /** Called when user clicks "Submit for Review" — receives current form data so the
+   *  parent can create-then-submit in a single action (no prior save required). */
+  onSubmit?: (data: {
+    title: string;
+    topicId: string;
+    content: string;
+    coverImage: string;
+    tags: string[];
+  }) => Promise<void>;
 
   isSaving?: boolean;
   isSubmitting?: boolean;
@@ -332,7 +339,7 @@ const ArticleEditor: React.FC<ArticleEditorProps> = ({
         )}
         {canSubmit && (
           <button
-            onClick={onSubmit}
+            onClick={() => onSubmit!({ title: title.trim(), topicId, content, coverImage, tags })}
             disabled={isSubmitting || !title.trim() || !topicId || !content.trim()}
             className="flex items-center gap-2 px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

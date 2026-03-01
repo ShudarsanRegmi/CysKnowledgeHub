@@ -1,14 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PROJECTS } from '../projectsData';
+import { getProject, ApiProject } from '../services/ctfApi';
 import { ExternalLink, Github, ArrowRight } from 'lucide-react';
 
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const project = PROJECTS.find(p => p.id === id);
+  const [project, setProject] = useState<ApiProject | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!project) {
+  useEffect(() => {
+    if (!id) { setNotFound(true); setLoading(false); return; }
+    getProject(id)
+      .then(setProject)
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <div className="py-20 text-center text-gray-400">Loading…</div>;
+
+  if (notFound || !project) {
     return (
       <div className="py-20 text-center">
         <h2 className="text-2xl font-bold">Project not found</h2>

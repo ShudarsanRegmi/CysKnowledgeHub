@@ -1,9 +1,12 @@
 import { Schema, model, Document } from 'mongoose';
 
+export type TopicType = 'ctf' | 'blog' | 'experiment';
+
 export interface ITopic extends Document {
   title: string;
   slug: string;
   description?: string;
+  type: TopicType;
   order: number;
   createdBy: string;   // uid of admin who created it
   createdAt: Date;
@@ -15,6 +18,7 @@ const TopicSchema = new Schema<ITopic>(
     title:       { type: String, required: true, trim: true },
     slug:        { type: String, required: true, unique: true, lowercase: true, trim: true },
     description: { type: String, trim: true },
+    type:        { type: String, enum: ['ctf', 'blog', 'experiment'], default: 'ctf' },
     order:       { type: Number, default: 0 },
     createdBy:   { type: String, required: true },
   },

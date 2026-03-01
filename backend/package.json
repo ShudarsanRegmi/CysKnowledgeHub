@@ -8,13 +8,15 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed:test-users": "ts-node-dev --transpile-only scripts/seed-test-users.ts",
-    "clear:test-users": "ts-node-dev --transpile-only scripts/clear-test-users.ts"
+    "clear:test-users": "ts-node-dev --transpile-only scripts/clear-test-users.ts",
+    "seed:content": "ts-node-dev --transpile-only scripts/seed-content.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "firebase-admin": "^12.2.0",
+    "mongodb": "^7.1.0",
     "mongoose": "^8.4.3",
     "multer": "^2.0.2"
   },
