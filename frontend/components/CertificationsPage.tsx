@@ -11,53 +11,76 @@ interface CategoryProps {
 
 const Category: React.FC<CategoryProps> = ({ title, certifications, onSelectCert }) => {
   const levelStyles = {
-    Beginner: "bg-green-900/20 text-green-400 border border-green-500/20",
-    Intermediate: "bg-yellow-900/20 text-yellow-400 border border-yellow-500/20",
-    Advanced: "bg-red-900/20 text-red-400 border border-red-500/20",
+    Beginner: "bg-green-900/30 text-green-400 border-green-500/40",
+    Intermediate: "bg-yellow-900/30 text-yellow-400 border-yellow-500/40",
+    Advanced: "bg-red-900/30 text-red-400 border-red-500/40",
   };
 
   const levelOrder = { Beginner: 1, Intermediate: 2, Advanced: 3 };
   const sortedCerts = [...certifications].sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6 text-cyan-500">{title}</h2>
+    <div className="mb-16">
+      <h2 className="text-3xl font-extrabold mb-12 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center gap-4">
+        {title}
+        <div className="h-[2px] flex-1 bg-gradient-to-r from-cyan-500/40 relative">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_10px_#3b82f6]"></div>
+        </div>
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-6 sm:gap-y-8 pt-4 pb-16 relative">
         {sortedCerts.map((cert, i) => (
           <div
             key={i}
-            className="bg-gray-900 border border-gray-800 p-6 rounded-2xl hover:border-cyan-500/40 transition-all flex flex-col items-start shadow-sm hover:shadow-cyan-900/20 hover:shadow-lg"
+            className="group relative flex items-center w-full cursor-pointer h-[70px] sm:h-[80px] transform transition-transform duration-300 hover:-translate-y-1"
+            onClick={() => onSelectCert(cert)}
           >
-            <div className="flex justify-between w-full items-start mb-4">
-              <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded ${levelStyles[cert.level]}`}>
-                {cert.level}
-              </span>
-              {cert.badgeUrl ? (
-                <img
-                  src={cert.badgeUrl}
-                  alt={`${cert.name} badge`}
-                  className="w-12 h-12 object-contain bg-white/5 rounded-md p-1 border border-gray-800"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-gray-800 rounded-md flex items-center justify-center text-gray-500 border border-gray-700">
-                  <Award className="w-6 h-6" />
-                </div>
-              )}
+            {/* Left Circle (Badge) */}
+            <div className="w-[70px] h-[70px] sm:w-[80px] sm:h-[80px] flex-shrink-0 rounded-full z-20 bg-gradient-to-br from-blue-400 via-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_5px_15px_rgba(6,182,212,0.3)] group-hover:scale-105 group-hover:shadow-[0_8px_25px_rgba(6,182,212,0.5)] transition-all duration-300 relative border border-gray-700">
+              {/* Inner glow ring */}
+              <div className="absolute inset-0 bg-white/30 rounded-full blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              <div className="w-[75%] h-[75%] bg-gray-950 rounded-full flex items-center justify-center p-1.5 shadow-inner relative z-10 border border-gray-800">
+                {cert.badgeUrl ? (
+                  <img
+                    src={cert.badgeUrl}
+                    alt={`${cert.name} badge`}
+                    className="w-full h-full object-contain rounded-full drop-shadow-md"
+                  />
+                ) : (
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+                )}
+              </div>
             </div>
 
-            <h3 className="text-xl font-bold mb-2">{cert.name}</h3>
+            {/* Right Rectangle (Content) */}
+            <div className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 backdrop-blur-md py-1 pr-4 sm:pr-6 pl-[45px] sm:pl-[50px] -ml-[35px] sm:-ml-[40px] flex items-center justify-between h-[70px] sm:h-[80px] shadow-lg relative z-10 rounded-r-3xl border border-l-0 border-gray-700 group-hover:border-cyan-500/50 transition-colors duration-300 overflow-hidden">
 
-            <p className="text-gray-400 text-sm mb-4 flex-grow">
-              {cert.shortDesc}
-            </p>
+              {/* Dynamic Glass reflection top highlight */}
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-            <button
-              onClick={() => onSelectCert(cert)}
-              className="w-full flex items-center justify-center gap-2 py-2 mt-4 bg-gray-800 hover:bg-gray-700 rounded-xl border border-gray-700 text-sm font-semibold transition-colors"
-            >
-              View Details
-            </button>
+              {/* Core glow reveal on hover */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"></div>
+
+              {/* Name and Level */}
+              <div className="flex flex-col justify-center gap-0.5 relative z-10 flex-1 min-w-0">
+                <h3 className="text-sm sm:text-base font-bold text-gray-100 truncate group-hover:text-cyan-300 transition-colors tracking-wide leading-tight">
+                  {cert.name}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[8px] sm:text-[9px] uppercase font-bold px-2 py-0.5 rounded-full flex-shrink-0 shadow-sm border max-w-max tracking-wider leading-none ${levelStyles[cert.level]}`}>
+                    {cert.level} <span className="mx-1 opacity-40">|</span> {cert.organization}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Indicator */}
+              <div className="relative z-10 flex-shrink-0 ml-3 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-950/60 border border-gray-700/50 group-hover:bg-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-300 shadow-inner group-hover:shadow-[0_0_10px_rgba(6,182,212,0.4)]">
+                <span className="text-gray-400 group-hover:text-cyan-300 transition-colors duration-300 text-sm font-bold flex items-center justify-center transform group-hover:translate-x-0.5">
+                  →
+                </span>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -145,8 +168,8 @@ const CertificationsPage: React.FC = () => {
 
               <div>
                 <span className={`text-[10px] uppercase font-extrabold tracking-wider px-3 py-1.5 rounded-full inline-block mb-3 shadow-inner ${selectedCert.level === 'Beginner' ? 'bg-green-900/40 text-green-400 border border-green-500/30' :
-                    selectedCert.level === 'Intermediate' ? 'bg-yellow-900/40 text-yellow-400 border border-yellow-500/30' :
-                      'bg-red-900/40 text-red-400 border border-red-500/30'
+                  selectedCert.level === 'Intermediate' ? 'bg-yellow-900/40 text-yellow-400 border border-yellow-500/30' :
+                    'bg-red-900/40 text-red-400 border border-red-500/30'
                   }`}>
                   {selectedCert.level} Level
                 </span>
