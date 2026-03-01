@@ -162,9 +162,11 @@ router.patch('/articles/:id/status', async (req, res: Response): Promise<void> =
   }
 
   try {
-    const update: any = { status };
+    // Approving instantly publishes — no separate publish step required
+    const resolvedStatus = status === 'approved' ? 'published' : status;
+    const update: any = { status: resolvedStatus };
     if (status === 'rejected' && rejectionReason) update.rejectionReason = rejectionReason;
-    if (status === 'published') update.publishedAt = new Date();
+    if (resolvedStatus === 'published') update.publishedAt = new Date();
 
     const article = await Article.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!article) { res.status(404).json({ message: 'Article not found' }); return; }

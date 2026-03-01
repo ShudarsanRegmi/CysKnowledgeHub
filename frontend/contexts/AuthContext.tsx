@@ -113,6 +113,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpWithEmail = useCallback(async (email: string, password: string, displayName: string) => {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName });
+    // Force a token refresh so the new displayName is included in the JWT `name`
+    // claim. Without this, the cached token (minted before updateProfile) reaches
+    // the backend with name=undefined and displayName is stored as null.
+    await result.user.getIdToken(/* forceRefresh */ true);
     const du = await syncUserWithBackend(result.user);
     setDbUser(du);
   }, []);

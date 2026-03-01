@@ -308,7 +308,7 @@ const ArticlesReviewPanel: React.FC = () => {
     setActionId(id);
     try {
       await adminSetArticleStatus(id, status, rejectionReason);
-      flash(`Article ${status}.`);
+      flash(status === 'approved' ? 'Article approved and published.' : `Article ${status}.`);
       await load();
     } catch (err: any) { setError(err.message); }
     finally { setActionId(null); setRejectForm(null); }
@@ -396,9 +396,9 @@ const ArticlesReviewPanel: React.FC = () => {
                   {a.status === 'pending' && (
                     <>
                       <ActionButton
-                        label="Approve"
-                        color="text-indigo-400 border-indigo-700/40 hover:bg-indigo-900/30"
-                        icon={<Check className="w-3 h-3" />}
+                        label="Approve & Publish"
+                        color="text-cyan-400 border-cyan-700/40 hover:bg-cyan-900/20"
+                        icon={<BookOpen className="w-3 h-3" />}
                         loading={actionId === a._id}
                         onClick={() => handleStatus(a._id, 'approved')}
                       />
@@ -410,15 +410,6 @@ const ArticlesReviewPanel: React.FC = () => {
                         onClick={() => setRejectForm({ id: a._id, reason: '' })}
                       />
                     </>
-                  )}
-                  {a.status === 'approved' && (
-                    <ActionButton
-                      label="Publish"
-                      color="text-cyan-400 border-cyan-700/40 hover:bg-cyan-900/20"
-                      icon={<BookOpen className="w-3 h-3" />}
-                      loading={actionId === a._id}
-                      onClick={() => handleStatus(a._id, 'published')}
-                    />
                   )}
                   {a.status === 'published' && (
                     <ActionButton
