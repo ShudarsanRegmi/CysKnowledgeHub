@@ -7,6 +7,7 @@ import { ContentType, RoadmapData } from './types';
 import ProjectsPage from './components/ProjectsPage';
 import AchievementsPage from './components/AchievementsPage';
 import CertificationsPage from "./components/CertificationsPage";
+import CertifiedStudentsPage from './components/CertifiedStudentsPage';
 import CompaniesPage from './components/CompaniesPage';
 import StudentsPage from './components/StudentsPage';
 import FacultyPage from './components/FacultyPage';
@@ -448,6 +449,10 @@ const App: React.FC = () => {
 
       case 'certifications':
         return <CertificationsPage />;
+
+      case 'certified-students':
+        return <CertifiedStudentsPage />;
+
       case 'students':
         return <StudentsPage />;
 
