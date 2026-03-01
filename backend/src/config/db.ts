@@ -18,7 +18,7 @@ const MONGO_URI = buildMongoURI();
 
 export async function connectDB(): Promise<void> {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(MONGO_URI, { family: 4 });
     console.log(`[MongoDB] Connected → ${MONGO_URI}`);
   } catch (err) {
     console.error('[MongoDB] Connection failed:', err);
