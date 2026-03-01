@@ -12,6 +12,7 @@ import StudentsPage from './components/StudentsPage';
 import FacultyPage from './components/FacultyPage';
 import InterviewExperiencesPage from './components/InterviewExperiencesPage';
 import DepartmentGallery from './components/galleries/DepartmentGallery';
+import EventsGallery from './components/galleries/EventsGallery';
 import CTFWriteupsPage from './components/CTFWriteupsPage';
 import AuthorDashboard from './components/AuthorDashboard';
 import AdminDashboard from './components/AdminDashboard';
@@ -457,9 +458,7 @@ const App: React.FC = () => {
       case 'gallery-department':
         return <DepartmentGallery />;
       case 'gallery-events':
-        return (
-          <div className="py-20 text-center text-gray-400">Events gallery coming soon.</div>
-        );
+        return <EventsGallery />;
       case 'interviews':
         return <InterviewExperiencesPage />;
 
@@ -616,3 +615,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+  
