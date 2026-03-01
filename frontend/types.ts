@@ -145,3 +145,23 @@ export interface CompanyInfo {
   interviewExperience?: string;
   notesTips: string;
 }
+
+export interface StudentCertification {
+  name: string;
+  organization: string;
+  logo: string;
+  month: string;
+  year: string;
+}
+
+export interface CertifiedStudent {
+  id: string;
+  name: string;
+  batch: string;
+  photoUrl: string;
+  primaryCertification: StudentCertification;
+  additionalCertifications: StudentCertification[];
+  testimonial: string;
+  difficultyPerceived: 'Easy' | 'Medium' | 'Hard';
+}
+

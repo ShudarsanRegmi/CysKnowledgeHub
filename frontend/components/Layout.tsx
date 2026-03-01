@@ -44,7 +44,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         { id: 'projects', label: 'Projects', icon: Github },
         { id: 'achievements', label: 'Achievements', icon: Award },
         { id: 'experiments', label: 'Experiments', icon: Cpu },
-        { id: 'certifications', label: 'Certifications', icon: FileBadge },
+        { id: 'certifications', label: 'Certifications Insight', icon: FileBadge },
+        { id: 'certified-students', label: 'Certified Students', icon: ShieldCheck },
       ]
     },
     {
