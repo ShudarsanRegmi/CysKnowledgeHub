@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users, PenLine, ShieldCheck } from 'lucide-react';
+import { Shield, BookOpen, BookOpenText, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users, PenLine, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
 interface LayoutProps {
@@ -49,6 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       subItems: [
         { id: 'projects', label: 'Projects', icon: Github, path: '/projects' },
         { id: 'achievements', label: 'Achievements', icon: Award, path: '/achievements' },
+        { id: 'publications', label: 'Publications', icon: BookOpenText, path: '/publications' },
         { id: 'experiments', label: 'Experiments', icon: Cpu, path: '/experiments' },
         { id: 'certifications', label: 'Certifications', icon: FileBadge, path: '/certifications' },
       ]
