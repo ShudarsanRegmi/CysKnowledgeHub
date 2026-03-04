@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import MDEditor from '@uiw/react-md-editor';
 import {
   Terminal, BookOpen, Tag, Calendar, User, ChevronRight,
   ArrowLeft, Loader2, AlertCircle, Search, Hash, FileText,
 } from 'lucide-react';
+import NovelRenderer from './NovelRenderer';
 import { getTopics, getArticlesByTopic, getArticle, Topic, Article } from '../services/ctfApi';
 
 // ─── Article detail view ──────────────────────────────────────────────────────
@@ -80,8 +80,11 @@ const ArticleDetail: React.FC<{
         ))}
       </div>
 
-      <div className="prose prose-invert max-w-none">
-        <MDEditor.Markdown source={article.content} style={{ background: 'transparent', color: '#e5e7eb', fontSize: 15, lineHeight: 1.7 }} />
+      <div className="mt-6">
+        <NovelRenderer
+          content={article.content}
+          contentType={(article as any).contentType ?? 'markdown'}
+        />
       </div>
     </div>
   );

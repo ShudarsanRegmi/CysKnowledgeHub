@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import sanitizeHtml from 'sanitize-html';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/requireRole';
 import { Article } from '../models/Article';
@@ -7,13 +8,38 @@ import { User } from '../models/User';
 
 const router = Router();
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Strip dangerous HTML from markdown content while keeping safe tags.
+ * Novel (JSON) content is not sanitized here — it's structured data, not HTML.
+ */
+const ALLOWED_TAGS = [
+  ...sanitizeHtml.defaults.allowedTags,
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'del', 's', 'pre', 'code', 'img', 'details', 'summary',
+];
+
+function sanitizeContent(content: string, type: string): string {
+  if (type === 'novel') return content; // JSON — structural sanitization not required
+  return sanitizeHtml(content, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      a:    ['href', 'title', 'target', 'rel'],
+      img:  ['src', 'alt', 'title', 'width', 'height'],
+      code: ['class'],
+      pre:  ['class'],
+    },
+  });
+}
+
 // ─── Author routes (author + admin) ──────────────────────────────────────────
 
 /** GET /api/articles/my  — list the current author's own articles */
 router.get('/my', requireAuth, requireRole('author'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const articles = await Article.find({ authorUid: req.user!.uid })
-      .populate('topicId', 'title slug')
+      .populate('topicId', 'title slug type')
       .sort({ createdAt: -1 });
     res.json({ articles });
   } catch (err) {
@@ -37,10 +63,14 @@ router.post('/', requireAuth, requireRole('author'), async (req: AuthRequest, re
     const dbUser = await User.findOne({ uid: req.user!.uid });
     const authorName = dbUser?.displayName || req.user!.email || 'Unknown Author';
 
+    const { contentType, excerpt } = req.body;
+    const safeContent = sanitizeContent(content, contentType ?? 'novel');
     const article = await Article.create({
       title: title.trim(),
       topicId,
-      content,
+      content: safeContent,
+      contentType: contentType ?? 'novel',
+      excerpt: excerpt?.trim(),
       coverImage,
       tags: tags ?? [],
       authorUid: req.user!.uid,
@@ -93,13 +123,15 @@ router.patch('/:id', requireAuth, requireRole('author'), async (req: AuthRequest
       return;
     }
 
-    const { title, topicId, content, coverImage, tags } = req.body;
+    const { title, topicId, content, coverImage, tags, contentType, excerpt } = req.body;
     const update: any = {};
     if (title) update.title = title.trim();
     if (topicId) update.topicId = topicId;
-    if (content) update.content = content;
+    if (content) update.content = sanitizeContent(content, contentType ?? article.contentType);
     if (coverImage !== undefined) update.coverImage = coverImage;
     if (tags) update.tags = tags;
+    if (contentType) update.contentType = contentType;
+    if (excerpt !== undefined) update.excerpt = excerpt?.trim();
 
     const updated = await Article.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
     res.json({ article: updated });
@@ -145,6 +177,24 @@ router.patch('/:id/submit', requireAuth, requireRole('author'), async (req: Auth
 
     if (!['draft', 'rejected'].includes(article.status)) {
       res.status(400).json({ message: `Cannot submit an article in "${article.status}" state` });
+      return;
+    }
+
+    // Ensure the article has real content before allowing submission
+    if (!article.title?.trim()) {
+      res.status(400).json({ message: 'Article must have a title before submitting' });
+      return;
+    }
+    const rawContent = article.content?.trim() ?? '';
+    let contentIsEmpty = !rawContent;
+    if (!contentIsEmpty && article.contentType === 'novel') {
+      try {
+        const json = JSON.parse(rawContent);
+        contentIsEmpty = !json.content || json.content.length === 0;
+      } catch { /* malformed JSON – let it through, admin will see it */ }
+    }
+    if (contentIsEmpty) {
+      res.status(400).json({ message: 'Article must have content before it can be submitted for review' });
       return;
     }
 

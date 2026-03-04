@@ -9,7 +9,8 @@ const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
  */
 export async function uploadArticleImage(
   file: File,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
+  type: 'ctf' | 'blog' = 'ctf',
 ): Promise<string> {
   const user = auth.currentUser;
   if (!user) throw new Error('Must be authenticated to upload images');
@@ -48,7 +49,7 @@ export async function uploadArticleImage(
     xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
     xhr.addEventListener('abort', () => reject(new Error('Upload aborted')));
 
-    xhr.open('POST', `${BASE}/api/upload/image`);
+    xhr.open('POST', `${BASE}/api/upload/image?type=${type}`);
     xhr.setRequestHeader('Authorization', `Bearer ${idToken}`);
     xhr.send(formData);
   });

@@ -22,7 +22,8 @@ import fs from 'fs';
 // ─── Bootstrap Firebase Admin ──────────────────────────────────────────────
 
 const serviceAccountPath = path.resolve(
-  process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? '../config/serviceAccountKey.json'
+  process.env.FIREBASE_SERVICE_ACCOUNT_PATH ??
+  './config/cysknowledgehub-firebase-adminsdk-fbsvc-840d1ddb86.json'
 );
 
 if (!fs.existsSync(serviceAccountPath)) {
@@ -42,10 +43,12 @@ function buildMongoURI(): string {
   if (process.env.MONGO_URI) return process.env.MONGO_URI;
   const username = process.env.MONGODB_USERNAME;
   const password = process.env.MONGODB_PASSWORD;
+  const database = process.env.MONGODB_DATABASE ?? 'cybershield';
   if (username && password) {
-    return `mongodb+srv://${encodeURIComponent(username)}:${encodeURIComponent(password)}@cysknowledgehub.sxc3yvo.mongodb.net/?appName=Cysknowledgehub`;
+    const cluster = process.env.MONGODB_CLUSTER ?? 'cysknowledgehub.sxc3yvo.mongodb.net';
+    return `mongodb+srv://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${cluster}/${database}?appName=Cysknowledgehub`;
   }
-  return 'mongodb://localhost:27017/cybershield';
+  return `mongodb://localhost:27017/${database}`;
 }
 
 const MONGO_URI = buildMongoURI();
@@ -110,7 +113,13 @@ async function seed() {
     let firebaseUser: admin.auth.UserRecord;
     try {
       firebaseUser = await admin.auth().getUserByEmail(u.email);
-      console.log(`[seed] Firebase user already exists: ${u.email} (uid: ${firebaseUser.uid})`);
+      // Always reset password + displayName so credentials stay in sync with this file
+      await admin.auth().updateUser(firebaseUser.uid, {
+        password: u.password,
+        displayName: u.displayName,
+        emailVerified: true,
+      });
+      console.log(`[seed] Firebase user updated:        ${u.email} (uid: ${firebaseUser.uid})`);
     } catch {
       firebaseUser = await admin.auth().createUser({
         email: u.email,
@@ -121,9 +130,11 @@ async function seed() {
       console.log(`[seed] Created Firebase user:       ${u.email} (uid: ${firebaseUser.uid})`);
     }
 
-    // 2. Upsert MongoDB document with the correct role
+    // 2. Upsert MongoDB document with the correct role.
+    // Match by email (stable) so a re-created Firebase user (new uid) doesn't
+    // cause a duplicate-key error on the uid index.
     await User.findOneAndUpdate(
-      { uid: firebaseUser.uid },
+      { email: u.email },
       {
         uid: firebaseUser.uid,
         email: u.email,

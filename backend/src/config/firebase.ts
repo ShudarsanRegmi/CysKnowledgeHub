@@ -3,25 +3,8 @@ import path from 'path';
 import fs from 'fs';
 
 const serviceAccountPath = path.resolve(
-  process.env.FIREBASE_SERVICE_ACCOUNT_PATH || './config/serviceAccountKey.json'
+  process.env.FIREBASE_SERVICE_ACCOUNT_PATH || './config/cysknowledgehub-firebase-adminsdk-fbsvc-840d1ddb86.json'
 );
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDRzKzgvo6wtAJiUOI1rJB8Uyta6qBapX8",
-
-  authDomain: "cysknowledgehub.firebaseapp.com",
-
-  projectId: "cysknowledgehub",
-
-  storageBucket: "cysknowledgehub.firebasestorage.app",
-
-  messagingSenderId: "588231990374",
-
-  appId: "1:588231990374:web:68b6b9c3a34c307bc221a7",
-
-  measurementId: "G-BD5PFJWF22"
-
-};
 
 if (!admin.apps.length) {
   if (!fs.existsSync(serviceAccountPath)) {

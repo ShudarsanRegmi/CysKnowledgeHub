@@ -16,12 +16,21 @@ import achievementsRoutes  from './routes/achievements';
 import interviewsRoutes    from './routes/interviews';
 import companiesRoutes     from './routes/companies';
 import roadmapsRoutes      from './routes/roadmaps';
+import blogRoutes          from './routes/blog';
 
 const app = express();
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? [process.env.CLIENT_ORIGIN]
+  : ['http://localhost:3000', 'http://localhost:5173'];
+
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. curl, Postman, same-origin)
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
   credentials: true,
 }));
 app.use(express.json());
@@ -41,6 +50,7 @@ app.use('/api/achievements',  achievementsRoutes);
 app.use('/api/interviews',    interviewsRoutes);
 app.use('/api/companies',     companiesRoutes);
 app.use('/api/roadmaps',      roadmapsRoutes);
+app.use('/api/blog',          blogRoutes);
 
 // ─── API 404 Fallback (must be before SPA catch-all) ─────────────────────────
 app.use('/api/*', (_req, res) => {
