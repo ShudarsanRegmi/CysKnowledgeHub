@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BookOpenText } from 'lucide-react';
 import { PUBLICATIONS } from '../publicationsData';
 import { Publication } from '../types';
@@ -7,6 +7,7 @@ import PublicationDetailModal from './PublicationDetailModal';
 
 const PublicationsPage: React.FC = () => {
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
+  const handleCloseModal = useCallback(() => setSelectedPublication(null), []);
 
   const publicationsByYear = useMemo(() => {
     const sorted = [...PUBLICATIONS].sort((a, b) => b.publicationDate.localeCompare(a.publicationDate));
@@ -69,7 +70,7 @@ const PublicationsPage: React.FC = () => {
 
       <PublicationDetailModal
         publication={selectedPublication}
-        onClose={() => setSelectedPublication(null)}
+        onClose={handleCloseModal}
       />
     </div>
   );

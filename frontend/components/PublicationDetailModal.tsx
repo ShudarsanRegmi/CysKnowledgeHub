@@ -40,6 +40,8 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
     year: 'numeric',
   });
 
+  const publicationLink = publication.link && !/example/i.test(publication.link) ? publication.link : undefined;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
@@ -47,13 +49,13 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Publication details"
+        aria-labelledby="publication-dialog-title"
         className="relative w-full max-w-3xl max-h-[90vh] overflow-auto bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl"
       >
         <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-md border-b border-gray-800 p-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-2">{publication.kind}</p>
-            <h2 className="text-xl md:text-2xl font-bold text-white leading-tight">{publication.title}</h2>
+            <h2 id="publication-dialog-title" className="text-xl md:text-2xl font-bold text-white leading-tight">{publication.title}</h2>
           </div>
           <button
             type="button"
@@ -106,15 +108,19 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
           )}
 
           <div className="pt-2">
-            <a
-              href={publication.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold transition-colors"
-            >
-              View Publication
-              <ExternalLink className="w-4 h-4" />
-            </a>
+            {publicationLink ? (
+              <a
+                href={publicationLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold transition-colors"
+              >
+                View Publication
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            ) : (
+              <p className="text-sm text-gray-500">External publication link is currently unavailable.</p>
+            )}
           </div>
         </div>
       </div>

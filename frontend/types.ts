@@ -158,5 +158,5 @@ export interface Publication {
   abstract: string;
   keywords?: string[];
   authors: string[];
-  link: string;
+  link?: string;
 }
