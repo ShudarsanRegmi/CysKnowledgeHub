@@ -7,15 +7,23 @@ import { requireRole } from '../middleware/requireRole';
 
 const router = Router();
 
-// ─── Storage configuration ────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads', 'ctf-images');
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+function uploadDir(type: string): string {
+  const sub = type === 'blog' ? 'blog-images' : 'ctf-images';
+  const dir = path.resolve(process.cwd(), 'uploads', sub);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
 }
 
+// Ensure both default dirs exist at startup
+uploadDir('ctf');
+uploadDir('blog');
+
+// ─── Storage configuration ────────────────────────────────────────────────────
+
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+  destination: (req, _file, cb) => cb(null, uploadDir((req.query?.type as string) ?? 'ctf')),
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
     cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
@@ -60,8 +68,9 @@ router.post(
       return;
     }
 
+    const uploadType = ((req as any).query?.type === 'blog') ? 'blog-images' : 'ctf-images';
     const baseUrl = process.env.SERVER_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
-    const url = `${baseUrl}/uploads/ctf-images/${file.filename}`;
+    const url = `${baseUrl}/uploads/${uploadType}/${file.filename}`;
     res.json({ url });
   }
 );

@@ -138,13 +138,27 @@ router.delete('/topics/:id', async (req, res: Response): Promise<void> => {
 /** GET /api/admin/articles — all articles with filters */
 router.get('/articles', async (req, res: Response): Promise<void> => {
   try {
-    const { status, topicId } = req.query;
+    const { status, topicId, topicType } = req.query;
     const filter: any = {};
     if (status) filter.status = status;
     if (topicId) filter.topicId = new mongoose.Types.ObjectId(topicId as string);
 
+    // Filter by topic type if requested (e.g. ?topicType=blog shows only blog articles)
+    if (topicType) {
+      const matchingTopics = await Topic.find({ type: topicType }).select('_id');
+      const ids = matchingTopics.map((t) => t._id);
+      // Intersect with any already set topicId filter
+      if (filter.topicId) {
+        const already = filter.topicId.toString();
+        const found = ids.some((id) => id.toString() === already);
+        if (!found) { res.json({ articles: [] }); return; }
+      } else {
+        filter.topicId = { $in: ids };
+      }
+    }
+
     const articles = await Article.find(filter)
-      .populate('topicId', 'title slug')
+      .populate('topicId', 'title slug type')
       .sort({ createdAt: -1 });
     res.json({ articles });
   } catch (err) {
@@ -189,6 +203,30 @@ router.patch('/articles/:id/order', async (req, res: Response): Promise<void> =>
     res.json({ article });
   } catch (err) {
     res.status(500).json({ message: 'Failed to update order', error: String(err) });
+  }
+});
+
+/** PATCH /api/admin/articles/:id/topic — reassign article to a different topic/category */
+router.patch('/articles/:id/topic', async (req, res: Response): Promise<void> => {
+  const { topicId } = req.body;
+  if (!topicId) {
+    res.status(400).json({ message: 'topicId is required' });
+    return;
+  }
+  try {
+    const topic = await Topic.findById(topicId);
+    if (!topic) { res.status(404).json({ message: 'Topic not found' }); return; }
+
+    const article = await Article.findByIdAndUpdate(
+      req.params.id,
+      { topicId },
+      { new: true }
+    ).populate('topicId', 'title slug type');
+
+    if (!article) { res.status(404).json({ message: 'Article not found' }); return; }
+    res.json({ article });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to reassign topic', error: String(err) });
   }
 });
 

@@ -17,7 +17,7 @@ import fs from 'fs';
 // ─── Bootstrap Firebase Admin ──────────────────────────────────────────────
 
 const serviceAccountPath = path.resolve(
-  process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? './config/serviceAccountKey.json'
+  process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? './config/cysknowledgehub-firebase-adminsdk-fbsvc-840d1ddb86.json'
 );
 
 if (!fs.existsSync(serviceAccountPath)) {
@@ -32,7 +32,19 @@ if (!admin.apps.length) {
 
 // ─── Bootstrap MongoDB ─────────────────────────────────────────────────────
 
-const MONGO_URI = process.env.MONGO_URI ?? 'mongodb://localhost:27017/cybershield';
+function buildMongoURI(): string {
+  if (process.env.MONGO_URI) return process.env.MONGO_URI;
+  const username = process.env.MONGODB_USERNAME;
+  const password = process.env.MONGODB_PASSWORD;
+  const database = process.env.MONGODB_DATABASE ?? 'cybershield';
+  if (username && password) {
+    const cluster = process.env.MONGODB_CLUSTER ?? 'cysknowledgehub.sxc3yvo.mongodb.net';
+    return `mongodb+srv://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${cluster}/${database}?appName=Cysknowledgehub`;
+  }
+  return `mongodb://localhost:27017/${database}`;
+}
+
+const MONGO_URI = buildMongoURI();
 
 // ─── Emails to remove ─────────────────────────────────────────────────────
 

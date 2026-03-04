@@ -7,10 +7,10 @@ import {
 import {
   adminGetUsers, adminSetUserRole,
   adminGetTopics, adminCreateTopic, adminUpdateTopic, adminDeleteTopic,
-  adminGetArticles, adminSetArticleStatus, adminSetArticleOrder,
+  adminGetArticles, adminSetArticleStatus, adminSetArticleOrder, adminUpdateArticleTopic,
   DbUser, Topic, Article,
 } from '../services/ctfApi';
-import MDEditor from '@uiw/react-md-editor';
+import NovelRenderer from './NovelRenderer';
 
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
 
@@ -68,10 +68,13 @@ const UsersPanel: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <Users className="w-5 h-5 text-cyan-500" />User Management
-        </h2>
-        <button onClick={load} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="Refresh">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Users className="w-5 h-5 text-cyan-500" /> User Management
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Manage roles for all registered users</p>
+        </div>
+        <button onClick={load} className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-800 rounded-xl transition-all" title="Refresh">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
@@ -80,29 +83,47 @@ const UsersPanel: React.FC = () => {
       {successMsg && <SuccessBanner msg={successMsg} />}
 
       {loading ? <LoadingSpinner /> : (
-        <div className="space-y-2">
-          {users.map((u) => (
-            <div key={u.uid} className="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-xl px-5 py-3">
-              <div className="flex-1 min-w-0">
+        <div className="rounded-2xl border border-gray-800 overflow-hidden overflow-x-auto">
+          <div className="min-w-[580px]">
+          {/* Table header */}
+          <div className="grid grid-cols-[1fr_180px_160px_40px] gap-4 px-5 py-2.5 bg-gray-900/80 border-b border-gray-800 text-xs font-semibold uppercase tracking-widest text-gray-500">
+            <span>User</span>
+            <span>Current Role</span>
+            <span>Change Role</span>
+            <span />
+          </div>
+          {users.map((u, i) => (
+            <div
+              key={u.uid}
+              className={`grid grid-cols-[1fr_180px_160px_40px] gap-4 items-center px-5 py-3.5 ${
+                i % 2 === 0 ? 'bg-gray-900/40' : 'bg-gray-900/20'
+              } hover:bg-gray-800/40 transition-colors`}
+            >
+              <div className="min-w-0">
                 <p className="font-medium text-white truncate">{u.displayName || '(no name)'}</p>
                 <p className="text-xs text-gray-500 truncate">{u.email}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div>
                 <Badge label={u.role} color={ROLE_COLORS[u.role] ?? ROLE_COLORS.student} />
+              </div>
+              <div>
                 <select
                   value={u.role}
                   disabled={updatingId === u.uid}
                   onChange={(e) => handleRoleChange(u.uid, e.target.value)}
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50 disabled:opacity-50"
                 >
                   <option value="student">student</option>
                   <option value="author">author</option>
                   <option value="admin">admin</option>
                 </select>
+              </div>
+              <div className="flex justify-center">
                 {updatingId === u.uid && <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />}
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>
@@ -171,13 +192,16 @@ const TopicsPanel: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <Hash className="w-5 h-5 text-cyan-500" />Topic Management
-        </h2>
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Hash className="w-5 h-5 text-cyan-500" /> Topic Management
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Organise content categories and their display order</p>
+        </div>
         <div className="flex gap-2">
-          <button onClick={load} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><RefreshCw className="w-4 h-4" /></button>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-semibold transition-colors">
-            <Plus className="w-4 h-4" />New Topic
+          <button onClick={load} className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-800 rounded-xl transition-all"><RefreshCw className="w-4 h-4" /></button>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-cyan-900/30">
+            <Plus className="w-4 h-4" /> New Topic
           </button>
         </div>
       </div>
@@ -231,26 +255,37 @@ const TopicsPanel: React.FC = () => {
       {loading ? <LoadingSpinner /> : topics.length === 0 ? (
         <p className="text-center text-gray-600 py-12">No topics yet. Create your first one!</p>
       ) : (
-        <div className="space-y-2">
+        <div className="rounded-2xl border border-gray-800 overflow-hidden overflow-x-auto">
+          <div className="min-w-[640px]">
+          {/* Table header */}
+          <div className="grid grid-cols-[44px_1fr_120px_2fr_100px] gap-4 px-5 py-2.5 bg-gray-900/80 border-b border-gray-800 text-xs font-semibold uppercase tracking-widest text-gray-500">
+            <span>Order</span>
+            <span>Title</span>
+            <span>Type</span>
+            <span>Description</span>
+            <span className="text-right">Actions</span>
+          </div>
           {topics.map((t, idx) => (
-            <div key={t._id} className="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-xl px-5 py-3">
-              {/* Order controls */}
+            <div
+              key={t._id}
+              className={`grid grid-cols-[44px_1fr_120px_2fr_100px] gap-4 items-center px-5 py-3.5 ${
+                idx % 2 === 0 ? 'bg-gray-900/40' : 'bg-gray-900/20'
+              } hover:bg-gray-800/40 transition-colors`}
+            >
               <div className="flex flex-col gap-0.5">
                 <button disabled={idx === 0} onClick={() => moveOrder(t, 'up')} className="text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><ChevronUp className="w-3.5 h-3.5" /></button>
                 <button disabled={idx === topics.length - 1} onClick={() => moveOrder(t, 'down')} className="text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><ChevronDown className="w-3.5 h-3.5" /></button>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-white">{t.title}</p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    t.type === 'blog' ? 'text-emerald-400 bg-emerald-900/30 border-emerald-700/40' :
-                    t.type === 'experiment' ? 'text-purple-400 bg-purple-900/30 border-purple-700/40' :
-                    'text-cyan-400 bg-cyan-900/30 border-cyan-700/40'
-                  }`}>{t.type ?? 'ctf'}</span>
-                </div>
-                {t.description && <p className="text-xs text-gray-500 truncate">{t.description}</p>}
+              <p className="font-medium text-white">{t.title}</p>
+              <div className="flex items-center">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                  t.type === 'blog' ? 'text-emerald-400 bg-emerald-900/30 border-emerald-700/40' :
+                  t.type === 'experiment' ? 'text-purple-400 bg-purple-900/30 border-purple-700/40' :
+                  'text-cyan-400 bg-cyan-900/30 border-cyan-700/40'
+                }`}>{t.type ?? 'ctf'}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <p className="text-xs text-gray-500 truncate min-w-0">{t.description || '—'}</p>
+              <div className="flex items-center gap-1 justify-end">
                 <button onClick={() => openEdit(t)} className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-gray-800 rounded-lg transition-colors"><Edit2 className="w-3.5 h-3.5" /></button>
                 <button onClick={() => handleDelete(t._id)} disabled={deletingId === t._id} className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50">
                   {deletingId === t._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -258,6 +293,7 @@ const TopicsPanel: React.FC = () => {
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>
@@ -274,7 +310,10 @@ const ArticlePreviewModal: React.FC<{ article: Article; onClose: () => void }> =
         <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
       </div>
       <div className="flex-1 overflow-y-auto p-6" data-color-mode="dark">
-        <MDEditor.Markdown source={article.content} style={{ background: 'transparent', color: '#e5e7eb', fontSize: 14 }} />
+        <NovelRenderer
+          content={article.content}
+          contentType={(article as any).contentType ?? 'markdown'}
+        />
       </div>
     </div>
   </div>
@@ -309,10 +348,13 @@ const ArticlesReviewPanel: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('pending');
   const [topicFilter, setTopicFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [timeFilter, setTimeFilter] = useState('');
   const [previewArticle, setPreviewArticle] = useState<Article | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const [rejectForm, setRejectForm] = useState<{ id: string; reason: string } | null>(null);
+  const [changeCatForm, setChangeCatForm] = useState<{ id: string; topicType: string; newTopicId: string } | null>(null);
+  const [changingCat, setChangingCat] = useState(false);
 
   const flash = (msg: string) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(null), 3000); };
 
@@ -328,11 +370,12 @@ const ArticlesReviewPanel: React.FC = () => {
       const { articles } = await adminGetArticles({
         status: statusFilter || undefined,
         topicId: topicFilter || undefined,
+        topicType: typeFilter || undefined,
       });
       setArticles(articles);
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
-  }, [statusFilter, topicFilter]);
+  }, [statusFilter, topicFilter, typeFilter]);
 
   // Client-side time filter applied to fetched articles
   const visibleArticles = timeFilter
@@ -345,7 +388,11 @@ const ArticlesReviewPanel: React.FC = () => {
     setActionId(id);
     try {
       await adminSetArticleStatus(id, status, rejectionReason);
-      flash(status === 'approved' ? 'Article approved and published.' : `Article ${status}.`);
+      const msg =
+        status === 'approved' ? 'Article approved and published.' :
+        status === 'pending'  ? 'Article unpublished and set to pending.' :
+        `Article ${status}.`;
+      flash(msg);
       await load();
     } catch (err: any) { setError(err.message); }
     finally { setActionId(null); setRejectForm(null); }
@@ -357,58 +404,81 @@ const ArticlesReviewPanel: React.FC = () => {
     catch (err: any) { setError(err.message); }
   };
 
+  const handleChangeCat = async () => {
+    if (!changeCatForm || !changeCatForm.newTopicId) return;
+    setChangingCat(true);
+    try {
+      await adminUpdateArticleTopic(changeCatForm.id, changeCatForm.newTopicId);
+      flash('Category updated.');
+      setChangeCatForm(null);
+      await load();
+    } catch (err: any) { setError(err.message); }
+    finally { setChangingCat(false); }
+  };
+
   return (
     <div className="space-y-4">
       {previewArticle && <ArticlePreviewModal article={previewArticle} onClose={() => setPreviewArticle(null)} />}
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-cyan-500" />Article Review
-          {!loading && (
-            <span className="text-sm font-normal text-gray-500">
-              ({visibleArticles.length}{timeFilter || topicFilter ? ` of ${articles.length}` : ''})
-            </span>
-          )}
-        </h2>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Status filter */}
+      {/* Toolbar row */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-cyan-500" /> Article Review
+            {!loading && (
+              <span className="text-sm font-normal text-gray-500">
+                — {visibleArticles.length}{timeFilter || topicFilter ? ` of ${articles.length}` : ''} articles
+              </span>
+            )}
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Review, approve, and publish submitted content</p>
+        </div>
+        <div className="flex items-center gap-2">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
             <option value="published">Published</option>
             <option value="rejected">Rejected</option>
             <option value="draft">Draft</option>
           </select>
-
-          {/* Topic filter */}
+          <select
+            value={typeFilter}
+            onChange={(e) => { setTypeFilter(e.target.value); setTopicFilter(''); }}
+            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+          >
+            <option value="">All types</option>
+            <option value="blog">Blog</option>
+            <option value="ctf">CTF</option>
+            <option value="experiment">Experiment</option>
+          </select>
           <select
             value={topicFilter}
             onChange={(e) => setTopicFilter(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <option value="">All topics</option>
-            {topics.map((t) => (
+            {topics
+              .filter((t) => !typeFilter || t.type === typeFilter)
+              .map((t) => (
               <option key={t._id} value={t._id}>{t.title}</option>
             ))}
           </select>
-
-          {/* Submitted time filter */}
           <select
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+            className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             {TIME_RANGES.map(({ label, value }) => (
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
-
-          <button onClick={load} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><RefreshCw className="w-4 h-4" /></button>
+          <button onClick={load} className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-800 rounded-xl transition-all">
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -426,35 +496,49 @@ const ArticlesReviewPanel: React.FC = () => {
             const canReorder = a.status === 'published';
 
             return (
-              <div key={a._id} className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4 space-y-3">
+              <div key={a._id} className="group bg-gray-900/80 border border-gray-800 hover:border-gray-700 rounded-2xl px-5 py-4 space-y-3 transition-all">
                 <div className="flex items-start gap-4">
                   {/* Order controls (published only) */}
                   {canReorder && (
-                    <div className="flex flex-col gap-0.5 mt-0.5">
+                    <div className="flex flex-col gap-0.5 mt-0.5 opacity-50 group-hover:opacity-100 transition-opacity">
                       <button disabled={idx === 0} onClick={() => moveOrder(a, 'up')} className="text-gray-600 hover:text-white disabled:opacity-20"><ChevronUp className="w-3.5 h-3.5" /></button>
                       <button disabled={idx === visibleArticles.length - 1} onClick={() => moveOrder(a, 'down')} className="text-gray-600 hover:text-white disabled:opacity-20"><ChevronDown className="w-3.5 h-3.5" /></button>
                     </div>
                   )}
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 flex-wrap mb-1">
+                    <div className="flex items-center gap-3 mb-1.5">
                       <h3 className="font-semibold text-white">{a.title}</h3>
                       <Badge label={a.status} color={STATUS_COLORS[a.status] ?? STATUS_COLORS.draft} />
+                      {typeof a.topicId === 'object' && (a.topicId as any).type && (
+                        <Badge
+                          label={(a.topicId as any).type}
+                          color={
+                            (a.topicId as any).type === 'blog'
+                              ? 'text-emerald-400 bg-emerald-900/30 border-emerald-700/40'
+                              : (a.topicId as any).type === 'experiment'
+                              ? 'text-purple-400 bg-purple-900/30 border-purple-700/40'
+                              : 'text-cyan-400 bg-cyan-900/30 border-cyan-700/40'
+                          }
+                        />
+                      )}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      <span className="mr-3">By: <span className="text-gray-400">{a.authorName}</span></span>
-                      <span className="mr-3">Topic: <span className="text-gray-400">{topicTitle}</span></span>
-                      <span>Submitted: {new Date(a.updatedAt).toLocaleDateString()}</span>
+                    <div className="flex items-center gap-5 text-xs text-gray-500">
+                      <span>By <span className="text-gray-300 font-medium">{a.authorName}</span></span>
+                      <span>Topic: <span className="text-gray-400">{topicTitle}</span></span>
+                      <span>{new Date(a.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                     {a.rejectionReason && (
-                      <p className="text-xs text-red-400 mt-1">Rejection reason: {a.rejectionReason}</p>
+                      <p className="text-xs text-red-400 mt-1.5 flex items-center gap-1">
+                        <X className="w-3 h-3" /> {a.rejectionReason}
+                      </p>
                     )}
                   </div>
 
                   {/* Preview */}
                   <button
                     onClick={() => setPreviewArticle(a)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors flex-shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors flex-shrink-0 opacity-70 group-hover:opacity-100"
                   >
                     <Eye className="w-3 h-3" /> Preview
                   </button>
@@ -486,7 +570,7 @@ const ArticlesReviewPanel: React.FC = () => {
                       color="text-yellow-400 border-yellow-700/40 hover:bg-yellow-900/20"
                       icon={<X className="w-3 h-3" />}
                       loading={actionId === a._id}
-                      onClick={() => handleStatus(a._id, 'approved')}
+                      onClick={() => handleStatus(a._id, 'pending')}
                     />
                   )}
                   {(a.status === 'rejected' || a.status === 'approved') && (
@@ -498,6 +582,18 @@ const ArticlesReviewPanel: React.FC = () => {
                       onClick={() => handleStatus(a._id, 'pending')}
                     />
                   )}
+                  {/* Change Category — always available for admin */}
+                  <ActionButton
+                    label="Change Category"
+                    color="text-purple-400 border-purple-700/40 hover:bg-purple-900/20"
+                    icon={<Hash className="w-3 h-3" />}
+                    loading={false}
+                    onClick={() => {
+                      const currentType = typeof a.topicId === 'object' ? (a.topicId as any).type : '';
+                      setChangeCatForm({ id: a._id, topicType: currentType, newTopicId: '' });
+                      setRejectForm(null);
+                    }}
+                  />
                 </div>
 
                 {/* Rejection reason input */}
@@ -518,6 +614,33 @@ const ArticlesReviewPanel: React.FC = () => {
                       {actionId === a._id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Reject'}
                     </button>
                     <button onClick={() => setRejectForm(null)} className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl text-sm">Cancel</button>
+                  </div>
+                )}
+
+                {/* Change category inline form */}
+                {changeCatForm?.id === a._id && (
+                  <div className="flex gap-2 items-center mt-2">
+                    <select
+                      value={changeCatForm.newTopicId}
+                      onChange={(e) => setChangeCatForm({ ...changeCatForm, newTopicId: e.target.value })}
+                      className="flex-1 bg-gray-800 border border-purple-700/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+                    >
+                      <option value="">— Select new category —</option>
+                      {topics
+                        .filter((t) => !changeCatForm.topicType || t.type === changeCatForm.topicType)
+                        .map((t) => (
+                          <option key={t._id} value={t._id}>{t.title}</option>
+                        ))}
+                    </select>
+                    <button
+                      onClick={handleChangeCat}
+                      disabled={changingCat || !changeCatForm.newTopicId}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
+                    >
+                      {changingCat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      {changingCat ? 'Saving…' : 'Move'}
+                    </button>
+                    <button onClick={() => setChangeCatForm(null)} className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl text-sm">Cancel</button>
                   </div>
                 )}
               </div>
@@ -564,41 +687,50 @@ const SuccessBanner: React.FC<{ msg: string }> = ({ msg }) => (
 type AdminTab = 'users' | 'topics' | 'review';
 
 const TABS: { id: AdminTab; label: string; icon: React.FC<any> }[] = [
-  { id: 'users',  label: 'Users',          icon: Users },
-  { id: 'topics', label: 'Topics',         icon: Hash },
   { id: 'review', label: 'Article Review', icon: ShieldCheck },
+  { id: 'topics', label: 'Topics',         icon: Hash },
+  { id: 'users',  label: 'Users',          icon: Users },
 ];
 
 const AdminDashboard: React.FC = () => {
   const [tab, setTab] = useState<AdminTab>('review');
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <ShieldCheck className="w-6 h-6 text-cyan-500" />
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <div className="p-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+          <ShieldCheck className="w-5 h-5 text-yellow-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Manage users, topics, and content submissions</p>
+        </div>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-2xl p-1 w-fit">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              tab === id
-                ? 'bg-cyan-900/40 text-cyan-300 border border-cyan-500/30'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800'
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </button>
-        ))}
+      {/* Underline tab bar */}
+      <div className="border-b border-gray-800">
+        <div className="flex gap-1">
+          {TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`relative flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all ${
+                tab === id ? 'text-cyan-400' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+              {tab === id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Panel */}
-      <div className="bg-gray-950 border border-gray-800 rounded-2xl p-6">
+      <div>
         {tab === 'users'  && <UsersPanel />}
         {tab === 'topics' && <TopicsPanel />}
         {tab === 'review' && <ArticlesReviewPanel />}

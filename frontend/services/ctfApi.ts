@@ -28,6 +28,10 @@ export interface Article {
   rejectionReason?: string;
   order: number;
   tags: string[];
+  contentType?: 'markdown' | 'novel';
+  excerpt?: string;
+  viewCount?: number;
+  likeCount?: number;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
@@ -103,6 +107,8 @@ export const createArticle = (body: {
   content: string;
   coverImage?: string;
   tags?: string[];
+  contentType?: 'markdown' | 'novel';
+  excerpt?: string;
 }) =>
   authFetch(`${BASE}/api/articles`, { method: 'POST', body: JSON.stringify(body) }).then((r) =>
     json<{ article: Article }>(r)
@@ -110,7 +116,7 @@ export const createArticle = (body: {
 
 export const updateArticle = (
   id: string,
-  body: Partial<{ title: string; topicId: string; content: string; coverImage: string; tags: string[] }>
+  body: Partial<{ title: string; topicId: string; content: string; coverImage: string; tags: string[]; contentType: 'markdown' | 'novel'; excerpt: string }>
 ) =>
   authFetch(`${BASE}/api/articles/${id}`, { method: 'PATCH', body: JSON.stringify(body) }).then((r) =>
     json<{ article: Article }>(r)
@@ -128,6 +134,12 @@ export const submitArticle = (id: string) =>
 
 export const getArticleForEdit = (id: string) =>
   authFetch(`${BASE}/api/articles/${id}`).then((r) => json<{ article: Article }>(r));
+
+/** Create a topic — available to both authors and admins. */
+export const createTopic = (body: { title: string; description?: string; type: 'ctf' | 'blog' | 'experiment' }) =>
+  authFetch(`${BASE}/api/topics`, { method: 'POST', body: JSON.stringify(body) }).then((r) =>
+    json<{ topic: Topic }>(r)
+  );
 
 // ─── Admin APIs ───────────────────────────────────────────────────────────────
 
@@ -157,12 +169,19 @@ export const adminUpdateTopic = (
     body: JSON.stringify(body),
   }).then((r) => json<{ topic: Topic }>(r));
 
+/** Admin: reassign an article to a different topic/category. */
+export const adminUpdateArticleTopic = (articleId: string, topicId: string) =>
+  authFetch(`${BASE}/api/admin/articles/${articleId}/topic`, {
+    method: 'PATCH',
+    body: JSON.stringify({ topicId }),
+  }).then((r) => json<{ article: Article }>(r));
+
 export const adminDeleteTopic = (id: string) =>
   authFetch(`${BASE}/api/admin/topics/${id}`, { method: 'DELETE' }).then((r) =>
     json<{ message: string }>(r)
   );
 
-export const adminGetArticles = (params?: { status?: string; topicId?: string }) => {
+export const adminGetArticles = (params?: { status?: string; topicId?: string; topicType?: string }) => {
   const filtered = Object.fromEntries(
     Object.entries(params ?? {}).filter(([, v]) => v !== undefined && v !== '')
   );

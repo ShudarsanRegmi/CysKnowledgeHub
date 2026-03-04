@@ -15,12 +15,14 @@ import InterviewExperiencesPage from './components/InterviewExperiencesPage';
 import DepartmentGallery from './components/galleries/DepartmentGallery';
 import EventsGallery from './components/galleries/EventsGallery';
 import CTFWriteupsPage from './components/CTFWriteupsPage';
+import BlogPage from './components/BlogPage';
 import AuthorDashboard from './components/AuthorDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import ProjectDetailPage from './components/ProjectDetailPage';
 import { useAuth } from './contexts/AuthContext';
 import { getArticle, getFeedByType, ApiRoadmap, ApiInterview, getRoadmaps, getRoadmap, getInterviews } from './services/ctfApi';
 import MDEditor from '@uiw/react-md-editor';
+import NovelRenderer from './components/NovelRenderer';
 import {
   Terminal, Shield, BookOpen, Map, Award, Briefcase,
   ExternalLink, ArrowRight, User, ChevronRight,
@@ -435,10 +437,10 @@ const FeedArticleDetail: React.FC<{
         ))}
       </div>
 
-      <div className="prose prose-invert max-w-none">
-        <MDEditor.Markdown
-          source={article.content}
-          style={{ background: 'transparent', color: '#e5e7eb', fontSize: 15, lineHeight: 1.7 }}
+      <div className="mt-6">
+        <NovelRenderer
+          content={article.content}
+          contentType={(article as any).contentType ?? 'markdown'}
         />
       </div>
     </div>
@@ -780,7 +782,8 @@ const App: React.FC = () => (
   <Layout>
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/blogs" element={<ContentListPage type={ContentType.BLOG} label="blogs" />} />
+      <Route path="/blogs" element={<BlogPage />} />
+      <Route path="/blogs/:slug" element={<BlogPage />} />
       <Route path="/experiments" element={<ContentListPage type={ContentType.EXPERIMENT} label="experiments" />} />
       <Route path="/ctf" element={<CTFWriteupsPage />} />
       <Route path="/roadmaps" element={<RoadmapsPage />} />
