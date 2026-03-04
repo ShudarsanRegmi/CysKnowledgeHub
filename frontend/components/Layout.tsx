@@ -228,7 +228,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
 
-      <main className={`flex-1 w-full flex flex-col ${location.pathname === '/gallery' ? 'min-h-[calc(100vh-64px)]' : 'max-w-7xl mx-auto px-4 py-8'}`}>
+      <main className={`flex-1 w-full flex flex-col ${isActive('/gallery') ? 'min-h-[calc(100vh-64px)]' : 'max-w-7xl mx-auto px-4 py-8'}`}>
         {children}
       </main>
 
