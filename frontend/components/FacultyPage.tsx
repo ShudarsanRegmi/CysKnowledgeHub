@@ -509,7 +509,7 @@ const FacultyPage: React.FC = () => {
                             Dept. of Cyber Security · Chennai
                         </div>
                         <h1 className={`text-4xl md:text-5xl font-bold leading-tight mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                            Meet the <span className="text-cyan-400">Faculty</span>
+                            Meet the Faculty
                         </h1>
                         <p className={`text-sm md:text-base max-w-2xl ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                             The researchers and educators of the Cyber Security department at Amrita School of Engineering, Chennai.
