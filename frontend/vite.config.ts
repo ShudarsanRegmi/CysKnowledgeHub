@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: '0.0.0.0',
+      // Ensures page refresh on any route works in dev (SPA fallback)
+      historyApiFallback: true,
     },
     plugins: [react()],
     resolve: {

@@ -42,9 +42,19 @@ app.use('/api/interviews',    interviewsRoutes);
 app.use('/api/companies',     companiesRoutes);
 app.use('/api/roadmaps',      roadmapsRoutes);
 
-// ─── 404 Fallback ─────────────────────────────────────────────────────────────
-app.use((_req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+// ─── API 404 Fallback (must be before SPA catch-all) ─────────────────────────
+app.use('/api/*', (_req, res) => {
+  res.status(404).json({ message: 'API route not found' });
+});
+
+// ─── Serve built frontend ────────────────────────────────────────────────────
+app.use(express.static(path.join(process.cwd(), '../frontend/dist')));
+
+// ─── SPA Fallback (must be last) ──────────────────────────────────────────────
+// For any request that didn't match an API route or a static file, send
+// index.html so React Router can handle client-side navigation on refresh.
+app.get('*', (_req, res) => {
+  res.sendFile(path.resolve(process.cwd(), '../frontend/dist/index.html'));
 });
 
 export default app;
