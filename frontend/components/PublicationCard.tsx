@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarDays, Building2, FileText } from 'lucide-react';
+import { CalendarDays, Building2, FileText, Globe2, Landmark } from 'lucide-react';
 import { Publication } from '../types';
 
 interface PublicationCardProps {
@@ -18,10 +18,24 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publication, onClick 
       aria-label={`Open publication details for ${publication.title}`}
     >
       <div className="flex items-center justify-between gap-3 mb-3">
-        <span className="text-[11px] uppercase tracking-wider font-bold text-cyan-400/80 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-full">
-          {publication.kind}
-        </span>
-        <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] uppercase tracking-wider font-bold text-cyan-400/80 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-full">
+            {publication.kind}
+          </span>
+          <span className="text-[11px] uppercase tracking-wider font-semibold text-violet-400/80 bg-violet-500/10 border border-violet-500/20 px-2 py-1 rounded-full">
+            {publication.venueType}
+          </span>
+          {publication.isInternational ? (
+            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-emerald-400/80 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-full">
+              <Globe2 className="w-3 h-3" /> Intl
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-amber-400/80 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-full">
+              <Landmark className="w-3 h-3" /> National
+            </span>
+          )}
+        </div>
+        <span className="inline-flex items-center gap-1 text-xs text-gray-400 shrink-0">
           <CalendarDays className="w-3.5 h-3.5" />
           {publicationYear}
         </span>

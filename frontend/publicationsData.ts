@@ -8,6 +8,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2025-11-18',
     venue: 'IEEE International Conference on Communications and Network Security (CNS)',
     publisher: 'IEEE',
+    venueType: 'Conference',
+    isInternational: true,
     abstract:
       'This work proposes a temporal graph signal representation of ransomware behavior traces and demonstrates robust family classification under obfuscation and packing variants.',
     keywords: ['Ransomware', 'Graph Signal Processing', 'Behavioral Analytics', 'Malware Detection'],
@@ -21,6 +23,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2025-09-06',
     venue: 'Springer Journal of Network and Systems Management',
     publisher: 'Springer',
+    venueType: 'Journal',
+    isInternational: true,
     abstract:
       'The paper introduces a low-overhead policy decision model for micro-segmentation in educational network environments with dynamic device trust scoring.',
     keywords: ['Zero Trust', 'Micro-segmentation', 'Policy Engine', 'Network Security'],
@@ -34,6 +38,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2025-07-22',
     venue: 'Elsevier Computers & Security',
     publisher: 'Elsevier',
+    venueType: 'Journal',
+    isInternational: true,
     abstract:
       'A privacy-preserving federated training strategy is developed for intrusion detection across isolated academic labs, reducing leakage while retaining detection performance.',
     keywords: ['Federated Learning', 'Intrusion Detection', 'Privacy', 'Cybersecurity'],
@@ -47,6 +53,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2025-04-14',
     venue: 'Indian Patent Office',
     publisher: 'IP India',
+    venueType: 'Other',
+    isInternational: false,
     abstract:
       'This patent discloses a client-side phishing detection framework combining URL semantics, visual similarity, and interaction telemetry for dynamic risk scoring.',
     keywords: ['Phishing', 'Browser Security', 'Risk Scoring', 'Patent'],
@@ -60,6 +68,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2025-02-10',
     venue: 'ACM Asia Conference on Computer and Communications Security (ASIACCS)',
     publisher: 'ACM',
+    venueType: 'Conference',
+    isInternational: true,
     abstract:
       'The study evaluates retrieval-augmented workflows for SOC triage and reports improvements in analyst response consistency over baseline playbook-only approaches.',
     keywords: ['SOC', 'Incident Response', 'RAG', 'Alert Triage'],
@@ -73,6 +83,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2024-10-28',
     venue: 'IEEE Cloud Summit',
     publisher: 'IEEE',
+    venueType: 'Conference',
+    isInternational: true,
     abstract:
       'This paper presents a canonical graph model that maps cloud IAM and resource policies into comparable structures to detect risky drift across providers.',
     keywords: ['Cloud Security', 'Misconfiguration', 'Policy Graph', 'IAM'],
@@ -86,6 +98,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2024-08-16',
     venue: 'Springer Lecture Notes in Computer Science (LNCS)',
     publisher: 'Springer',
+    venueType: 'Journal',
+    isInternational: true,
     abstract:
       'A sequence-aware attribution model is proposed for malware family recognition under runtime constraints suitable for endpoint monitoring agents.',
     keywords: ['Malware Analysis', 'API Sequences', 'Endpoint Security'],
@@ -99,6 +113,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2024-06-09',
     venue: 'Indian Patent Office',
     publisher: 'IP India',
+    venueType: 'Other',
+    isInternational: false,
     abstract:
       'The patent defines a threat-intelligence sharing pipeline with differential privacy controls to preserve participant anonymity while retaining actionable indicators.',
     keywords: ['Threat Intelligence', 'Differential Privacy', 'Patent'],
@@ -112,6 +128,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2024-03-02',
     venue: 'Elsevier Internet of Things Journal',
     publisher: 'Elsevier',
+    venueType: 'Journal',
+    isInternational: true,
     abstract:
       'The article proposes a hybrid attention architecture with explainability maps to identify botnet behavior in constrained IoT telemetry streams.',
     keywords: ['IoT Security', 'Botnet Detection', 'Explainable AI'],
@@ -125,6 +143,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2023-11-13',
     venue: 'IEEE Region 10 Conference (TENCON)',
     publisher: 'IEEE',
+    venueType: 'Conference',
+    isInternational: true,
     abstract:
       'This conference paper details a repeatable memory forensics workflow that balances pedagogical simplicity with realistic triage fidelity.',
     keywords: ['Memory Forensics', 'SOC Labs', 'Incident Investigation'],
@@ -138,6 +158,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2023-07-07',
     venue: 'Springer SN Computer Science',
     publisher: 'Springer',
+    venueType: 'Journal',
+    isInternational: true,
     abstract:
       'The study compares open-source SIEM stacks on ingestion throughput, detection extensibility, and maintainability for student-driven operations.',
     keywords: ['SIEM', 'Log Analytics', 'Blue Team'],
@@ -151,6 +173,8 @@ export const PUBLICATIONS: Publication[] = [
     publicationDate: '2023-03-18',
     venue: 'ACM Student Research Competition',
     publisher: 'ACM',
+    venueType: 'Conference',
+    isInternational: true,
     abstract:
       'A poster contribution showcasing an interactive annotation pipeline that improves duplicate alert suppression for SOC analysts.',
     keywords: ['Alert Deduplication', 'Human-in-the-Loop', 'SOC'],

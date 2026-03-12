@@ -46,7 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       id: 'learn', label: 'Learn', icon: BookOpen,
       subItems: [
-        { id: 'blogs', label: 'Blogs', icon: BookOpen, path: '/blogs' },
+        { id: 'blogs', label: 'Blogs', icon: PenLine, path: '/blogs' },
         { id: 'ctf', label: 'CTF Guides', icon: Terminal, path: '/ctf' },
         { id: 'roadmaps', label: 'Roadmaps', icon: Map, path: '/roadmaps' },
       ]

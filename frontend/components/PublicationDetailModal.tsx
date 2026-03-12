@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, CalendarDays, Building2, FileText, Tag, ExternalLink, Users } from 'lucide-react';
+import { X, CalendarDays, Building2, FileText, Tag, ExternalLink, Users, Globe2, Landmark } from 'lucide-react';
 import { Publication } from '../types';
 
 interface PublicationDetailModalProps {
@@ -76,6 +76,16 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
             <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-3">
               <p className="text-gray-500 text-xs uppercase mb-1 inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> Publisher</p>
               <p className="text-gray-100 font-medium">{publication.publisher}</p>
+            </div>
+            <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-3">
+              <p className="text-gray-500 text-xs uppercase mb-1 inline-flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> Venue Type</p>
+              <p className="text-gray-100 font-medium">{publication.venueType}</p>
+            </div>
+            <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-3">
+              <p className="text-gray-500 text-xs uppercase mb-1 inline-flex items-center gap-1">
+                {publication.isInternational ? <Globe2 className="w-3.5 h-3.5" /> : <Landmark className="w-3.5 h-3.5" />} Scope
+              </p>
+              <p className="text-gray-100 font-medium">{publication.isInternational ? 'International' : 'National'}</p>
             </div>
             <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-3 md:col-span-2">
               <p className="text-gray-500 text-xs uppercase mb-1 inline-flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> Venue</p>

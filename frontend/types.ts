@@ -147,6 +147,7 @@ export interface CompanyInfo {
 }
 
 export type PublicationKind = 'Paper' | 'Patent' | 'Book Chapter' | 'Poster';
+export type VenueType = 'Conference' | 'Journal' | 'Workshop' | 'Symposium' | 'Other';
 
 export interface Publication {
   id: string;
@@ -155,6 +156,8 @@ export interface Publication {
   publicationDate: string;
   venue: string;
   publisher: string;
+  venueType: VenueType;
+  isInternational: boolean;
   abstract: string;
   keywords?: string[];
   authors: string[];
