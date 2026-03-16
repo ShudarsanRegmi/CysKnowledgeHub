@@ -1,3 +1,5 @@
+import VideoHub from './components/VideoHub';
+import VideoModeration from './components/VideoModeration';
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -814,6 +816,8 @@ const App: React.FC = () => {
         <Route path="/author-dashboard" element={<AuthorDashboardRoute />} />
         <Route path="/admin-dashboard" element={<AdminDashboardRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/hub" element={<VideoHub />} />
+        <Route path="/admin/videos" element={<VideoModeration />} />
       </Routes>
       <ChatAssistant />
     </Layout>

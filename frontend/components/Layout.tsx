@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users, PenLine, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { Shield, BookOpen, Map, Award, Terminal, Briefcase, PlayCircle, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users, PenLine, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import AuthModal from './AuthModal';
@@ -49,6 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         { id: 'blogs', label: 'Blogs', icon: BookOpen, path: '/blogs' },
         { id: 'ctf', label: 'CTF Guides', icon: Terminal, path: '/ctf' },
         { id: 'roadmaps', label: 'Roadmaps', icon: Map, path: '/roadmaps' },
+        { id: 'hub', label: 'Video Hub', icon: PlayCircle, path: '/hub' },
       ]
     },
     {

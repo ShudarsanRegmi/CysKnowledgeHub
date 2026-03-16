@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users, Hash, FileText, ShieldCheck, Loader2, AlertCircle,
   Plus, Trash2, Edit2, Check, X, ChevronUp, ChevronDown,
-  RefreshCw, Eye, BookOpen, UserCog, Search, Layers,
+  RefreshCw, Eye, BookOpen, UserCog, Search, Layers, PlayCircle,
 } from 'lucide-react';
 import {
   adminGetUsers, adminSetUserRole,
   adminGetTopics, adminCreateTopic, adminUpdateTopic, adminDeleteTopic,
   adminGetArticles, adminSetArticleStatus, adminSetArticleOrder, adminUpdateArticleTopic,
-  DbUser, Topic, Article,
+  adminGetVideos, adminSetVideoStatus,
+  DbUser, Topic, Article, Video,
 } from '../services/ctfApi';
 import NovelRenderer from './NovelRenderer';
 import { useToast } from '../contexts/ToastContext';
@@ -68,8 +69,20 @@ const getTypeColors = (type: string, isLight: boolean): string => {
   return colors[type as keyof typeof colors] || colors.ctf;
 };
 
+const getVideoCategoryColors = (category: string, isLight: boolean): string => {
+  const colors = {
+    tutorial: isLight
+      ? 'text-cyan-700 bg-cyan-100 border-cyan-300'
+      : 'text-cyan-400 bg-cyan-900/30 border-cyan-700/40',
+    reel: isLight
+      ? 'text-amber-700 bg-amber-100 border-amber-300'
+      : 'text-amber-400 bg-amber-900/30 border-amber-700/40',
+  };
+  return colors[category.toLowerCase() as keyof typeof colors] || (isLight ? 'text-gray-700 bg-gray-100 border-gray-300' : 'text-gray-400 bg-gray-800/60 border-gray-700');
+};
+
 const Badge: React.FC<{ label: string; color: string }> = ({ label, color }) => (
-  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${color}`}>
+  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border inline-block w-max ${color}`}>
     {label}
   </span>
 );
@@ -298,8 +311,8 @@ const TopicsPanel: React.FC = () => {
         message={
           deleteConfirm
             ? deleteConfirm.articleCount > 0
-              ? `Are you sure you want to delete "${deleteConfirm.title}"?\n\nThis will delete ${deleteConfirm.articleCount} article${deleteConfirm.articleCount === 1 ? '' : 's'}.`
-              : `Are you sure you want to delete "${deleteConfirm.title}"?`
+            ? `Are you sure you want to delete "${deleteConfirm.title}"?\n\nThis will delete ${deleteConfirm.articleCount} article${deleteConfirm.articleCount === 1 ? '' : 's'}.`
+            : `Are you sure you want to delete "${deleteConfirm.title}"?`
             : ''
         }
         confirmText="Delete"
@@ -1007,6 +1020,211 @@ const ContentPanel: React.FC = () => {
   );
 };
 
+// ─── Panel: Video Moderation ───────────────────────────────────────────────────
+
+const VideosPanel: React.FC = () => {
+  const toast = useToast();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState('pending');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const videos = await adminGetVideos({
+        status: statusFilter || undefined,
+        category: categoryFilter || undefined,
+      });
+      setVideos(videos);
+    } catch (err: any) {
+      toast.error(err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, categoryFilter, toast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const visibleVideos = videos.filter((v) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      v.title.toLowerCase().includes(q) ||
+      v.author.toLowerCase().includes(q) ||
+      v.tag.toLowerCase().includes(q)
+    );
+  });
+
+  const handleStatus = async (id: string, status: 'published' | 'pending' | 'rejected') => {
+    setActionId(id);
+    try {
+      await adminSetVideoStatus(id, status);
+      const msg =
+        status === 'published' ? 'Video approved and published.' :
+        status === 'pending' ? 'Video set back to pending.' :
+        'Video rejected.';
+      toast.success(msg);
+      await load();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <PlayCircle className="w-5 h-5 text-cyan-500" /> Video Moderation
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Approve or reject submitted videos and reels/shorts.</p>
+        </div>
+        <button
+          onClick={load}
+          className={`p-2.5 transition-all rounded-xl border ${
+            isLight
+              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-gray-200'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800 border-gray-800'
+          }`}
+          title="Refresh"
+        >
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search title, author, tag..."
+            className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+        >
+          <option value="">All status</option>
+          <option value="pending">Pending</option>
+          <option value="published">Published</option>
+          <option value="rejected">Rejected</option>
+        </select>
+
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+        >
+          <option value="">All categories</option>
+          <option value="Tutorial">Tutorial</option>
+          <option value="Reel">Reel</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <LoadingSpinner />
+      ) : visibleVideos.length === 0 ? (
+        <div className="text-center py-16">
+          <FileText className="w-12 h-12 text-gray-700 mx-auto mb-3 opacity-50" />
+          <p className="text-gray-600">
+            {videos.length === 0
+              ? 'No videos submitted yet.'
+              : 'No videos match the selected filters.'}
+          </p>
+        </div>
+      ) : (
+        <div className={`rounded-2xl border overflow-hidden overflow-x-auto ${isLight ? 'border-gray-200' : 'border-gray-800'}`}>
+          <div className="min-w-[720px]">
+            <div className={`grid grid-cols-[1.5fr_120px_110px_120px_80px] gap-4 px-5 py-2.5 border-b text-xs font-semibold uppercase tracking-widest ${
+              isLight ? 'bg-gray-50 border-gray-200 text-gray-600' : 'bg-gray-900/80 border-gray-800 text-gray-500'
+            }`}>
+              <span>Title</span>
+              <span>Category</span>
+              <span>Author</span>
+              <span>Status</span>
+              <span />
+            </div>
+            {visibleVideos.map((v) => (
+              <div
+                key={v._id}
+                className={`grid grid-cols-[1.5fr_120px_110px_120px_80px] gap-4 items-center px-5 py-3.5 transition-colors ${
+                  isLight
+                    ? 'bg-white hover:bg-gray-100'
+                    : 'bg-gray-900/40 hover:bg-gray-800/40'
+                }`}
+              >
+                <div className="min-w-0">
+                  <p className={`font-medium truncate ${isLight ? 'text-gray-900' : 'text-white'}`}>{v.title}</p>
+                  <p className={`text-xs truncate ${isLight ? 'text-gray-600' : 'text-gray-500'}`}>{v.tag}</p>
+                </div>
+                {/* 🌟 THIS IS THE FIXED LINE! */}
+                <div>
+                  <Badge label={v.category} color={getVideoCategoryColors(v.category, isLight)} />
+                </div>
+                <span className={`text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>{v.author}</span>
+                <Badge label={v.status} color={getStatusColors(v.status, isLight)} />
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {v.status === 'pending' && (
+                    <>
+                      <ActionButton
+                        label="Approve"
+                        color="text-cyan-400 border-cyan-700/40 hover:bg-cyan-900/20"
+                        icon={<Check className="w-3 h-3" />}
+                        loading={actionId === v._id}
+                        onClick={() => handleStatus(v._id, 'published')}
+                      />
+                      <ActionButton
+                        label="Reject"
+                        color="text-red-400 border-red-700/40 hover:bg-red-900/20"
+                        icon={<X className="w-3 h-3" />}
+                        loading={actionId === v._id}
+                        onClick={() => handleStatus(v._id, 'rejected')}
+                      />
+                    </>
+                  )}
+                  {v.status === 'published' && (
+                    <ActionButton
+                      label="Unpublish"
+                      color="text-yellow-400 border-yellow-700/40 hover:bg-yellow-900/20"
+                      icon={<X className="w-3 h-3" />}
+                      loading={actionId === v._id}
+                      onClick={() => handleStatus(v._id, 'pending')}
+                    />
+                  )}
+                  {v.status === 'rejected' && (
+                    <ActionButton
+                      label="Set Pending"
+                      color="text-gray-400 border-gray-700 hover:bg-gray-800"
+                      icon={<UserCog className="w-3 h-3" />}
+                      loading={actionId === v._id}
+                      onClick={() => handleStatus(v._id, 'pending')}
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Small shared components ──────────────────────────────────────────────────
 
 const ActionButton: React.FC<{
@@ -1028,18 +1246,21 @@ const LoadingSpinner: React.FC = () => (
 
 // ─── Main AdminDashboard ──────────────────────────────────────────────────────
 
-type AdminTab = 'users' | 'topics' | 'content';
+type AdminTab = 'users' | 'topics' | 'content' | 'videos';
 
 const TABS: { id: AdminTab; label: string; icon: React.FC<any> }[] = [
   { id: 'content', label: 'Content', icon: Layers },
-  { id: 'topics', label: 'Topics',   icon: Hash },
-  { id: 'users',  label: 'Users',    icon: Users },
+  { id: 'videos',  label: 'Videos',  icon: PlayCircle },
+  { id: 'topics',  label: 'Topics',   icon: Hash },
+  { id: 'users',   label: 'Users',    icon: Users },
 ];
 
-const AdminDashboard: React.FC = () => {
+type AdminDashboardProps = { initialTab?: AdminTab };
+
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialTab }) => {
   const { theme } = useTheme();
   const isLight = theme === 'light';
-  const [tab, setTab] = useState<AdminTab>('content');
+  const [tab, setTab] = useState<AdminTab>(initialTab ?? 'content');
 
   return (
     <div className="space-y-6">
@@ -1088,6 +1309,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'users'   && <UsersPanel />}
         {tab === 'topics'  && <TopicsPanel />}
         {tab === 'content' && <ContentPanel />}
+        {tab === 'videos'  && <VideosPanel />}
       </div>
     </div>
   );

@@ -207,6 +207,34 @@ export const adminSetArticleOrder = (id: string, order: number) =>
     body: JSON.stringify({ order }),
   }).then((r) => json<{ article: Article }>(r));
 
+export interface Video {
+  _id: string;
+  video_id: string;
+  category: string;
+  tag: string;
+  title: string;
+  description: string;
+  author: string;
+  author_id: string;
+  date: string;
+  base_upvotes: number;
+  status: 'pending' | 'published' | 'rejected';
+}
+
+export const adminGetVideos = (params?: { status?: string; category?: string }) => {
+  const filtered = Object.fromEntries(
+    Object.entries(params ?? {}).filter(([, v]) => v !== undefined && v !== '')
+  );
+  const qs = new URLSearchParams(filtered).toString();
+  return authFetch(`${BASE}/api/videos${qs ? `?${qs}` : ''}`).then((r) => json<Video[]>(r));
+};
+
+export const adminSetVideoStatus = (id: string, status: string) =>
+  authFetch(`${BASE}/api/videos/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  }).then((r) => json<Video>(r));
+
 // ─── Content Types ────────────────────────────────────────────────────────────
 
 export interface ApiProjectLink {
