@@ -18,7 +18,7 @@ const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 export async function uploadArticleImage(
   file: File,
   onProgress?: (pct: number) => void,
-  type: 'ctf' | 'blog' = 'ctf',
+  type: 'ctf' | 'blog' | 'writeups' = 'ctf',
 ): Promise<string> {
   return _uploadImage(file, type, onProgress);
 }
@@ -33,12 +33,12 @@ export async function uploadArticleImage(
  *   in the backend to switch from local storage to ImageKit CDN automatically.
  *
  * @param file - The image File / Blob extracted from the clipboard or drop event.
- * @param type - 'blog' or 'ctf' determines the ImageKit folder / local sub-dir.
+ * @param type - 'blog', 'ctf' or 'writeups' determines the ImageKit folder / local sub-dir.
  * @returns     The public CDN URL to embed as the image src in the editor.
  */
 export async function uploadInlineImage(
   file: File,
-  type: 'ctf' | 'blog' = 'ctf',
+  type: 'ctf' | 'blog' | 'writeups' = 'ctf',
 ): Promise<string> {
   return _uploadImage(file, type);
 }
@@ -47,7 +47,7 @@ export async function uploadInlineImage(
 
 async function _uploadImage(
   file: File,
-  type: 'ctf' | 'blog',
+  type: 'ctf' | 'blog' | 'writeups',
   onProgress?: (pct: number) => void,
 ): Promise<string> {
   const user = auth.currentUser;

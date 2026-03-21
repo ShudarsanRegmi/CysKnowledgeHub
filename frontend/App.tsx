@@ -13,7 +13,7 @@ import FacultyPage from './components/FacultyPage';
 import InterviewExperiencesPage from './components/InterviewExperiencesPage';
 import DepartmentGallery from './components/galleries/DepartmentGallery';
 import EventsGallery from './components/galleries/EventsGallery';
-import CTFWriteupsPage from './components/CTFWriteupsPage';
+import CTFPage from './components/CTFPage';
 import BlogPage from './components/BlogPage';
 import AuthorDashboard from './components/AuthorDashboard';
 import AdminDashboard from './components/AdminDashboard';
@@ -798,7 +798,7 @@ const App: React.FC = () => {
         <Route path="/blogs" element={<BlogPage />} />
         <Route path="/blogs/:slug" element={<BlogPage />} />
         <Route path="/experiments" element={<ContentListPage type={ContentType.EXPERIMENT} label="experiments" />} />
-        <Route path="/ctf" element={<CTFWriteupsPage />} />
+        <Route path="/ctf" element={<CTFPage />} />
         <Route path="/roadmaps" element={<RoadmapsPage />} />
         <Route path="/roadmaps/:id" element={<RoadmapDetailRoute />} />
         <Route path="/projects" element={<ProjectsPage />} />

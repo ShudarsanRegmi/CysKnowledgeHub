@@ -12,7 +12,8 @@ const router = Router();
 // ─── Local-disk fallback (used when ImageKit is not configured) ───────────────
 
 function localUploadDir(type: string): string {
-  const sub = type === 'blog' ? 'blog-images' : 'ctf-images';
+  const sub = type === 'blog' ? 'blog-images' : 
+              type === 'writeups' ? 'writeup-images' : 'ctf-images';
   const dir = path.resolve(process.cwd(), 'uploads', sub);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
@@ -67,8 +68,10 @@ router.post(
       return;
     }
 
-    const uploadType = (req.query?.type as string) === 'blog' ? 'blog' : 'ctf';
-    const folder = uploadType === 'blog' ? '/blog-images' : '/ctf-images';
+    const typeQuery = req.query?.type as string;
+    const uploadType = ['blog', 'ctf', 'writeups'].includes(typeQuery) ? typeQuery : 'ctf';
+    const folder = uploadType === 'blog' ? '/blog-images' : 
+                   uploadType === 'writeups' ? '/writeup-images' : '/ctf-images';
 
     // ── ImageKit path ─────────────────────────────────────────────────────────
     if (isImageKitConfigured()) {
@@ -101,7 +104,8 @@ router.post(
       const dir = localUploadDir(uploadType);
       fs.writeFileSync(path.join(dir, fileName), file.buffer);
 
-      const subDir = uploadType === 'blog' ? 'blog-images' : 'ctf-images';
+      const subDir = uploadType === 'blog' ? 'blog-images' : 
+                     uploadType === 'writeups' ? 'writeup-images' : 'ctf-images';
       const baseUrl = process.env.SERVER_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
       const url = `${baseUrl}/uploads/${subDir}/${fileName}`;
 

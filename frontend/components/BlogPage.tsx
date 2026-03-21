@@ -54,7 +54,32 @@ const TrendingCard: React.FC<{
   );
 };
 
-// ─── BlogPage ─────────────────────────────────────────────────────────────────
+const FADE_IN_ANIMATION = `
+  @keyframes fadeInRise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeInRise 0.4s ease-out both;
+  }
+`;
+
+const BlogSkeletonCard = () => (
+  <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden animate-pulse">
+    <div className="w-full h-44 bg-gray-800/50" />
+    <div className="p-5 space-y-3">
+      <div className="h-5 bg-gray-800/60 rounded-lg w-3/4" />
+      <div className="space-y-2">
+        <div className="h-3 bg-gray-800/40 rounded w-full" />
+        <div className="h-3 bg-gray-800/40 rounded w-5/6" />
+      </div>
+      <div className="pt-3 border-t border-gray-800 flex justify-between">
+        <div className="h-3 bg-gray-800/40 rounded w-1/3" />
+        <div className="h-3 bg-gray-800/40 rounded w-1/4" />
+      </div>
+    </div>
+  </div>
+);
 
 const LIMIT = 8;
 
@@ -374,6 +399,7 @@ const BlogPage: React.FC = () => {
           CENTER COLUMN — Feed
       ═══════════════════════════════════════════════════════════════════ */}
       <main className="flex-1 min-w-0">
+        <style>{FADE_IN_ANIMATION}</style>
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Security Blog</h1>
@@ -415,8 +441,10 @@ const BlogPage: React.FC = () => {
 
         {/* Feed cards */}
         {initialLoading ? (
-          <div className="flex justify-center py-24">
-            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {[...Array(6)].map((_, i) => (
+              <BlogSkeletonCard key={i} />
+            ))}
           </div>
         ) : feedError ? (
           <div className="flex flex-col items-center gap-3 py-24 text-gray-500">
@@ -432,8 +460,11 @@ const BlogPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {articles.map((article) => (
+          <div
+            key={`${activeCategory}-${activeTag}-${debouncedSearch}-${sortMode}`}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+          >
+            {articles.map((article, idx) => (
               <BlogArticleCard
                 key={article._id}
                 article={article}
@@ -443,6 +474,8 @@ const BlogPage: React.FC = () => {
                 isLiked={likedIds.has(article._id)}
                 likeCount={likeCounts.get(article._id) ?? article.likeCount ?? 0}
                 onToggleLike={user ? handleToggleLike : undefined}
+                className="animate-fadeIn"
+                style={{ animationDelay: `${(idx + 1) * 300}ms` }}
               />
             ))}
           </div>

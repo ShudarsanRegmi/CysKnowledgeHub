@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       id: 'learn', label: 'Learn', icon: BookOpen,
       subItems: [
         { id: 'blogs', label: 'Blogs', icon: BookOpen, path: '/blogs' },
-        { id: 'ctf', label: 'CTF Guides', icon: Terminal, path: '/ctf' },
+        { id: 'ctf', label: 'CTF', icon: Terminal, path: '/ctf' },
         { id: 'roadmaps', label: 'Roadmaps', icon: Map, path: '/roadmaps' },
       ]
     },
@@ -266,7 +266,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <h4 className="font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
               <li><button onClick={() => navigate('/blogs')} className="hover:text-cyan-400">Security Blogs</button></li>
-              <li><button onClick={() => navigate('/ctf')} className="hover:text-cyan-400">CTF Guides</button></li>
+              <li><button onClick={() => navigate('/ctf')} className="hover:text-cyan-400">CTF</button></li>
               <li><button onClick={() => navigate('/roadmaps')} className="hover:text-cyan-400">Roadmaps</button></li>
             </ul>
           </div>

@@ -13,6 +13,7 @@ import { Company }     from '../src/models/Company';
 import { Roadmap }     from '../src/models/Roadmap';
 import { Topic }       from '../src/models/Topic';
 import { Article }     from '../src/models/Article';
+import { CTFWriteup }   from '../src/models/CTFWriteup';
 
 dotenv.config();
 
@@ -730,11 +731,91 @@ const ROADMAPS = [
 const SYSTEM_UID  = 'seed-script';
 const SYSTEM_NAME = 'CysKH Demo Bot';
 
+const MOCK_WRITEUPS = [
+  {
+    title: 'Sanity Check — CyberShield Internal CTF 2025',
+    eventName: 'CyberShield Internal CTF 2025',
+    eventSlug: 'cybershield-internal-ctf-2025',
+    challengeName: 'Sanity Check',
+    category: 'misc',
+    difficulty: 'easy',
+    content: JSON.stringify({
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Challenge Overview' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'This was a simple sanity check challenge to ensure everyone could use the platform.' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'The flag was in the description.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Flag' }] },
+        { type: 'codeBlock', content: [{ type: 'text', text: 'CYS{w3lc0me_t0_th3_ctf}' }] }
+      ]
+    }),
+    contentType: 'novel',
+    authorUid: SYSTEM_UID,
+    authorName: SYSTEM_NAME,
+    status: 'published',
+    tags: ['misc', 'welcome'],
+  },
+  {
+    title: 'Auth Bypass — KnightCTF 2024',
+    eventName: 'KnightCTF 2024',
+    eventSlug: 'knightctf-2024',
+    challengeName: 'Auth Bypass',
+    category: 'web',
+    difficulty: 'medium',
+    content: JSON.stringify({
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Vulnerability Analysis' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'The application was using a weak JWT secret. By brute-forcing the secret using a wordlist, we were able to sign our own tokens as admin.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Exploitation' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: '1. Crack the secret using hashcat.' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: '2. Create a new token on jwt.io.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Flag' }] },
+        { type: 'codeBlock', content: [{ type: 'text', text: 'KCTF{jwt_s3cr3t_1s_too_sh0rt}' }] }
+      ]
+    }),
+    contentType: 'novel',
+    authorUid: SYSTEM_UID,
+    authorName: SYSTEM_NAME,
+    status: 'published',
+    tags: ['web', 'jwt', 'crack'],
+  },
+  {
+    title: 'Basic Buffer Overflow — VulnCTF 2024',
+    eventName: 'VulnCTF 2024',
+    eventSlug: 'vulnctf-2024',
+    challengeName: 'PwnMe',
+    category: 'pwn',
+    difficulty: 'hard',
+    content: JSON.stringify({
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Reverse Engineering' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'The binary uses gets() to read input into a 64-byte buffer, leading to a stack-based buffer overflow.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Payload Development' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'We need to overwrite the return address with the address of the win() function.' }] },
+        { type: 'codeBlock', attrs: { language: 'python' }, content: [{ type: 'text', text: 'from pwn import *\np = process("./pwnme")\np.sendline(b"A"*72 + p64(0x4011d6))\np.interactive()' }] }
+      ]
+    }),
+    contentType: 'novel',
+    authorUid: SYSTEM_UID,
+    authorName: SYSTEM_NAME,
+    status: 'published',
+    tags: ['pwn', 'bof', 'python'],
+  }
+];
+
 const CTF_TOPICS = [
   { slug: 'web-exploitation',    title: 'Web Exploitation',   description: 'XSS, SQLi, SSRF, CSRF, broken auth and other web-layer attack techniques.', type: 'ctf' as const, order: 1, createdBy: SYSTEM_UID },
   { slug: 'reverse-engineering', title: 'Reverse Engineering', description: 'Binary analysis, disassembly, decompilation and patch-diffing challenges.',  type: 'ctf' as const, order: 2, createdBy: SYSTEM_UID },
   { slug: 'cryptography',        title: 'Cryptography',        description: 'Classical ciphers, AES modes, RSA, elliptic curves and side-channel attacks.', type: 'ctf' as const, order: 3, createdBy: SYSTEM_UID },
   { slug: 'binary-exploitation', title: 'Binary Exploitation', description: 'Buffer overflows, format strings, heap exploitation and ROP chains.',          type: 'ctf' as const, order: 4, createdBy: SYSTEM_UID },
+
+  // Writeup Categories (Dynamic Sidebar)
+  { slug: 'web',       title: 'Web',       description: 'Web Security Writeups',       type: 'writeup' as const, order: 1, createdBy: SYSTEM_UID },
+  { slug: 'pwn',       title: 'Pwn',       description: 'Binary Exploitation Writeups', type: 'writeup' as const, order: 2, createdBy: SYSTEM_UID },
+  { slug: 'misc',      title: 'Misc',      description: 'Miscellaneous Challenges',     type: 'writeup' as const, order: 3, createdBy: SYSTEM_UID },
+  { slug: 'forensics', title: 'Forensics', description: 'Digital Forensics Writeups',   type: 'writeup' as const, order: 4, createdBy: SYSTEM_UID },
 ];
 
 function buildCTFArticles(topicMap: Record<string, mongoose.Types.ObjectId>) {
@@ -1696,6 +1777,14 @@ async function main() {
   const blogArticles = buildBlogArticles(blogTopicMap);
   await Article.insertMany(blogArticles);
   console.log(`[seed-content] ✓ Blog Articles: ${blogArticles.length} inserted`);
+
+  // CTF Writeups
+  await CTFWriteup.deleteMany({ authorUid: SYSTEM_UID });
+  await CTFWriteup.insertMany(MOCK_WRITEUPS.map(w => ({
+    ...w,
+    slug: w.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now()
+  })));
+  console.log(`[seed-content] ✓ CTF Writeups: ${MOCK_WRITEUPS.length} inserted`);
 
   await mongoose.disconnect();
   console.log('[seed-content] Done. Disconnected.');

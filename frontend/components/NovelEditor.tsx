@@ -81,7 +81,7 @@ interface NovelEditorProps {
   /** Called when user pastes an image; should return the hosted public URL. */
   onUploadImage?: (file: File) => Promise<string>;
   /** Forwarded to the upload endpoint as the `type` query param. */
-  uploadType?: 'ctf' | 'blog';
+  uploadType?: 'ctf' | 'blog' | 'writeups';
 }
 
 /**

@@ -9,7 +9,7 @@ export interface Topic {
   title: string;
   slug: string;
   description?: string;
-  type: 'ctf' | 'blog' | 'experiment';
+  type: 'ctf' | 'blog' | 'experiment' | 'writeup';
   order: number;
   createdBy: string;
   createdAt: string;
@@ -96,6 +96,12 @@ export const getArticle = (topicSlug: string, articleSlug: string) =>
     json<{ topic: Topic; article: Article }>(r)
   );
 
+/** Returns topics with their associated published articles. */
+export const getGroupedContent = (type: string) =>
+  fetch(`${BASE}/api/topics/grouped?type=${encodeURIComponent(type)}`).then((r) =>
+    json<{ topics: (Topic & { articles: Article[] })[] }>(r)
+  );
+
 // ─── Author APIs ──────────────────────────────────────────────────────────────
 
 export const getMyArticles = () =>
@@ -136,7 +142,7 @@ export const getArticleForEdit = (id: string) =>
   authFetch(`${BASE}/api/articles/${id}`).then((r) => json<{ article: Article }>(r));
 
 /** Create a topic — available to both authors and admins. */
-export const createTopic = (body: { title: string; description?: string; type: 'ctf' | 'blog' | 'experiment' }) =>
+export const createTopic = (body: { title: string; description?: string; type: 'ctf' | 'blog' | 'experiment' | 'writeup' }) =>
   authFetch(`${BASE}/api/topics`, { method: 'POST', body: JSON.stringify(body) }).then((r) =>
     json<{ topic: Topic }>(r)
   );
@@ -155,14 +161,14 @@ export const adminSetUserRole = (uid: string, role: string) =>
 export const adminGetTopics = () =>
   authFetch(`${BASE}/api/admin/topics`).then((r) => json<{ topics: Topic[] }>(r));
 
-export const adminCreateTopic = (body: { title: string; description?: string; type?: 'ctf' | 'blog' | 'experiment' }) =>
+export const adminCreateTopic = (body: { title: string; description?: string; type?: 'ctf' | 'blog' | 'experiment' | 'writeup' }) =>
   authFetch(`${BASE}/api/admin/topics`, { method: 'POST', body: JSON.stringify(body) }).then((r) =>
     json<{ topic: Topic }>(r)
   );
 
 export const adminUpdateTopic = (
   id: string,
-  body: Partial<{ title: string; description: string; order: number; type: 'ctf' | 'blog' | 'experiment' }>
+  body: Partial<{ title: string; description: string; order: number; type: 'ctf' | 'blog' | 'experiment' | 'writeup' }>
 ) =>
   authFetch(`${BASE}/api/admin/topics/${id}`, {
     method: 'PATCH',

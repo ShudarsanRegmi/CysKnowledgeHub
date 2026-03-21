@@ -5,6 +5,7 @@ import { requireRole } from '../middleware/requireRole';
 import { User } from '../models/User';
 import { Topic } from '../models/Topic';
 import { Article } from '../models/Article';
+import { CTFWriteup } from '../models/CTFWriteup';
 
 const router = Router();
 
@@ -67,7 +68,7 @@ router.post('/topics', async (req: AuthRequest, res: Response): Promise<void> =>
     return;
   }
 
-  const allowedTypes = ['ctf', 'blog', 'experiment'];
+  const allowedTypes = ['ctf', 'blog', 'experiment', 'writeup'];
   if (type && !allowedTypes.includes(type)) {
     res.status(400).json({ message: `Invalid type. Must be one of: ${allowedTypes.join(', ')}` });
     return;
@@ -98,7 +99,7 @@ router.post('/topics', async (req: AuthRequest, res: Response): Promise<void> =>
 /** PATCH /api/admin/topics/:id — update a topic */
 router.patch('/topics/:id', async (req, res: Response): Promise<void> => {
   const { title, description, order, type } = req.body;
-  const allowedTypes = ['ctf', 'blog', 'experiment'];
+  const allowedTypes = ['ctf', 'blog', 'experiment', 'writeup'];
   if (type && !allowedTypes.includes(type)) {
     res.status(400).json({ message: `Invalid type. Must be one of: ${allowedTypes.join(', ')}` });
     return;
@@ -227,6 +228,58 @@ router.patch('/articles/:id/topic', async (req, res: Response): Promise<void> =>
     res.json({ article });
   } catch (err) {
     res.status(500).json({ message: 'Failed to reassign topic', error: String(err) });
+  }
+});
+
+// ─── Writeup review ───────────────────────────────────────────────────────────
+
+/** GET /api/admin/writeups — all writeups with filters */
+router.get('/writeups', async (req, res: Response): Promise<void> => {
+  try {
+    const { status, category, difficulty } = req.query;
+    const filter: any = {};
+    if (status) filter.status = status;
+    if (category) filter.category = category;
+    if (difficulty) filter.difficulty = difficulty;
+
+    const writeups = await CTFWriteup.find(filter)
+      .sort({ createdAt: -1 });
+    res.json({ writeups });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch writeups', error: String(err) });
+  }
+});
+
+/** PATCH /api/admin/writeups/:id/status — approve or reject writeup */
+router.patch('/writeups/:id/status', async (req, res: Response): Promise<void> => {
+  const { status, rejectionReason } = req.body;
+  const allowed = ['published', 'rejected', 'pending', 'draft'];
+  if (!allowed.includes(status)) {
+    res.status(400).json({ message: `Invalid status. Must be one of: ${allowed.join(', ')}` });
+    return;
+  }
+
+  try {
+    const writeup = await CTFWriteup.findByIdAndUpdate(
+      req.params.id, 
+      { status, rejectionReason }, 
+      { new: true }
+    );
+    if (!writeup) { res.status(404).json({ message: 'Writeup not found' }); return; }
+    res.json({ writeup });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update writeup status', error: String(err) });
+  }
+});
+
+/** DELETE /api/admin/writeups/:id — delete writeup */
+router.delete('/writeups/:id', async (req, res: Response): Promise<void> => {
+  try {
+    const writeup = await CTFWriteup.findByIdAndDelete(req.params.id);
+    if (!writeup) { res.status(404).json({ message: 'Writeup not found' }); return; }
+    res.json({ message: 'Writeup deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete writeup', error: String(err) });
   }
 });
 

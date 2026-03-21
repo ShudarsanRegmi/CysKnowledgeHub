@@ -22,7 +22,7 @@ router.post('/', requireAuth, requireRole('author', 'admin'), async (req: AuthRe
       return;
     }
 
-    const allowedTypes = ['ctf', 'blog', 'experiment'];
+    const allowedTypes = ['ctf', 'blog', 'experiment', 'writeup'];
     if (!type || !allowedTypes.includes(type)) {
       res.status(400).json({ message: `type must be one of: ${allowedTypes.join(', ')}` });
       return;
@@ -57,6 +57,33 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     res.json({ topics });
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch topics', error: String(err) });
+  }
+});
+
+/**
+ * GET /api/topics/grouped?type=ctf|blog
+ * Returns topics with their associated published articles.
+ */
+router.get('/grouped', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { type } = req.query;
+    const filter: any = {};
+    if (type) filter.type = type;
+
+    const topics = await Topic.find(filter).sort({ order: 1, createdAt: 1 }).lean();
+    
+    // For each topic, find published articles
+    const grouped = await Promise.all(topics.map(async (topic) => {
+      const articles = await Article.find({ topicId: topic._id, status: 'published' })
+        .select('title slug coverImage authorName tags publishedAt order')
+        .sort({ order: 1, publishedAt: -1 })
+        .lean();
+      return { ...topic, articles };
+    }));
+
+    res.json({ topics: grouped });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch grouped topics', error: String(err) });
   }
 });
 

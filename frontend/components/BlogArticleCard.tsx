@@ -11,6 +11,8 @@ interface BlogArticleCardProps {
   isLiked?: boolean;
   likeCount?: number;
   onToggleLike?: (articleId: string) => void;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 // Deterministic gradient based on article id for cover placeholder
@@ -34,6 +36,8 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
   isLiked = false,
   likeCount = article.likeCount ?? 0,
   onToggleLike,
+  className = '',
+  style = {},
 }) => {
   // Reading time requires full content — only available on article detail, not feed
   const mins = article.content ? readingTime(article.content, article.contentType) : null;
@@ -52,7 +56,10 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
     : '';
 
   return (
-    <article className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all duration-200 group flex flex-col">
+    <article
+      className={`bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all duration-200 group flex flex-col ${className}`}
+      style={style}
+    >
       {/* Cover */}
       <div
         className="relative cursor-pointer"
