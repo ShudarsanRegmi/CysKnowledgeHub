@@ -1,48 +1,37 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users, PenLine, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import AuthModal from './AuthModal';
 interface LayoutProps {
   children: React.ReactNode;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [openNav, setOpenNav] = useState<string | null>(null);
-  const { theme, toggle: toggleTheme } = useTheme();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, signOut, role } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
-
-  // Close user-menu and nav dropdowns on outside click
+  // Close user-menu on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setShowUserMenu(false);
       }
-      const target = e.target as Element;
-      if (!target.closest('[data-nav-dropdown]')) {
-        setOpenNav(null);
-      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [])
+  }, []);
 
-  // Keep a concise top-level nav and expose category subsections
+  // Keep a concise top-level nav and expose category subsections to avoid duplicate flat items
   const navItems = [
-    { id: 'home', label: 'Home', icon: Shield, path: '/' },
+    { id: 'home', label: 'Home', icon: Shield },
     {
       id: 'learn', label: 'Learn', icon: BookOpen,
       subItems: [
@@ -54,36 +43,45 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       id: 'showcase', label: 'Showcase', icon: Github,
       subItems: [
-        { id: 'projects', label: 'Projects', icon: Github, path: '/projects' },
-        { id: 'achievements', label: 'Achievements', icon: Award, path: '/achievements' },
-        { id: 'experiments', label: 'Experiments', icon: Cpu, path: '/experiments' },
-        { id: 'certifications', label: 'Certifications', icon: FileBadge, path: '/certifications' },
+        { id: 'projects', label: 'Projects', icon: Github },
+        { id: 'achievements', label: 'Achievements', icon: Award },
+        { id: 'experiments', label: 'Experiments', icon: Cpu },
+        { id: 'certifications', label: 'Certifications', icon: FileBadge },
       ]
     },
     {
       id: 'directory', label: 'Directory', icon: Users,
       subItems: [
-        { id: 'students', label: 'The Constellation', icon: Users, path: '/students' },
-        { id: 'faculty', label: 'Faculty', icon: UserCircle, path: '/faculty' },
-        { id: 'gallery', label: 'Gallery', icon: Map, path: '/gallery' },
+        // The Constellation (Students list)
+        { id: 'students', label: 'The Constellation', icon: Users },
+        // Placeholder entries for future pages (faculty)
+        { id: 'faculty', label: 'Faculty', icon: UserCircle },
+        { id: 'research-labs', label: 'Research Labs', icon: Map },
+      ]
+    },
+    {
+      id: 'gallery_main', label: 'Gallery', icon: Map,
+      subItems: [
+        { id: 'gallery-department', label: 'Department Gallery', icon: Map },
+        { id: 'gallery-events', label: 'Events Gallery', icon: Map },
       ]
     },
     {
       id: 'career_hub', label: 'Career Hub', icon: Briefcase,
       subItems: [
-        { id: 'career', label: 'Preparation', icon: Briefcase, path: '/career' },
-        { id: 'interviews', label: 'Experiences', icon: MessageSquare, path: '/interviews' },
-        { id: 'companies', label: 'Companies', icon: Building2, path: '/companies' },
+        { id: 'career', label: 'Preparation', icon: Briefcase },
+        { id: 'interviews', label: 'Experiences', icon: MessageSquare },
+        { id: 'companies', label: 'Companies', icon: Building2 },
       ]
     }
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-950 text-gray-100">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
             <Shield className="w-8 h-8 text-cyan-500" />
             <span className="text-xl font-bold tracking-tight mono">CYBER<span className="text-cyan-500">SHIELD</span></span>
           </div>
@@ -94,31 +92,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {navItems.map((item) => (
               item.subItems ? (
                 <div key={item.id} className="relative group">
-                  <button className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-colors hover:text-cyan-400 hover:bg-gray-800/50 ${
-                    item.subItems.some(s => isActive(s.path)) ? 'text-cyan-500' : 'text-gray-400'
-                  }`}>
+                  <button className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-gray-100 dark:hover:bg-gray-800/50`}>
                     {item.label} <ChevronDown className="w-3.5 h-3.5 opacity-70 group-hover:rotate-180 transition-transform" />
                   </button>
-                  <div className="absolute top-full left-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl overflow-hidden">
-                      {item.subItems.map(sub => (
-                        <button
-                          key={sub.id}
-                          onClick={() => { navigate(sub.path); setOpenNav(null); }}
-                          className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-800 hover:text-cyan-400 ${isActive(sub.path) ? 'text-cyan-500 bg-gray-800/50' : 'text-gray-400'}`}
-                        >
-                          <sub.icon className="w-4 h-4" />
-                          {sub.label}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden translate-y-2 group-hover:translate-y-0">
+                    {item.subItems.map(sub => (
+                      <button
+                        key={sub.id}
+                        onClick={() => setActiveTab(sub.id)}
+                        className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-cyan-600 dark:hover:text-cyan-400 ${activeTab === sub.id ? 'text-cyan-600 dark:text-cyan-500 bg-gray-100 dark:bg-gray-800/50' : 'text-gray-500 dark:text-gray-400'}`}
+                      >
+                        <sub.icon className="w-4 h-4" />
+                        {sub.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ) : (
                 <button
                   key={item.id}
-                  onClick={() => navigate((item as any).path)}
-                  className={`px-3 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-gray-800/50 hover:text-cyan-400 ${isActive((item as any).path) ? 'text-cyan-500' : 'text-gray-400'}`}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`px-3 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-gray-800/50 hover:text-cyan-400 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'}`}
                 >
                   {item.label}
                 </button>
@@ -126,7 +120,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors mr-2"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             {/* Profile / Auth button */}
             {user ? (
               <div className="relative" ref={userMenuRef}>
@@ -154,7 +157,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                     {(role === 'author' || role === 'admin') && (
                       <button
-                        onClick={() => { setShowUserMenu(false); navigate('/author-dashboard'); }}
+                        onClick={() => { setShowUserMenu(false); setActiveTab('author-dashboard'); }}
                         className="w-full flex items-center gap-2 px-4 py-3 text-sm text-cyan-400 hover:bg-gray-800 transition-colors"
                       >
                         <PenLine className="w-4 h-4" />
@@ -163,7 +166,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     )}
                     {role === 'admin' && (
                       <button
-                        onClick={() => { setShowUserMenu(false); navigate('/admin-dashboard'); }}
+                        onClick={() => { setShowUserMenu(false); setActiveTab('admin-dashboard'); }}
                         className="w-full flex items-center gap-2 px-4 py-3 text-sm text-yellow-400 hover:bg-gray-800 transition-colors"
                       >
                         <ShieldCheck className="w-4 h-4" />
@@ -191,15 +194,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             )}
 
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="p-2 rounded-xl text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 transition-colors"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
             {/* Mobile hamburger */}
             <button
               className="md:hidden p-2 text-gray-400 hover:text-white"
@@ -223,8 +217,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {item.subItems.map(sub => (
                       <button
                         key={sub.id}
-                        onClick={() => { navigate(sub.path); setIsMenuOpen(false); }}
-                        className={`text-xl font-bold flex items-center gap-3 ${isActive(sub.path) ? 'text-cyan-500' : 'text-gray-400'}`}
+                        onClick={() => {
+                          setActiveTab(sub.id);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`text-xl font-bold flex items-center gap-3 ${activeTab === sub.id ? 'text-cyan-500' : 'text-gray-400'}`}
                       >
                         <sub.icon className="w-5 h-5" />
                         {sub.label}
@@ -233,8 +230,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </>
                 ) : (
                   <button
-                    onClick={() => { navigate((item as any).path); setIsMenuOpen(false); }}
-                    className={`text-2xl font-bold flex items-center gap-3 ${isActive((item as any).path) ? 'text-cyan-500' : 'text-gray-400'}`}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`text-2xl font-bold flex items-center gap-3 ${activeTab === item.id ? 'text-cyan-500' : 'text-gray-400'}`}
                   >
                     <item.icon className="w-6 h-6" />
                     {item.label}
@@ -246,7 +246,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
 
-      <main className={`flex-1 w-full flex flex-col ${isActive('/gallery') ? 'min-h-[calc(100vh-64px)]' : 'max-w-7xl mx-auto px-4 py-8'}`}>
+      <main className={`flex-1 w-full flex flex-col ${activeTab === 'gallery-events' ? 'min-h-[calc(100vh-64px)]' : 'max-w-7xl mx-auto px-4 py-8'}`}>
         {children}
       </main>
 
