@@ -363,7 +363,7 @@ const App: React.FC = () => {
         );
 
       case 'ctf':
-        return <CTFWriteupsPage />;
+        return <CTFPage />;
 
       case 'blogs':
       case 'experiments': {
@@ -615,29 +615,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/blogs" element={<BlogPage />} />
-        <Route path="/blogs/:slug" element={<BlogPage />} />
-        <Route path="/experiments" element={<ContentListPage type={ContentType.EXPERIMENT} label="experiments" />} />
-        <Route path="/ctf" element={<CTFPage />} />
-        <Route path="/roadmaps" element={<RoadmapsPage />} />
-        <Route path="/roadmaps/:id" element={<RoadmapDetailRoute />} />
-        <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/projects/:id" element={<ProjectDetailPage />} />
-        <Route path="/achievements" element={<AchievementsPage />} />
-        <Route path="/certifications" element={<CertificationsPage />} />
-        <Route path="/companies" element={<CompaniesPage />} />
-        <Route path="/students" element={<StudentsPage />} />
-        <Route path="/interviews" element={<InterviewExperiencesPage />} />
-        <Route path="/career" element={<CareerPage />} />
-        <Route path="/faculty" element={<FacultyPage />} />
-        <Route path="/gallery" element={<DepartmentGallery />} />
-        <Route path="/author-dashboard" element={<AuthorDashboardRoute />} />
-        <Route path="/admin-dashboard" element={<AdminDashboardRoute />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+      {renderContent()}
       <ChatAssistant />
     </Layout>
   );
