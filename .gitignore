@@ -1,4 +1,5 @@
 backend/uploads/blog-images/*
+backend/uploads/writeup-images/*
 # Logs
 logs
 *.log
