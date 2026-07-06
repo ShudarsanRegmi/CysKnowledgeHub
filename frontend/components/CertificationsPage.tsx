@@ -40,7 +40,7 @@ const Category: React.FC<CategoryProps> = ({ title, certifications, onSelectCert
               {/* Inner glow ring */}
               <div className="absolute inset-0 bg-white/30 rounded-full blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-              <div className="w-[75%] h-[75%] bg-[#12121e] rounded-full flex items-center justify-center p-1.5 shadow-inner relative z-10 border border-[#2a2a40]">
+              <div className="w-[75%] h-[75%] bg-[#f5f6f8] dark:bg-[#12121e] rounded-full flex items-center justify-center p-1.5 shadow-inner relative z-10 border border-[#dde1e8] dark:border-[#2a2a40]">
                 {cert.badgeUrl ? (
                   <img
                     src={cert.badgeUrl}
@@ -217,7 +217,7 @@ const CertificationsPage: React.FC = () => {
             <div className="mt-8 pt-6 border-t border-gray-800/80 relative z-10">
               <button
                 onClick={() => setSelectedCert(null)}
-                className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(6,182,212,0.5)] hover:shadow-[0_0_25px_-5px_rgba(6,182,212,0.7)] hover:-translate-y-0.5 active:translate-y-0"
+                className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-50 font-bold py-3.5 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(6,182,212,0.5)] hover:shadow-[0_0_25px_-5px_rgba(6,182,212,0.7)] hover:-translate-y-0.5 active:translate-y-0"
               >
                 Close Details
               </button>

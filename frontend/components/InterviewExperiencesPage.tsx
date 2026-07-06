@@ -104,7 +104,7 @@ export const InterviewExperiencesPage: React.FC = () => {
 
                 {/* ── Mobile Filter Toggle ── */}
                 <button
-                    className="lg:hidden w-full py-3 bg-gray-900 border border-gray-800 rounded-xl font-medium flex items-center justify-center gap-2"
+                    className="lg:hidden w-full py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl font-medium flex items-center justify-center gap-2 text-gray-700 dark:text-gray-200"
                     onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
                 >
                     <SlidersHorizontal size={18} /> {isMobileFilterOpen ? 'Hide Filters' : 'Show Filters'}
@@ -113,22 +113,22 @@ export const InterviewExperiencesPage: React.FC = () => {
                 {/* ── Sidebar: Advanced Filters ── */}
                 <aside className={`w-full lg:w-[280px] shrink-0 space-y-6 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'} lg:sticky lg:top-24`}>
 
-                    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg">
-                        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-5 flex items-center gap-2">
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-lg">
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-5 flex items-center gap-2">
                             <Filter size={16} className="text-cyan-500" /> Filters
                         </h2>
 
                         {/* Company Filter */}
                         <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-gray-200 mb-3">Company</h3>
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Company</h3>
                             <div className="space-y-2 max-h-[160px] overflow-y-auto scrollbar-hide">
                                 {companies.map(c => (
                                     <label key={c} className="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" className="hidden" checked={selectedCompanies.includes(c)} onChange={() => toggleFilter(setSelectedCompanies, c)} />
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCompanies.includes(c) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-600 group-hover:border-cyan-400'}`}>
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCompanies.includes(c) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-cyan-400'}`}>
                                             {selectedCompanies.includes(c) && <Check size={12} className="text-white" />}
                                         </div>
-                                        <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{c}</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-cyan-600 dark:group-hover:text-white transition-colors">{c}</span>
                                     </label>
                                 ))}
                             </div>
@@ -136,15 +136,15 @@ export const InterviewExperiencesPage: React.FC = () => {
 
                         {/* Domain Filter */}
                         <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-gray-200 mb-3">Domain</h3>
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Domain</h3>
                             <div className="space-y-2 max-h-[160px] overflow-y-auto scrollbar-hide pr-2">
                                 {domains.map(d => (
                                     <label key={d} className="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" className="hidden" checked={selectedDomains.includes(d)} onChange={() => toggleFilter(setSelectedDomains, d)} />
-                                        <div className={`w-4 h-4 rounded border flex-shrink-0 items-center justify-center transition-colors ${selectedDomains.includes(d) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-600 group-hover:border-cyan-400'}`}>
+                                        <div className={`w-4 h-4 rounded border flex-shrink-0 items-center justify-center transition-colors ${selectedDomains.includes(d) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-cyan-400'}`}>
                                             {selectedDomains.includes(d) && <Check size={12} className="text-white" />}
                                         </div>
-                                        <span className="text-sm text-gray-300 group-hover:text-white transition-colors leading-tight">{d}</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-cyan-600 dark:group-hover:text-white transition-colors leading-tight">{d}</span>
                                     </label>
                                 ))}
                             </div>
@@ -152,15 +152,15 @@ export const InterviewExperiencesPage: React.FC = () => {
 
                         {/* Result Filter */}
                         <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-gray-200 mb-3">Status</h3>
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Status</h3>
                             <div className="space-y-2">
                                 {results.map(r => (
                                     <label key={r} className="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" className="hidden" checked={selectedResults.includes(r)} onChange={() => toggleFilter(setSelectedResults, r)} />
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedResults.includes(r) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-600 group-hover:border-cyan-400'}`}>
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedResults.includes(r) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-cyan-400'}`}>
                                             {selectedResults.includes(r) && <Check size={12} className="text-white" />}
                                         </div>
-                                        <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{r}</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-cyan-600 dark:group-hover:text-white transition-colors">{r}</span>
                                     </label>
                                 ))}
                             </div>
@@ -168,15 +168,15 @@ export const InterviewExperiencesPage: React.FC = () => {
 
                         {/* Difficulty Filter */}
                         <div>
-                            <h3 className="text-sm font-semibold text-gray-200 mb-3">Difficulty</h3>
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Difficulty</h3>
                             <div className="flex flex-wrap gap-2">
                                 {difficulties.map(d => (
                                     <button
                                         key={d}
                                         onClick={() => toggleFilter(setSelectedDifficulties, d)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${selectedDifficulties.includes(d)
-                                            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
-                                            : 'bg-gray-950 border-gray-800 text-gray-400 hover:border-gray-600'
+                                            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-700 dark:text-cyan-400'
+                                            : 'bg-gray-50 dark:bg-gray-950 border-gray-300 dark:border-gray-800 text-gray-650 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-600'
                                             }`}
                                     >
                                         {d}
@@ -195,7 +195,7 @@ export const InterviewExperiencesPage: React.FC = () => {
                                 setSelectedResults([]);
                                 setSelectedDifficulties([]);
                             }}
-                            className="w-full py-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-xl text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                            className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 dark:bg-gray-950 dark:hover:bg-gray-900 dark:border-gray-800 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
                             Clear All Filters
                         </button>
@@ -207,7 +207,7 @@ export const InterviewExperiencesPage: React.FC = () => {
                 <div className="flex-1 space-y-6 min-w-0">
 
                     {/* Top Bar: Search and Sort */}
-                    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-2 md:p-3 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-2 md:p-3 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
 
                         <div className="relative w-full md:w-96 flex-shrink-0 group">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 w-5 h-5 transition-colors" />
@@ -216,21 +216,21 @@ export const InterviewExperiencesPage: React.FC = () => {
                                 placeholder="Search by company, role, topic (e.g. Graph)..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-gray-950 border border-gray-800 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-gray-600 text-white"
+                                className="w-full bg-gray-55 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-gray-400 dark:placeholder-gray-600 text-gray-850 dark:text-white"
                             />
                         </div>
 
                         <div className="flex items-center gap-3 w-full md:w-auto px-2 md:px-0">
                             <span className="text-sm font-medium text-gray-500 whitespace-nowrap hidden sm:block">Sort by:</span>
-                            <div className="relative w-full sm:w-40 border border-gray-800 rounded-xl bg-gray-950">
+                            <div className="relative w-full sm:w-40 border border-gray-300 dark:border-gray-800 rounded-xl bg-gray-55 dark:bg-gray-950">
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value as any)}
-                                    className="w-full bg-transparent text-sm text-gray-300 py-3 pl-4 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-cyan-500 rounded-xl cursor-pointer"
+                                    className="w-full bg-transparent text-sm text-gray-700 dark:text-gray-355 py-3 pl-4 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-cyan-500 rounded-xl cursor-pointer"
                                 >
-                                    <option value="helpful">Most Helpful</option>
-                                    <option value="recent">Most Recent</option>
-                                    <option value="views">Most Viewed</option>
+                                    <option value="helpful" className="bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-300">Most Helpful</option>
+                                    <option value="recent" className="bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-300">Most Recent</option>
+                                    <option value="views" className="bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-300">Most Viewed</option>
                                 </select>
                                 <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                             </div>
@@ -240,7 +240,7 @@ export const InterviewExperiencesPage: React.FC = () => {
 
                     {/* Results Count Summary */}
                     <div className="px-2 text-sm text-gray-400 font-medium">
-                        Showing <span className="text-white">{filteredAndSortedExperiences.length}</span> experiences
+                        Showing <span className="text-gray-800 dark:text-white font-semibold">{filteredAndSortedExperiences.length}</span> experiences
                     </div>
 
                     {/* Cards Grid */}
@@ -254,15 +254,15 @@ export const InterviewExperiencesPage: React.FC = () => {
                                 <InterviewExperienceCard key={exp._id} experience={exp} />
                             ))
                         ) : (
-                            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center shadow-lg">
-                                <AlertCircle className="w-12 h-12 text-gray-600 mb-4" />
-                                <h3 className="text-xl font-bold text-white mb-2">No experiences found</h3>
-                                <p className="text-gray-400 max-w-sm">
+                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center shadow-lg">
+                                <AlertCircle className="w-12 h-12 text-gray-450 dark:text-gray-600 mb-4" />
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No experiences found</h3>
+                                <p className="text-gray-500 dark:text-gray-400 max-w-sm">
                                     We couldn't find any interview experiences matching your current filters and search term.
                                 </p>
                                 <button
                                     onClick={() => { setSearchTerm(''); setSelectedCompanies([]); setSelectedDomains([]); setSelectedResults([]); setSelectedDifficulties([]); }}
-                                    className="mt-6 text-cyan-400 hover:text-cyan-300 text-sm font-bold uppercase tracking-wider"
+                                    className="mt-6 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 text-sm font-bold uppercase tracking-wider"
                                 >
                                     Clear search & filters
                                 </button>

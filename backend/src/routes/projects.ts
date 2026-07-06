@@ -4,13 +4,32 @@ import { Project } from '../models/Project';
 const router = Router();
 
 // GET /api/projects
+// Query params: featured, category, projectType, techStack, year, search
 router.get('/', async (req: Request, res: Response) => {
   try {
     const filter: Record<string, any> = {};
+
     if (req.query.featured === 'true') filter.featured = true;
     if (req.query.category) filter.categories = req.query.category as string;
+    if (req.query.projectType) filter.projectType = req.query.projectType as string;
+    if (req.query.techStack) filter.techStack = req.query.techStack as string;
+    if (req.query.year) filter.year = req.query.year as string;
 
-    const projects = await Project.find(filter).sort({ featured: -1, createdAt: -1 });
+    // Full-text search across title, abstract, tags, categories, contributors, techStack
+    if (req.query.search) {
+      const regex = new RegExp(req.query.search as string, 'i');
+      filter.$or = [
+        { title: regex },
+        { abstract: regex },
+        { description: regex },
+        { tags: regex },
+        { categories: regex },
+        { contributors: regex },
+        { techStack: regex },
+      ];
+    }
+
+    const projects = await Project.find(filter).sort({ featured: -1, year: -1, createdAt: -1 });
     res.json(projects);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch projects' });

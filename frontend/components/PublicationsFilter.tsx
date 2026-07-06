@@ -35,17 +35,17 @@ function ToggleChip({
 }) {
   const palette = {
     cyan: active
-      ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-300'
-      : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300',
+      ? 'bg-cyan-100 dark:bg-cyan-500/20 border-cyan-400 dark:border-cyan-500/60 text-cyan-700 dark:text-cyan-300'
+      : 'bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-300',
     violet: active
-      ? 'bg-violet-500/20 border-violet-500/60 text-violet-300'
-      : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300',
+      ? 'bg-violet-100 dark:bg-violet-500/20 border-violet-400 dark:border-violet-500/60 text-violet-700 dark:text-violet-300'
+      : 'bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-300',
     emerald: active
-      ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300'
-      : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300',
+      ? 'bg-emerald-100 dark:bg-emerald-500/20 border-emerald-400 dark:border-emerald-500/60 text-emerald-700 dark:text-emerald-300'
+      : 'bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-300',
     amber: active
-      ? 'bg-amber-500/20 border-amber-500/60 text-amber-300'
-      : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300',
+      ? 'bg-amber-100 dark:bg-amber-500/20 border-amber-400 dark:border-amber-500/60 text-amber-700 dark:text-amber-300'
+      : 'bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-300',
   };
 
   return (
@@ -92,10 +92,10 @@ const PublicationsFilter: React.FC<PublicationsFilterProps> = ({
   }
 
   return (
-    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 space-y-5 backdrop-blur-sm">
+    <div className="bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-5 backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-gray-300">
+        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
           <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
           <span className="font-semibold text-sm">Filters</span>
           {hasActiveFilters && (
@@ -127,7 +127,7 @@ const PublicationsFilter: React.FC<PublicationsFilterProps> = ({
           placeholder="Search title, author, keyword…"
           value={filters.search}
           onChange={(e) => onChange({ ...filters, search: e.target.value })}
-          className="w-full bg-gray-800/60 border border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-cyan-500/60 transition-colors"
+          className="w-full bg-gray-50 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-cyan-500/60 transition-colors"
         />
       </div>
 

@@ -170,7 +170,7 @@ const FacultyCard: React.FC<{ faculty: FacultyMember; onOpen: () => void }> = ({
     return (
         <div
             onClick={onOpen}
-            className="group relative bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden
+            className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden
                        hover:border-cyan-500/40 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
         >
             {/* Top accent stripe */}
@@ -244,7 +244,7 @@ const FacultyCard: React.FC<{ faculty: FacultyMember; onOpen: () => void }> = ({
                     )}
 
                     {/* Links */}
-                    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-800/80">
+                    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800/80">
                         {faculty.linkedinUrl && (
                             <a
                                 href={faculty.linkedinUrl}
@@ -302,7 +302,7 @@ const FacultyModal: React.FC<{ faculty: FacultyMember; onClose: () => void }> = 
             onClick={onClose}
         >
             <div
-                className="relative w-full max-w-xl bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden shadow-2xl mt-16 flex flex-col max-h-[85vh]"
+                className="relative w-full max-w-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden shadow-2xl mt-16 flex flex-col max-h-[85vh]"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Top gradient banner */}
@@ -314,7 +314,7 @@ const FacultyModal: React.FC<{ faculty: FacultyMember; onClose: () => void }> = 
                 {/* Close button — pinned outside the scroll area */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-20 p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                    className="absolute top-4 right-4 z-20 p-1.5 rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -413,7 +413,7 @@ const FacultyModal: React.FC<{ faculty: FacultyMember; onClose: () => void }> = 
                     </div>
 
                     {/* Profile links */}
-                    <div className="flex flex-wrap gap-3 pt-5 border-t border-gray-800">
+                    <div className="flex flex-wrap gap-3 pt-5 border-t border-gray-100 dark:border-gray-800/80">
                         {faculty.linkedinUrl && (
                             <a
                                 href={faculty.linkedinUrl}
@@ -542,7 +542,7 @@ const FacultyPage: React.FC = () => {
                         placeholder="Search by name, subject, or research area…"
                         value={query}
                         onChange={e => setQuery(e.target.value)}
-                        className="w-full bg-gray-900 border border-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 placeholder-gray-600 transition"
+                        className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500 placeholder-gray-400 dark:placeholder-gray-600 transition"
                     />
                 </div>
 
@@ -570,7 +570,7 @@ const FacultyPage: React.FC = () => {
 
             {/* ── Result count ────────────────────────────────────────────── */}
             <p className="text-sm text-gray-500">
-                Showing <span className="text-gray-300 font-semibold">{filtered.length}</span> faculty member{filtered.length !== 1 ? 's' : ''}
+                Showing <span className="text-gray-700 dark:text-gray-300 font-semibold">{filtered.length}</span> faculty member{filtered.length !== 1 ? 's' : ''}
             </p>
 
             {/* ── Faculty List ─────────────────────────────────────────────── */}
@@ -581,10 +581,10 @@ const FacultyPage: React.FC = () => {
                     ))}
                 </div>
             ) : (
-                <div className="py-20 text-center">
-                    <ExternalLink className="w-10 h-10 text-gray-700 mx-auto mb-4" />
-                    <p className="text-gray-400 font-medium">No faculty members match your search.</p>
-                    <p className="text-gray-600 text-sm mt-1">Try adjusting the search query or filters.</p>
+                <div className="py-20 text-center border border-gray-200 dark:border-gray-800 rounded-3xl bg-gray-50 dark:bg-gray-900/40">
+                    <ExternalLink className="w-10 h-10 text-gray-400 dark:text-gray-700 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">No faculty members match your search.</p>
+                    <p className="text-gray-400 dark:text-gray-600 text-sm mt-1">Try adjusting the search query or filters.</p>
                 </div>
             )}
 

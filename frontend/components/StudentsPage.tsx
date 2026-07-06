@@ -205,7 +205,7 @@ const SectionPanel: React.FC<{ section: string; students: Student[]; onSelect: (
             <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider">
                 Section {section}
             </h3>
-            <div className="flex-1 h-px bg-gray-800" />
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
             <span className="text-[11px] text-gray-600 font-mono">{students.length} students</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -458,7 +458,7 @@ const StudentsPage: React.FC = () => {
                             key={b}
                             onClick={() => setBatchFilter(b)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${batchFilter === b
-                                ? 'bg-cyan-600 text-white'
+                                ? 'bg-cyan-600 text-slate-50'
                                 : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-cyan-500/40 hover:text-gray-200'
                                 }`}
                         >
@@ -475,7 +475,7 @@ const StudentsPage: React.FC = () => {
                             key={sec}
                             onClick={() => setSectionFilter(sec)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${sectionFilter === sec
-                                ? 'bg-cyan-600 text-white'
+                                ? 'bg-cyan-600 text-slate-50'
                                 : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-cyan-500/40 hover:text-gray-200'
                                 }`}
                         >

@@ -558,7 +558,7 @@ const BlogPage: React.FC = () => {
           {(role === 'author' || role === 'admin') ? (
             <button
               onClick={handleWriteForUs}
-              className="block w-full text-center text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg px-3 py-2 transition-colors"
+              className="block w-full text-center text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-lg px-3 py-2 transition-colors"
             >
               Go to Dashboard →
             </button>

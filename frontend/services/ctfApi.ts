@@ -234,6 +234,10 @@ export interface ApiProject {
   featured: boolean;
   imageUrl?: string;
   contributors: string[];
+  techStack?: string[];
+  demoVideoUrl?: string;
+  reportUrl?: string;
+  projectType?: 'Final Year' | 'Semester' | 'Hackathon' | 'Research' | 'Tool' | 'Other';
   createdAt: string;
   updatedAt: string;
 }
@@ -348,7 +352,14 @@ export interface ApiRoadmap {
 
 // ─── Content Fetch Functions ──────────────────────────────────────────────────
 
-export const getProjects = (params?: { featured?: boolean; category?: string }) => {
+export const getProjects = (params?: {
+  featured?: boolean;
+  category?: string;
+  projectType?: string;
+  techStack?: string;
+  year?: string;
+  search?: string;
+}) => {
   const qs = new URLSearchParams(
     Object.fromEntries(
       Object.entries(params ?? {})
@@ -360,6 +371,7 @@ export const getProjects = (params?: { featured?: boolean; category?: string }) 
     json<ApiProject[]>(r)
   );
 };
+
 
 export const getProject = (id: string) =>
   fetch(`${BASE}/api/projects/${id}`).then((r) => json<ApiProject>(r));

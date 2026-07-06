@@ -341,7 +341,7 @@ const TopicsPanel: React.FC = () => {
         </h2>
         <div className="flex gap-2">
           <button onClick={load} className="p-2.5 transition-all rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800"><RefreshCw className="w-4 h-4" /></button>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-semibold transition-colors"><Plus className="w-4 h-4" /> New Topic</button>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors"><Plus className="w-4 h-4" /> New Topic</button>
         </div>
       </div>
 
@@ -374,7 +374,7 @@ const TopicsPanel: React.FC = () => {
             </select>
           </div>
           <div className="flex gap-2">
-            <button onClick={handleSave} disabled={saving || !form.title.trim()} className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+            <button onClick={handleSave} disabled={saving || !form.title.trim()} className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
             </button>
             <button onClick={() => setShowForm(false)} className="px-4 py-2 rounded-xl text-sm bg-gray-800 border border-gray-700 text-white">Cancel</button>
@@ -414,19 +414,22 @@ const TopicsPanel: React.FC = () => {
 
 // ─── Panel: Content Review ────────────────────────────────────────────────────
 
-const ArticlePreviewModal: React.FC<{ article: any; onClose: () => void }> = ({ article, onClose }) => (
-  <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div className="bg-gray-950 border border-gray-700 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-        <h2 className="font-bold text-white truncate">{article.title}</h2>
-        <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
-      </div>
-      <div className="flex-1 overflow-y-auto p-6" data-color-mode="dark">
-        <NovelRenderer content={article.content} contentType={article.contentType ?? 'markdown'} />
+const ArticlePreviewModal: React.FC<{ article: any; onClose: () => void }> = ({ article, onClose }) => {
+  const { theme } = useTheme();
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-gray-950 border border-gray-700 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+          <h2 className="font-bold text-white truncate">{article.title}</h2>
+          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6" data-color-mode={theme}>
+          <NovelRenderer content={article.content} contentType={article.contentType ?? 'markdown'} />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TIME_RANGES = [
   { label: 'All time',    value: '' },

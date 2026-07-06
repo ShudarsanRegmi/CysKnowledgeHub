@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApiAchievement } from '../services/ctfApi';
 import { Trophy, Users, ExternalLink, Calendar, Shield } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Props {
   achievement: ApiAchievement;
@@ -16,6 +17,7 @@ const HolographicAchievementCard: React.FC<Props> = ({
   rowSpan = 1 
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const { theme } = useTheme();
 
   const categoryColors = {
     Hackathon: 'text-purple-400',
@@ -42,16 +44,20 @@ const HolographicAchievementCard: React.FC<Props> = ({
     >
       {/* Holographic Card */}
       <div
-        className={`relative h-full bg-gray-900/40 backdrop-blur-md rounded-2xl overflow-hidden
+        className={`relative h-full bg-white dark:bg-gray-900/40 backdrop-blur-md rounded-2xl overflow-hidden
           border transition-all duration-500 ${
             isHovered 
               ? 'border-cyan-500/60 shadow-[0_0_30px_rgba(6,182,212,0.4)] scale-[1.02]' 
-              : 'border-gray-800'
+              : 'border-gray-200 dark:border-gray-800'
           } ${isPodium ? 'shadow-[0_0_30px_rgba(6,182,212,0.3)]' : ''}`}
         style={{
           background: isHovered 
-            ? 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(17,24,39,0.8) 100%)'
-            : 'rgba(17, 24, 39, 0.4)'
+            ? (theme === 'light'
+                ? 'linear-gradient(135deg, rgba(6,182,212,0.1) 0%, rgba(255,255,255,0.95) 100%)'
+                : 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(17,24,39,0.8) 100%)')
+            : (theme === 'light'
+                ? 'rgba(255, 255, 255, 0.7)'
+                : 'rgba(17, 24, 39, 0.4)')
         }}
       >
         {/* Scanning Line Animation */}
@@ -79,7 +85,11 @@ const HolographicAchievementCard: React.FC<Props> = ({
           />
           
           {/* Top Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-transparent to-gray-900/90" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${
+            theme === 'light'
+              ? 'from-white/40 via-transparent to-white/95'
+              : 'from-gray-900/60 via-transparent to-gray-900/95'
+          }`} />
           
           {/* Rank Badge - Top Right with Medal Shield */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -89,13 +99,13 @@ const HolographicAchievementCard: React.FC<Props> = ({
                 <Shield className="w-5 h-5 text-gray-900" />
               </div>
             </div>
-            <div className="bg-gray-900/90 backdrop-blur-sm text-cyan-400 px-3 py-1 rounded-full font-mono font-bold text-xs border border-cyan-500/30">
+            <div className="bg-white/95 dark:bg-gray-900/90 backdrop-blur-sm text-cyan-600 dark:text-cyan-400 px-3 py-1 rounded-full font-mono font-bold text-xs border border-cyan-500/30">
               {achievement.rank.toUpperCase()}
             </div>
           </div>
 
           {/* Category Badge - Top Left */}
-          <div className={`absolute top-4 left-4 ${categoryColors[achievement.category]} font-mono text-xs font-bold bg-gray-900/90 backdrop-blur-sm px-3 py-1 rounded border border-current/30`}>
+          <div className={`absolute top-4 left-4 ${categoryColors[achievement.category]} font-mono text-xs font-bold bg-white/95 dark:bg-gray-900/90 backdrop-blur-sm px-3 py-1 rounded border border-current/30`}>
             {categoryShort[achievement.category]}
           </div>
         </div>
@@ -105,21 +115,21 @@ const HolographicAchievementCard: React.FC<Props> = ({
           <div className="flex-1">
             {/* Title & Event */}
             <div className="mb-3">
-              <h3 className="text-lg font-bold text-white mb-1 line-clamp-2 group-hover:text-cyan-300 transition-colors">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">
                 {achievement.title}
               </h3>
-              <p className="text-sm text-gray-400 italic line-clamp-1">{achievement.eventName}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 italic line-clamp-1">{achievement.eventName}</p>
             </div>
 
             {/* Students */}
             <div className="flex items-start gap-2 mb-3">
               <div className="relative mt-1">
                 <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-sm" />
-                <Users className="relative w-4 h-4 text-cyan-400" />
+                <Users className="relative w-4 h-4 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div className="flex-1">
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 font-mono">SQUAD</div>
-                <div className="text-sm text-gray-300 line-clamp-1">
+                <div className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 font-mono">SQUAD</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-1">
                   {achievement.students.join(' • ')}
                 </div>
               </div>
@@ -127,15 +137,15 @@ const HolographicAchievementCard: React.FC<Props> = ({
 
             {/* Description - Only show on larger cards */}
             {rowSpan === 2 && (
-              <p className="text-gray-400 text-sm leading-relaxed line-clamp-3 mb-3">
+              <p className="text-gray-650 dark:text-gray-400 text-sm leading-relaxed line-clamp-3 mb-3">
                 {achievement.description}
               </p>
             )}
           </div>
 
           {/* Tech-Style Metadata Footer */}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-800/50">
-            <div className="flex items-center gap-3 text-[10px] font-mono text-gray-500">
+          <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-800/50">
+            <div className="flex items-center gap-3 text-[10px] font-mono text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 <span>[{achievement.date.toUpperCase()}]</span>

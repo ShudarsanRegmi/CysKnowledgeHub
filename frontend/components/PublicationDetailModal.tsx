@@ -50,17 +50,17 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
         role="dialog"
         aria-modal="true"
         aria-labelledby="publication-dialog-title"
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-auto bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl"
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl"
       >
-        <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-md border-b border-gray-800 p-5 flex items-start justify-between gap-4">
+        <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 p-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-2">{publication.kind}</p>
-            <h2 id="publication-dialog-title" className="text-xl md:text-2xl font-bold text-white leading-tight">{publication.title}</h2>
+            <p className="text-xs uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold mb-2">{publication.kind}</p>
+            <h2 id="publication-dialog-title" className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">{publication.title}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Close publication details"
           >
             <X className="w-5 h-5" />
@@ -98,18 +98,18 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-2">Abstract</h3>
-            <p className="text-gray-300 leading-relaxed text-sm">{publication.abstract}</p>
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-2">Abstract</h3>
+            <p className="text-gray-750 dark:text-gray-300 leading-relaxed text-sm">{publication.abstract}</p>
           </div>
 
           {publication.keywords && publication.keywords.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-2 inline-flex items-center gap-1">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-2 inline-flex items-center gap-1">
                 <Tag className="w-4 h-4 text-gray-500" /> Keywords
               </h3>
               <div className="flex flex-wrap gap-2">
                 {publication.keywords.map((keyword) => (
-                  <span key={keyword} className="text-xs px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-200">
+                  <span key={keyword} className="text-xs px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-800 dark:text-cyan-200">
                     {keyword}
                   </span>
                 ))}
@@ -123,7 +123,7 @@ const PublicationDetailModal: React.FC<PublicationDetailModalProps> = ({ publica
                 href={publicationLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-50 text-sm font-semibold transition-colors"
               >
                 View Publication
                 <ExternalLink className="w-4 h-4" />

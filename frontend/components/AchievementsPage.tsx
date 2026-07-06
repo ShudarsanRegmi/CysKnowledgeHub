@@ -36,7 +36,7 @@ const AchievementsPage: React.FC = () => {
       {loading && <div className="text-center text-gray-400 py-10">Loading achievements…</div>}
       {/* Header */}
       <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-700">
-        <h1 className="text-4xl font-bold text-white transition-all duration-500 hover:text-cyan-400">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white transition-all duration-500 hover:text-cyan-600 dark:hover:text-cyan-400">
           Field Victories
         </h1>
         <div className="w-16 h-1 bg-cyan-500 rounded-full transition-all duration-500 hover:w-24"></div>
@@ -53,8 +53,8 @@ const AchievementsPage: React.FC = () => {
             onClick={() => setSelectedType(type)}
             className={`px-5 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
               selectedType === type
-                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
-                : 'bg-gray-900/40 text-gray-400 border border-gray-800 hover:border-cyan-500/50 hover:text-white hover:shadow-md hover:shadow-cyan-500/10'
+                ? 'bg-cyan-600 dark:bg-cyan-600 text-slate-50 shadow-lg shadow-cyan-500/30'
+                : 'bg-gray-100 dark:bg-gray-900/40 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-800 hover:border-cyan-500/50 hover:text-cyan-700 dark:hover:text-white hover:shadow-md hover:shadow-cyan-500/10'
             }`}
           >
             {type}

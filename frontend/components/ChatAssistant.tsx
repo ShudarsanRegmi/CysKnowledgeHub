@@ -50,7 +50,7 @@ const ChatAssistant: React.FC = () => {
             {messages.map((m, idx) => (
               <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${m.role === 'user'
-                    ? 'bg-cyan-600 text-white rounded-br-none'
+                    ? 'bg-cyan-600 text-slate-50 rounded-br-none'
                     : 'bg-gray-800 text-gray-200 border border-gray-700 rounded-bl-none'
                   }`}>
                   {m.text}
@@ -77,7 +77,7 @@ const ChatAssistant: React.FC = () => {
             />
             <button
               onClick={handleSend}
-              className="bg-cyan-600 hover:bg-cyan-500 p-2 rounded-full transition-colors disabled:opacity-50"
+              className="bg-cyan-600 hover:bg-cyan-500 text-slate-50 p-2 rounded-full transition-colors disabled:opacity-50"
               disabled={loading}
             >
               <Send className="w-4 h-4" />
@@ -87,7 +87,7 @@ const ChatAssistant: React.FC = () => {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-cyan-600 hover:bg-cyan-500 p-4 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
+          className="bg-cyan-600 hover:bg-cyan-500 text-slate-50 p-4 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
         >
           <MessageSquare className="w-6 h-6" />
         </button>

@@ -78,9 +78,9 @@ const PublicationsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <header className="space-y-3">
-        <h1 className="text-4xl font-bold text-white">Student Publications</h1>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Student Publications</h1>
         <div className="w-20 h-1 bg-cyan-500 rounded-full" />
-        <p className="text-gray-400 max-w-3xl">
+        <p className="text-gray-600 dark:text-gray-400 max-w-3xl">
           A year-wise timeline of student scholarly output across conferences, journals, patents, and research showcases.
         </p>
       </header>
@@ -110,13 +110,13 @@ const PublicationsPage: React.FC = () => {
 
               return (
                 <section key={year} className="relative">
-                  <div className="md:absolute md:left-0 md:top-1.5 hidden md:flex w-8 h-8 rounded-full border border-cyan-500/40 bg-gray-950 items-center justify-center">
-                    <BookOpenText className="w-4 h-4 text-cyan-400" />
+                  <div className="md:absolute md:left-0 md:top-1.5 hidden md:flex w-8 h-8 rounded-full border border-cyan-500/40 bg-white dark:bg-gray-950 items-center justify-center">
+                    <BookOpenText className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                   </div>
 
-                  <div className="md:ml-12 mb-4 flex items-end justify-between gap-4 border-b border-gray-800 pb-2">
-                    <h2 className="text-2xl font-bold text-cyan-300">{year}</h2>
-                    <p className="text-sm text-gray-400">
+                  <div className="md:ml-12 mb-4 flex items-end justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-2">
+                    <h2 className="text-2xl font-bold text-cyan-700 dark:text-cyan-300">{year}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {publications.length} publication{publications.length > 1 ? 's' : ''}
                     </p>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, BookOpen, Briefcase, Flag, Users, Star, Sun, Code, Trophy, Music, ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type Category = 'academic' | 'social' | 'sports';
 
@@ -105,6 +106,7 @@ const catmullRom2bezier = (points: { x: number, y: number }[]) => {
 // SVG Path rendering component for glowing, animated ribbon
 const WindingPath = ({ points }: { points: { x: number, y: number }[] }) => {
     const d = catmullRom2bezier(points);
+    const { theme } = useTheme();
 
     return (
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
@@ -130,8 +132,8 @@ const WindingPath = ({ points }: { points: { x: number, y: number }[] }) => {
             </defs>
 
             {/* Dimmed static background path */}
-            <path d={d} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-            <path d={d} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="2" filter="url(#heavyGlow)" />
+            <path d={d} fill="none" stroke={theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'} strokeWidth="0.8" />
+            <path d={d} fill="none" stroke={theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)'} strokeWidth="2" filter="url(#heavyGlow)" />
 
             {/* Animated glowing streak */}
             <path
@@ -158,6 +160,7 @@ const WindingPath = ({ points }: { points: { x: number, y: number }[] }) => {
 };
 
 const EventsGallery: React.FC = () => {
+    const { theme } = useTheme();
     const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scrollTranslate, setScrollTranslate] = useState(0);
@@ -235,7 +238,7 @@ const EventsGallery: React.FC = () => {
 
     return (
         // The container height is deliberately lengthened so the user has thousands of pixels to scroll vertically!
-        <div ref={containerRef} className="w-full bg-[#050A15] relative font-sans border-t border-white/5" style={{ height: `${canvasWidth * 1.5}px` }}>
+        <div ref={containerRef} className={`w-full relative font-sans border-t transition-colors duration-300 ${theme === 'light' ? 'bg-[#f0f2f5] border-gray-200 text-gray-900' : 'bg-[#050A15] border-white/5 text-white'}`} style={{ height: `${canvasWidth * 1.5}px` }}>
 
             {/* STICKY CONTAINER: Stays frozen under the header while the user scrolls down */}
             <div className="sticky top-[64px] w-full h-[calc(100vh-64px)] overflow-hidden flex flex-col items-center justify-center">
@@ -244,7 +247,9 @@ const EventsGallery: React.FC = () => {
                 <div className="absolute inset-0 pointer-events-none z-0">
                     <div className="absolute inset-0 opacity-[0.15] blueprint-grid"
                         style={{
-                            backgroundImage: 'linear-gradient(rgba(56,189,248,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.5) 1px, transparent 1px)',
+                            backgroundImage: theme === 'light'
+                                ? 'linear-gradient(rgba(8,145,178,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(8,145,178,0.3) 1px, transparent 1px)'
+                                : 'linear-gradient(rgba(56,189,248,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.5) 1px, transparent 1px)',
                             backgroundSize: '100px 100px'
                         }}
                     />
@@ -252,30 +257,30 @@ const EventsGallery: React.FC = () => {
 
                 {/* Modern Header - Top Center */}
                 <div className="absolute top-10 left-1/2 -translate-x-1/2 text-center z-30 w-full pointer-events-none px-4">
-                    <h1 className="text-3xl md:text-5xl font-black text-white tracking-widest uppercase mb-2 drop-shadow-2xl font-sans" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
+                    <h1 className="text-3xl md:text-5xl font-black tracking-widest uppercase mb-2 drop-shadow-2xl font-sans text-gray-900 dark:text-white" style={theme === 'dark' ? { textShadow: '0 4px 20px rgba(0,0,0,0.8)' } : undefined}>
                         Campus Events Constellation
                     </h1>
-                    <p className="text-xs md:text-sm font-bold text-cyan-400 tracking-[0.4em] uppercase">
-                        Explore the Timeline <span className="text-white/50 ml-2">2024-2025</span>
+                    <p className="text-xs md:text-sm font-bold text-cyan-600 dark:text-cyan-400 tracking-[0.4em] uppercase">
+                        Explore the Timeline <span className="text-gray-500 dark:text-white/50 ml-2">2024-2025</span>
                     </p>
                 </div>
 
                 {/* Legend - Top Left */}
-                <div className="absolute left-8 top-12 z-30 hidden md:flex gap-6 text-[11px] md:text-sm font-bold uppercase tracking-widest text-slate-300">
-                    <div className="flex items-center gap-3 cursor-pointer hover:text-cyan-400 transition-all hover:scale-105">
+                <div className="absolute left-8 top-12 z-30 hidden md:flex gap-6 text-[11px] md:text-sm font-bold uppercase tracking-widest text-gray-600 dark:text-slate-300">
+                    <div className="flex items-center gap-3 cursor-pointer hover:text-cyan-600 dark:hover:text-cyan-400 transition-all hover:scale-105">
                         <div className="w-3 h-3 rounded-full bg-cyan-500 shadow-[0_0_12px_#38bdf8]"></div> Academic
                     </div>
-                    <div className="flex items-center gap-3 cursor-pointer hover:text-amber-400 transition-all hover:scale-105">
+                    <div className="flex items-center gap-3 cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 transition-all hover:scale-105">
                         <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_12px_#fbbf24]"></div> Social
                     </div>
-                    <div className="flex items-center gap-3 cursor-pointer hover:text-emerald-400 transition-all hover:scale-105">
+                    <div className="flex items-center gap-3 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-all hover:scale-105">
                         <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_#34d399]"></div> Sports
                     </div>
                 </div>
 
                 {/* Left indicator text */}
                 <div className="absolute left-8 top-1/2 -translate-y-1/2 z-30 pointer-events-none opacity-50 hidden md:flex items-center gap-4">
-                    <div className="flex flex-col text-[11px] font-bold tracking-[0.3em] uppercase text-cyan-300">
+                    <div className="flex flex-col text-[11px] font-bold tracking-[0.3em] uppercase text-cyan-600 dark:text-cyan-300">
                         <span>Winding</span>
                         <span>Pathway</span>
                     </div>
@@ -319,7 +324,7 @@ const EventsGallery: React.FC = () => {
 
                                     {/* Floating Date Badge (Top left of orb) */}
                                     <div className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-80 group-hover:opacity-100 transition-all duration-300 ${isSelected ? 'opacity-100 -translate-y-2' : ''}`}>
-                                        <p className={`text-xs md:text-sm font-extrabold tracking-[0.2em] uppercase ${cat.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]`}>
+                                        <p className={`text-xs md:text-sm font-extrabold tracking-[0.2em] uppercase ${theme === 'light' ? 'text-cyan-700 font-extrabold' : cat.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]`}>
                                             {event.month}
                                         </p>
                                     </div>
@@ -333,7 +338,7 @@ const EventsGallery: React.FC = () => {
 
                                         {/* Inner glowing bubble */}
                                         <div className={`relative w-16 h-16 md:w-24 md:h-24 rounded-full border-2 flex items-center justify-center 
-                    backdrop-blur-md transition-all duration-500 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.6)]
+                    backdrop-blur-md transition-all duration-500 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.6)]
                     ${cat.border} ${cat.bgOp} 
                     ${isSelected ? `${cat.glow} bg-opacity-40` : 'group-hover:bg-opacity-30 group-hover:scale-[1.05] group-hover:border-white'}`}
                                         >
@@ -345,19 +350,22 @@ const EventsGallery: React.FC = () => {
                                                 <div className={`absolute inset-0 rounded-full ${cat.bg} opacity-40 animate-ping shadow-[0_0_20px_inset]`} style={{ animationDuration: '2.5s' }} />
                                             )}
 
-                                            <event.icon className={`relative z-10 w-7 h-7 md:w-10 md:h-10 ${cat.text} drop-shadow-[0_2px_6px_rgba(0,0,0,1)] transition-transform duration-300 ${isSelected ? 'scale-110 drop-shadow-[0_0_15px_currentColor]' : ''}`} />
+                                            <event.icon className={`relative z-10 w-7 h-7 md:w-10 md:h-10 ${theme === 'light' ? 'text-cyan-700' : cat.text} drop-shadow-[0_2px_6px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_2px_6px_rgba(0,0,0,1)] transition-transform duration-300 ${isSelected ? 'scale-110 drop-shadow-[0_0_15px_currentColor]' : ''}`} />
                                         </div>
 
                                         {/* Small connection dot on the orb edge */}
-                                        <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full ${cat.bg} ring-[3px] ring-[#050A15] z-20 shadow-[0_0_10px_currentColor] ${isSelected ? 'animate-pulse scale-125' : ''}`} />
+                                        <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full ${cat.bg} ring-[3px] ${theme === 'light' ? 'ring-[#f0f2f5]' : 'ring-[#050A15]'} z-20 shadow-[0_0_10px_currentColor] ${isSelected ? 'animate-pulse scale-125' : ''}`} />
                                     </div>
 
                                     {/* Event Title Label */}
                                     <div className={`absolute left-1/2 -translate-x-1/2 mt-4 whitespace-nowrap transition-all duration-500 
                   ${isSelected ? 'translate-y-2' : '-translate-y-1 group-hover:translate-y-0'}
                 `}>
-                                        <p className={`text-xs md:text-sm font-extrabold text-white px-4 py-2 rounded-full backdrop-blur-xl border 
-                    ${isSelected ? `bg-slate-900/95 ${cat.border} shadow-[0_0_20px_rgba(0,0,0,0.8)]` : 'bg-slate-900/70 border-white/20 group-hover:border-white/40 group-hover:bg-slate-800/90'} 
+                                        <p className={`text-xs md:text-sm font-extrabold px-4 py-2 rounded-full backdrop-blur-xl border 
+                    ${theme === 'light'
+                        ? (isSelected ? `bg-white/95 ${cat.border} text-gray-900 shadow-[0_0_20px_rgba(0,0,0,0.15)]` : 'bg-white/70 border-gray-300 text-gray-700 group-hover:border-gray-400 group-hover:bg-white/90')
+                        : (isSelected ? `bg-slate-900/95 ${cat.border} text-white shadow-[0_0_20px_rgba(0,0,0,0.8)]` : 'bg-slate-900/70 border-white/20 text-white group-hover:border-white/40 group-hover:bg-slate-800/90')
+                    } 
                     shadow-xl leading-none`}>
                                             {event.title}
                                         </p>
@@ -371,37 +379,45 @@ const EventsGallery: React.FC = () => {
 
             {/* Floating Detailed Overlay Card (Right Side, absolute to screen) */}
             <div
-                className={`fixed top-[55%] right-4 md:right-10 -translate-y-1/2 w-[340px] md:w-[400px] bg-[#0A1122]/90 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-1.5 shadow-[0_30px_80px_rgba(0,0,0,0.9)] z-[100] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]
+                className={`fixed top-[55%] right-4 md:right-10 -translate-y-1/2 w-[340px] md:w-[400px] backdrop-blur-3xl rounded-[2rem] p-1.5 z-[100] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]
+          ${theme === 'light'
+            ? 'bg-white/90 border border-gray-200 shadow-[0_20px_60px_rgba(0,0,0,0.15)] text-gray-950'
+            : 'bg-[#0A1122]/90 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.9)] text-white'
+          }
           ${selectedEvent ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-full opacity-0 scale-95 pointer-events-none'}
         `}
             >
                 {selectedEvent && (
-                    <div className="bg-gradient-to-b from-white/[0.04] to-transparent rounded-[1.75rem] p-6 h-full relative overflow-hidden ring-1 ring-inset ring-white/10">
+                    <div className={`rounded-[1.75rem] p-6 h-full relative overflow-hidden ring-1 ring-inset ${
+                        theme === 'light'
+                          ? 'bg-gradient-to-b from-gray-50/50 to-transparent ring-gray-200/50'
+                          : 'bg-gradient-to-b from-white/[0.04] to-transparent ring-white/10'
+                      }`}>
                         {/* Ambient inner glow matching category */}
                         <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-25 pointer-events-none transition-colors duration-500" style={{ background: getCatColor(selectedEvent.category).hex }} />
 
                         <div className="relative z-10">
                             {/* Card Header */}
-                            <div className="mb-6 border-b border-white/10 pb-5">
-                                <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wider leading-none mb-4 flex items-start justify-between gap-3">
-                                    <span style={{ textShadow: '0 4px 15px rgba(0,0,0,0.8)' }}>{selectedEvent.title}</span>
-                                    <Sparkles className={`w-6 h-6 flex-shrink-0 mt-1 ${getCatColor(selectedEvent.category).text} animate-pulse`} />
+                            <div className={`mb-6 border-b pb-5 ${theme === 'light' ? 'border-gray-200' : 'border-white/10'}`}>
+                                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-wider leading-none mb-4 flex items-start justify-between gap-3 text-gray-900 dark:text-white">
+                                    <span style={theme === 'dark' ? { textShadow: '0 4px 15px rgba(0,0,0,0.8)' } : undefined}>{selectedEvent.title}</span>
+                                    <Sparkles className={`w-6 h-6 flex-shrink-0 mt-1 ${theme === 'light' ? 'text-cyan-700' : getCatColor(selectedEvent.category).text} animate-pulse`} />
                                 </h3>
 
                                 <div className="space-y-2.5">
-                                    <p className="text-xs md:text-sm font-bold text-slate-300 flex items-center gap-3 uppercase tracking-wider">
-                                        <div className={`p-1.5 rounded-md ${getCatColor(selectedEvent.category).bgOp}`}><Calendar className={`w-3.5 h-3.5 ${getCatColor(selectedEvent.category).text}`} /></div>
+                                    <p className="text-xs md:text-sm font-bold text-gray-750 dark:text-slate-300 flex items-center gap-3 uppercase tracking-wider">
+                                        <div className={`p-1.5 rounded-md ${getCatColor(selectedEvent.category).bgOp}`}><Calendar className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-cyan-700' : getCatColor(selectedEvent.category).text}`} /></div>
                                         {selectedEvent.shortDate}
                                     </p>
-                                    <p className="text-xs md:text-sm font-bold text-slate-400 flex items-center gap-3 uppercase tracking-wider">
-                                        <div className={`p-1.5 rounded-md ${getCatColor(selectedEvent.category).bgOp}`}><MapPin className={`w-3.5 h-3.5 ${getCatColor(selectedEvent.category).text}`} /></div>
+                                    <p className="text-xs md:text-sm font-bold text-gray-600 dark:text-slate-400 flex items-center gap-3 uppercase tracking-wider">
+                                        <div className={`p-1.5 rounded-md ${getCatColor(selectedEvent.category).bgOp}`}><MapPin className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-cyan-700' : getCatColor(selectedEvent.category).text}`} /></div>
                                         {selectedEvent.location}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Card Image */}
-                            <div className="w-full h-52 md:h-60 rounded-2xl overflow-hidden mb-6 relative group ring-1 ring-white/10 shadow-[0_0_20px_inset_rgba(0,0,0,0.5)]">
+                            <div className={`w-full h-52 md:h-60 rounded-2xl overflow-hidden mb-6 relative group ring-1 shadow-[0_0_20px_inset_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_inset_rgba(0,0,0,0.5)] ${theme === 'light' ? 'ring-gray-200/50' : 'ring-white/10'}`}>
                                 <img
                                     key={selectedEvent.id} // Forces re-render/animation on change
                                     src={selectedEvent.image}
@@ -410,10 +426,14 @@ const EventsGallery: React.FC = () => {
                                 />
 
                                 {/* Image Overlay Gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0A1122]/95 via-[#0A1122]/30 to-transparent pointer-events-none" />
+                                <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none ${
+                                    theme === 'light'
+                                      ? 'from-white/95 via-white/30 to-transparent'
+                                      : 'from-[#0A1122]/95 via-[#0A1122]/30 to-transparent'
+                                  }`} />
 
                                 {/* Read More fading text over image */}
-                                <div className="absolute bottom-4 left-4 right-4 text-sm text-slate-200 leading-relaxed font-medium opacity-95 drop-shadow-xl" style={{ textShadow: '0 2px 8px rgba(0,0,0,1)' }}>
+                                <div className="absolute bottom-4 left-4 right-4 text-sm font-medium leading-relaxed text-gray-800 dark:text-slate-200" style={theme === 'dark' ? { textShadow: '0 2px 8px rgba(0,0,0,1)' } : undefined}>
                                     {selectedEvent.description}
                                 </div>
                             </div>
@@ -421,7 +441,7 @@ const EventsGallery: React.FC = () => {
                             {/* Action Buttons */}
                             <div className="flex items-center gap-3">
                                 <button className={`w-full py-4 rounded-xl text-sm font-black text-[#050A15] tracking-[0.2em] uppercase transition-all shadow-xl flex items-center justify-center gap-2 
-                                    ${getCatColor(selectedEvent.category).bg} hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:scale-[1.03] active:scale-[0.97] group`}>
+                                    ${getCatColor(selectedEvent.category).bg} hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] hover:scale-[1.03] active:scale-[0.97] group`}>
                                     RSVP
                                     <ChevronRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
                                 </button>

@@ -59,9 +59,9 @@ const DepartmentGallery: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl p-6 bg-gradient-to-br from-pink-900/6 to-cyan-900/6 border border-white/6">
-        <h1 className="text-3xl font-extrabold">Department Gallery</h1>
-        <p className="text-gray-300 mt-1">A colorful collage of department life — interactive tiles with depth and motion.</p>
+      <header className="rounded-2xl p-6 bg-gray-50 dark:bg-gradient-to-br dark:from-pink-900/6 dark:to-cyan-900/6 border border-gray-200 dark:border-white/5">
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Department Gallery</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-1">A colorful collage of department life — interactive tiles with depth and motion.</p>
       </header>
 
       <section>

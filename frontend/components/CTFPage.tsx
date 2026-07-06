@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   Terminal, BookOpen, Tag, Calendar, User, ChevronRight,
   ArrowLeft, Loader2, AlertCircle, Search, Hash, FileText,
@@ -15,6 +16,7 @@ const ArticleDetail: React.FC<{
   articleSlug: string;
   onBack: () => void;
 }> = ({ topicSlug, articleSlug, onBack }) => {
+  const { theme } = useTheme();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,7 @@ const ArticleDetail: React.FC<{
   );
 
   return (
-    <div className="max-w-3xl mx-auto" data-color-mode="dark">
+    <div className="max-w-3xl mx-auto" data-color-mode={theme}>
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors text-sm mb-6 group"
@@ -98,6 +100,7 @@ const WriteupDetail: React.FC<{
   slug: string;
   onBack: () => void;
 }> = ({ slug, onBack }) => {
+  const { theme } = useTheme();
   const [writeup, setWriteup] = useState<Writeup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +129,7 @@ const WriteupDetail: React.FC<{
   );
 
   return (
-    <div className="max-w-4xl mx-auto" data-color-mode="dark">
+    <div className="max-w-4xl mx-auto" data-color-mode={theme}>
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors text-sm mb-6 group"

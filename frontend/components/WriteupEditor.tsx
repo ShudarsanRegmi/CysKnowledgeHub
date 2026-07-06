@@ -180,7 +180,7 @@ const WriteupEditor: React.FC<WriteupEditorProps> = ({
           <button
             onClick={() => onSubmit(getData())}
             disabled={isSaving || isSubmitting}
-            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-sm font-semibold transition-all"
+            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-all"
           >
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2 inline" />}
             Submit for Review
@@ -264,7 +264,7 @@ const WriteupEditor: React.FC<WriteupEditorProps> = ({
                     <div className="flex gap-2">
                       <button
                         onClick={handleCreateCategory}
-                        className="flex-1 py-1 px-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-[10px] font-bold uppercase transition-colors"
+                        className="flex-1 py-1 px-2 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-lg text-[10px] font-bold uppercase transition-colors"
                       >
                         {creatingCat ? '...' : 'Create'}
                       </button>

@@ -17,6 +17,10 @@ export interface IProject extends Document {
   featured: boolean;
   imageUrl?: string;
   contributors: string[];
+  techStack?: string[];
+  demoVideoUrl?: string;
+  reportUrl?: string;
+  projectType?: 'Final Year' | 'Semester' | 'Hackathon' | 'Research' | 'Tool' | 'Other';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,11 +38,21 @@ const ProjectSchema = new Schema<IProject>(
     featured:     { type: Boolean, default: false },
     imageUrl:     { type: String },
     contributors: [{ type: String }],
+    techStack:    [{ type: String, trim: true }],
+    demoVideoUrl: { type: String },
+    reportUrl:    { type: String },
+    projectType:  {
+      type: String,
+      enum: ['Final Year', 'Semester', 'Hackathon', 'Research', 'Tool', 'Other'],
+    },
   },
   { timestamps: true }
 );
 
 ProjectSchema.index({ categories: 1 });
 ProjectSchema.index({ featured: 1 });
+ProjectSchema.index({ projectType: 1 });
+ProjectSchema.index({ year: -1 });
+ProjectSchema.index({ techStack: 1 });
 
 export const Project = model<IProject>('Project', ProjectSchema);

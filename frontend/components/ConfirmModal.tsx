@@ -35,7 +35,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     danger: {
       icon: 'text-red-400',
       iconBg: isLight ? 'bg-red-100 border-red-300' : 'bg-red-900/30 border-red-700/40',
-      button: isLight ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-600 hover:bg-red-500',
+      button: isLight ? 'bg-red-500 hover:bg-red-600 text-slate-50' : 'bg-red-600 hover:bg-red-500',
       border: isLight ? 'border-red-300' : 'border-red-500/30',
     },
     warning: {

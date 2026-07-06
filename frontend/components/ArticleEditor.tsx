@@ -273,9 +273,7 @@ const ArticleEditor: React.FC<ArticleEditorProps> = ({
               <button
                 onClick={() => onSubmit!(buildData())}
                 disabled={isSubmitting || !title.trim() || !topicId}
-                className={`flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isLight ? 'text-black' : 'text-white'
-                }`}
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {isSubmitting ? 'Submitting…' : 'Submit for Review'}
@@ -363,7 +361,7 @@ const ArticleEditor: React.FC<ArticleEditorProps> = ({
                   <button
                     onClick={handleCreateCategory}
                     disabled={creatingCat || !newCatTitle.trim()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
                   >
                     {creatingCat ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
                     {creatingCat ? 'Creating…' : 'Create'}

@@ -299,7 +299,7 @@ const AuthorDashboard: React.FC = () => {
               setEditingWriteup(null);
               setView(activeTab === 'writeups' ? 'new-writeup' : 'new');
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-cyan-900/20"
+            className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold shadow-lg shadow-cyan-900/20"
           >
             <Plus className="w-4 h-4" />
             New {activeTab === 'writeups' ? 'Writeup' : activeTab === 'blog' ? 'Blog Post' : 'Guide'}

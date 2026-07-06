@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import type { JSONContent } from '@tiptap/react';
+import { useTheme } from '../contexts/ThemeContext';
 
 // ─── Tiptap extensions that match our Novel editor setup ─────────────────────
 const RENDER_EXTENSIONS = [
@@ -89,6 +90,7 @@ const NovelRenderer: React.FC<NovelRendererProps> = ({
   contentType = 'markdown',
   className = '',
 }) => {
+  const { theme } = useTheme();
   const html = useMemo(() => {
     if (contentType !== 'novel') return null;
     try {
@@ -110,10 +112,15 @@ const NovelRenderer: React.FC<NovelRendererProps> = ({
 
   // Fallback: Markdown renderer for legacy content
   return (
-    <div data-color-mode="dark" className={className}>
+    <div data-color-mode={theme} className={className}>
       <MDEditor.Markdown
         source={content}
-        style={{ background: 'transparent', color: '#e5e7eb', fontSize: 15, lineHeight: 1.7 }}
+        style={{
+          background: 'transparent',
+          color: theme === 'light' ? '#111827' : '#e5e7eb',
+          fontSize: 15,
+          lineHeight: 1.7
+        }}
       />
     </div>
   );
