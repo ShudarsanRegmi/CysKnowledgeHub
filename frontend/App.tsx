@@ -16,6 +16,7 @@ import DepartmentGallery from './components/galleries/DepartmentGallery';
 import EventsGallery from './components/galleries/EventsGallery';
 import CTFPage from './components/CTFPage';
 import ResearchLabsPage from './components/ResearchLabsPage';
+import CyberStack from './components/CyberStack';
 import AuthorDashboard from './components/AuthorDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import ProfilePage from './components/ProfilePage';
@@ -469,6 +470,9 @@ const App: React.FC = () => {
 
       case 'research-labs':
         return <ResearchLabsPage />;
+
+      case 'cyberstack':
+        return <CyberStack />;
 
       case 'gallery-department':
         return <DepartmentGallery />;

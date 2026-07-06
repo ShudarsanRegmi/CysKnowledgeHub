@@ -68,6 +68,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         { id: 'students',      label: 'Our Students', icon: Users },
         { id: 'faculty',       label: 'Faculty',           icon: UserCircle },
         { id: 'research-labs', label: 'Research Labs',     icon: Map },
+        { id: 'cyberstack',    label: 'Cyber Stack',       icon: Terminal },
       ],
     },
     {
