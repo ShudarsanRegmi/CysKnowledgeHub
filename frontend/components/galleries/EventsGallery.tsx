@@ -1,486 +1,326 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, BookOpen, Briefcase, Flag, Users, Star, Sun, Code, Trophy, Music, ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  MapPin, BookOpen, Briefcase, Flag, Users, Star, Sun, Code, Trophy, Music,
+  Calendar, Sparkles, ChevronDown, ChevronUp, ExternalLink
+} from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 type Category = 'academic' | 'social' | 'sports';
 
 interface EventData {
-    id: string;
-    title: string;
-    month: string;
-    shortDate: string;
-    location: string;
-    category: Category;
-    x: number;
-    y: number;
-    icon: React.ElementType;
-    description: string;
-    image: string;
+  id: string;
+  title: string;
+  month: string;
+  shortDate: string;
+  location: string;
+  category: Category;
+  icon: React.ElementType;
+  description: string;
+  image: string;
 }
 
 const EVENTS: EventData[] = [
-    {
-        id: 'e1', title: 'Freshman Welcome', month: 'SEPT 2024', shortDate: 'Sept 5 - 7, 2024', location: 'Main Auditorium', category: 'academic', x: 4, y: 65, icon: BookOpen,
-        description: 'Welcome to the academic year! An overview of the curriculum, campus facilities, and a chance to meet the faculty and fellow freshmen.',
-        image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e2', title: 'Campus Tour', month: 'SEPT 2024', shortDate: 'Sept 10, 2024', location: 'Campus Grounds', category: 'social', x: 14, y: 82, icon: MapPin,
-        description: 'Guided exploration of tech labs, student centers, and research facilities. Get familiar with your new home.',
-        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e3', title: 'Career Fair', month: 'OCT 2024', shortDate: 'Oct 12, 2024', location: 'Tech Hall A', category: 'academic', x: 23, y: 40, icon: Briefcase,
-        description: 'Connect with industry leading tech companies and promising startups for exciting placements and internship opportunities.',
-        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e4', title: 'Homecoming Parade', month: 'OCT 2024', shortDate: 'Oct 25, 2024', location: 'University Avenue', category: 'social', x: 30, y: 55, icon: Flag,
-        description: 'The spectacular annual homecoming celebration with alumni and current students. Enjoy floats, marching bands, and festivities.',
-        image: 'https://images.unsplash.com/photo-1561489396-888724a1543d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e5', title: 'Club Festival', month: 'NOV 2024', shortDate: 'Nov 8, 2024', location: 'Student Union', category: 'sports', x: 42, y: 85, icon: Users,
-        description: 'Engage with diverse student organizations, tech clubs, and open-source communities. Find your tribe!',
-        image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e6', title: 'Midterm Studies', month: 'DEC 2024', shortDate: 'Dec 1 - 10, 2024', location: 'Library 24/7 Zone', category: 'academic', x: 51, y: 60, icon: BookOpen,
-        description: 'Intensive peer study sessions and professor review periods before exams. Coffee and snacks provided nightly.',
-        image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e7', title: 'Winter Gala', month: 'DEC 2024', shortDate: 'Dec 15, 2024', location: 'Grand Ballroom', category: 'social', x: 58, y: 42, icon: Star,
-        description: 'A luxurious end of year celebration dinner and networking night under the stars to celebrate the semester’s success.',
-        image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e8', title: 'Spring Open Day', month: 'FEB 2025', shortDate: 'Feb 10, 2025', location: 'Central Quad', category: 'academic', x: 69, y: 78, icon: Sun,
-        description: 'Showcasing the most innovative student projects to the public, press, and prospective students.',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e9', title: 'Hackathon', month: 'MAR 2025', shortDate: 'Mar 5 - 7, 2025', location: 'Innovation Hub', category: 'academic', x: 79, y: 50, icon: Code,
-        description: 'A 48-hour continuous coding marathon. Build, break, and secure systems to win amazing prizes.',
-        image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e10', title: 'Sports Meet', month: 'MAR 2025', shortDate: 'Mar 20 - 22, 2025', location: 'University Stadium', category: 'sports', x: 88, y: 80, icon: Trophy,
-        description: 'Inter-department athletic competitions. Support your department and track medals across all track and field events.',
-        image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    },
-    {
-        id: 'e11', title: 'Spring Music Festival', month: 'APRIL 2025', shortDate: 'April 18-19, 2025', location: 'Student Union Lawn', category: 'social', x: 96, y: 45, icon: Music,
-        description: 'An unforgettable lineup rounding out the year! Enjoy live music across 3 stages, art stations, and vibrant festival nights under the open sky.',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-    }
+  {
+    id: 'e1', title: 'Freshman Welcome', month: 'SEPT 2024', shortDate: 'Sept 5 - 7, 2024', location: 'Main Auditorium', category: 'academic', icon: BookOpen,
+    description: 'Welcome to the academic year! An overview of the curriculum, campus facilities, and a chance to meet the faculty and fellow freshmen.',
+    image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e2', title: 'Campus Tour', month: 'SEPT 2024', shortDate: 'Sept 10, 2024', location: 'Campus Grounds', category: 'social', icon: MapPin,
+    description: 'Guided exploration of tech labs, student centers, and research facilities. Get familiar with your new home.',
+    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e3', title: 'Career Fair', month: 'OCT 2024', shortDate: 'Oct 12, 2024', location: 'Tech Hall A', category: 'academic', icon: Briefcase,
+    description: 'Connect with industry leading tech companies and promising startups for exciting placements and internship opportunities.',
+    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e4', title: 'Homecoming Parade', month: 'OCT 2024', shortDate: 'Oct 25, 2024', location: 'University Avenue', category: 'social', icon: Flag,
+    description: 'The spectacular annual homecoming celebration with alumni and current students. Enjoy floats, marching bands, and festivities.',
+    image: 'https://images.unsplash.com/photo-1561489396-888724a1543d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e5', title: 'Club Festival', month: 'NOV 2024', shortDate: 'Nov 8, 2024', location: 'Student Union', category: 'sports', icon: Users,
+    description: 'Engage with diverse student organizations, tech clubs, and open-source communities. Find your tribe!',
+    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e6', title: 'Midterm Studies', month: 'DEC 2024', shortDate: 'Dec 1 - 10, 2024', location: 'Library 24/7 Zone', category: 'academic', icon: BookOpen,
+    description: 'Intensive peer study sessions and professor review periods before exams. Coffee and snacks provided nightly.',
+    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e7', title: 'Winter Gala', month: 'DEC 2024', shortDate: 'Dec 15, 2024', location: 'Grand Ballroom', category: 'social', icon: Star,
+    description: 'A luxurious end of year celebration dinner and networking night under the stars to celebrate the semester\'s success.',
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e8', title: 'Spring Open Day', month: 'FEB 2025', shortDate: 'Feb 10, 2025', location: 'Central Quad', category: 'academic', icon: Sun,
+    description: 'Showcasing the most innovative student projects to the public, press, and prospective students.',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e9', title: 'Hackathon', month: 'MAR 2025', shortDate: 'Mar 5 - 7, 2025', location: 'Innovation Hub', category: 'academic', icon: Code,
+    description: 'A 48-hour continuous coding marathon. Build, break, and secure systems to win amazing prizes.',
+    image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e10', title: 'Sports Meet', month: 'MAR 2025', shortDate: 'Mar 20 - 22, 2025', location: 'University Stadium', category: 'sports', icon: Trophy,
+    description: 'Inter-department athletic competitions. Support your department and track medals across all track and field events.',
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 'e11', title: 'Spring Music Festival', month: 'APRIL 2025', shortDate: 'April 18-19, 2025', location: 'Student Union Lawn', category: 'social', icon: Music,
+    description: 'An unforgettable lineup rounding out the year! Enjoy live music across 3 stages, art stations, and vibrant festival nights under the open sky.',
+    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+  }
 ];
 
-const getCatColor = (cat: Category) => {
-    switch (cat) {
-        case 'academic': return { hex: '#38bdf8', tw: 'cyan', text: 'text-cyan-400', bg: 'bg-cyan-500', bgOp: 'bg-cyan-500/20', border: 'border-cyan-400', borderOp: 'border-cyan-400/50', glow: 'shadow-[0_0_30px_rgba(56,189,248,0.6)]' };
-        case 'social': return { hex: '#fbbf24', tw: 'amber', text: 'text-amber-400', bg: 'bg-amber-500', bgOp: 'bg-amber-500/20', border: 'border-amber-400', borderOp: 'border-amber-400/50', glow: 'shadow-[0_0_30px_rgba(251,191,36,0.6)]' };
-        case 'sports': return { hex: '#34d399', tw: 'emerald', text: 'text-emerald-400', bg: 'bg-emerald-500', bgOp: 'bg-emerald-500/20', border: 'border-emerald-400', borderOp: 'border-emerald-400/50', glow: 'shadow-[0_0_30px_rgba(52,211,153,0.6)]' };
-    }
-};
-
-const catmullRom2bezier = (points: { x: number, y: number }[]) => {
-    let d = '';
-    for (let i = 0; i < points.length - 1; i++) {
-        const p0 = i === 0 ? points[0] : points[i - 1];
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const p3 = i + 2 < points.length ? points[i + 2] : p2;
-
-        const cp1x = p1.x + (p2.x - p0.x) / 5.5;
-        const cp1y = p1.y + (p2.y - p0.y) / 5.5;
-
-        const cp2x = p2.x - (p3.x - p1.x) / 5.5;
-        const cp2y = p2.y - (p3.y - p1.y) / 5.5;
-
-        d += (i === 0 ? `M ${p1.x},${p1.y} ` : '') + `C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y} `;
-    }
-    return d;
-};
-
-// SVG Path rendering component for glowing, animated ribbon
-const WindingPath = ({ points }: { points: { x: number, y: number }[] }) => {
-    const d = catmullRom2bezier(points);
-    const { theme } = useTheme();
-
-    return (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-            <defs>
-                <linearGradient id="pathGradient" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" />
-                    <stop offset="50%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#34d399" />
-                </linearGradient>
-                <linearGradient id="pathGradientGlow" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="rgba(56,189,248,0.5)" />
-                    <stop offset="50%" stopColor="rgba(251,191,36,0.5)" />
-                    <stop offset="100%" stopColor="rgba(52,211,153,0.5)" />
-                </linearGradient>
-                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="1.5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-                <filter id="heavyGlow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-            </defs>
-
-            {/* Dimmed static background path */}
-            <path d={d} fill="none" stroke={theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'} strokeWidth="0.8" />
-            <path d={d} fill="none" stroke={theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)'} strokeWidth="2" filter="url(#heavyGlow)" />
-
-            {/* Animated glowing streak */}
-            <path
-                d={d}
-                fill="none"
-                stroke="url(#pathGradient)"
-                strokeWidth="0.4"
-                filter="url(#glow)"
-                className="path-animate"
-                strokeDasharray="20 100"
-            />
-
-            {/* Heavy glow underneath */}
-            <path
-                d={d}
-                fill="none"
-                stroke="url(#pathGradient)"
-                strokeWidth="0.1"
-                filter="url(#heavyGlow)"
-                opacity="0.6"
-            />
-        </svg>
-    );
+const CAT_COLORS: Record<Category, { hex: string; text: string; bg: string; bgLight: string; border: string; ring: string; glow: string }> = {
+  academic: {
+    hex: '#38bdf8', text: 'text-cyan-300', bg: 'bg-cyan-500', bgLight: 'bg-cyan-500/15',
+    border: 'border-cyan-500/40', ring: 'ring-cyan-400/30', glow: 'shadow-cyan-500/30'
+  },
+  social: {
+    hex: '#fbbf24', text: 'text-amber-300', bg: 'bg-amber-500', bgLight: 'bg-amber-500/15',
+    border: 'border-amber-500/40', ring: 'ring-amber-400/30', glow: 'shadow-amber-500/30'
+  },
+  sports: {
+    hex: '#34d399', text: 'text-emerald-300', bg: 'bg-emerald-500', bgLight: 'bg-emerald-500/15',
+    border: 'border-emerald-500/40', ring: 'ring-emerald-400/30', glow: 'shadow-emerald-500/30'
+  },
 };
 
 const EventsGallery: React.FC = () => {
-    const { theme } = useTheme();
-    const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [scrollTranslate, setScrollTranslate] = useState(0);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-    // Calculate dynamic canvas width so nodes NEVER clump together when you add more!
-    const canvasWidth = Math.max(2600, EVENTS.length * 300);
+  const toggle = (id: string) => setExpandedId(prev => prev === id ? null : id);
 
-    // Auto-select latest event on mount (removed by request)
+  return (
+    <div className={`w-full min-h-screen transition-colors duration-300 font-sans ${isLight ? 'bg-gradient-to-b from-slate-50 to-white' : 'bg-gradient-to-b from-[#050A15] via-[#070D1A] to-[#050A15]'}`}>
 
-    // 1. SCROLL LISTENER: Translate vertical scroll progress into horizontal track movement
-    useEffect(() => {
-        const handleScroll = () => {
-            if (!containerRef.current) return;
-            const wrap = containerRef.current;
-            const rect = wrap.getBoundingClientRect();
-
-            // The top of the container starts 64px from the viewport (under the header)
-            const scrolledPast = 64 - rect.top;
-            const totalScrollable = wrap.offsetHeight - (window.innerHeight - 64);
-
-            let progress = 0;
-            if (totalScrollable > 0 && scrolledPast > 0) {
-                progress = Math.min(1, scrolledPast / totalScrollable);
-            }
-
-            // Add right padding to allow scrolling past the last element
-            const rightPadding = window.innerWidth / 2;
-            const absoluteTrackWidth = canvasWidth + rightPadding;
-
-            // Subtract inner window width from canvas to find the absolute max pixels we can pan left
-            const maxTranslate = absoluteTrackWidth - window.innerWidth;
-            setScrollTranslate(Math.max(0, progress * maxTranslate));
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        handleScroll(); // Trigger immediately to sync layout
-
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [canvasWidth]);
-
-    // 2. AUTO-PAN LOGIC: When a node is selected, smoothly scroll the window vertically to the correct translation
-    useEffect(() => {
-        if (selectedEvent && containerRef.current) {
-            const wrap = containerRef.current;
-            const totalScrollable = wrap.offsetHeight - (window.innerHeight - 64);
-            if (totalScrollable <= 0) return;
-
-            // Where the node lives horizontally
-            const targetXPixel = (selectedEvent.x / 100) * canvasWidth;
-
-            // The screen space covered by the floating info card
-            const rightPaneWidth = window.innerWidth > 768 ? 440 : 0;
-            const visibleWidth = window.innerWidth - rightPaneWidth;
-
-            const rightPadding = window.innerWidth / 2;
-            const absoluteTrackWidth = canvasWidth + rightPadding;
-            const maxTranslate = absoluteTrackWidth - window.innerWidth;
-            const targetTranslate = targetXPixel - (visibleWidth / 2);
-
-            // Determine what vertical progress percentage translates to this ideal horizontal position
-            let progress = targetTranslate / maxTranslate;
-            progress = Math.max(0, Math.min(1, progress));
-
-            const absoluteWrapTop = window.scrollY + wrap.getBoundingClientRect().top;
-            const targetScrollY = (absoluteWrapTop - 64) + (progress * totalScrollable);
-
-            window.scrollTo({
-                top: targetScrollY,
-                behavior: 'smooth' // Extremely smooth browser-native animation
-            });
-        }
-    }, [selectedEvent, canvasWidth]);
-
-    const pathPoints = EVENTS.map(e => ({ x: e.x, y: e.y }));
-
-    return (
-        // The container height is deliberately lengthened so the user has thousands of pixels to scroll vertically!
-        <div ref={containerRef} className={`w-full relative font-sans border-t transition-colors duration-300 ${theme === 'light' ? 'bg-[#f0f2f5] border-gray-200 text-gray-900' : 'bg-[#050A15] border-white/5 text-white'}`} style={{ height: `${canvasWidth * 1.5}px` }}>
-
-            {/* STICKY CONTAINER: Stays frozen under the header while the user scrolls down */}
-            <div className="sticky top-[64px] w-full h-[calc(100vh-64px)] overflow-hidden flex flex-col items-center justify-center">
-
-                {/* Dark Campus Blueprint Background Overlay */}
-                <div className="absolute inset-0 pointer-events-none z-0">
-                    <div className="absolute inset-0 opacity-[0.15] blueprint-grid"
-                        style={{
-                            backgroundImage: theme === 'light'
-                                ? 'linear-gradient(rgba(8,145,178,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(8,145,178,0.3) 1px, transparent 1px)'
-                                : 'linear-gradient(rgba(56,189,248,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.5) 1px, transparent 1px)',
-                            backgroundSize: '100px 100px'
-                        }}
-                    />
-                </div>
-
-                {/* Modern Header - Top Center */}
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 text-center z-30 w-full pointer-events-none px-4">
-                    <h1 className="text-3xl md:text-5xl font-black tracking-widest uppercase mb-2 drop-shadow-2xl font-sans text-gray-900 dark:text-white" style={theme === 'dark' ? { textShadow: '0 4px 20px rgba(0,0,0,0.8)' } : undefined}>
-                        Campus Events Constellation
-                    </h1>
-                    <p className="text-xs md:text-sm font-bold text-cyan-600 dark:text-cyan-400 tracking-[0.4em] uppercase">
-                        Explore the Timeline <span className="text-gray-500 dark:text-white/50 ml-2">2024-2025</span>
-                    </p>
-                </div>
-
-                {/* Legend - Top Left */}
-                <div className="absolute left-8 top-12 z-30 hidden md:flex gap-6 text-[11px] md:text-sm font-bold uppercase tracking-widest text-gray-600 dark:text-slate-300">
-                    <div className="flex items-center gap-3 cursor-pointer hover:text-cyan-600 dark:hover:text-cyan-400 transition-all hover:scale-105">
-                        <div className="w-3 h-3 rounded-full bg-cyan-500 shadow-[0_0_12px_#38bdf8]"></div> Academic
-                    </div>
-                    <div className="flex items-center gap-3 cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 transition-all hover:scale-105">
-                        <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_12px_#fbbf24]"></div> Social
-                    </div>
-                    <div className="flex items-center gap-3 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-all hover:scale-105">
-                        <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_#34d399]"></div> Sports
-                    </div>
-                </div>
-
-                {/* Left indicator text */}
-                <div className="absolute left-8 top-1/2 -translate-y-1/2 z-30 pointer-events-none opacity-50 hidden md:flex items-center gap-4">
-                    <div className="flex flex-col text-[11px] font-bold tracking-[0.3em] uppercase text-cyan-600 dark:text-cyan-300">
-                        <span>Winding</span>
-                        <span>Pathway</span>
-                    </div>
-                    <div className="w-12 h-px bg-cyan-500/50" />
-                </div>
-
-                {/* The Horizontally Translating Canvas */}
-                <div
-                    className="absolute top-0 bottom-0 left-0 transition-transform duration-[400ms] ease-out flex items-center pr-[50vw]"
-                    style={{
-                        transform: `translate3d(${-scrollTranslate}px, 0, 0)`
-                    }}
-                >
-                    <div className="h-full relative mx-auto my-auto min-h-[650px] flex items-center object-contain" style={{ width: `${canvasWidth}px` }}>
-
-                        <WindingPath points={pathPoints} />
-
-                        {/* Connective background glows for each node */}
-                        {EVENTS.map((e, i) => (
-                            <div key={`ambient-${i}`} className="absolute blur-[100px] w-56 h-56 rounded-full pointer-events-none opacity-[0.25]"
-                                style={{ left: `${e.x}%`, top: `${e.y}%`, background: getCatColor(e.category).hex, transform: 'translate(-50%, -50%)' }} />
-                        ))}
-
-                        {/* Map Nodes */}
-                        {EVENTS.map((event) => {
-                            const cat = getCatColor(event.category);
-                            const isSelected = selectedEvent?.id === event.id;
-
-                            return (
-                                <button
-                                    key={event.id}
-                                    onClick={() => setSelectedEvent(event)}
-                                    className={`absolute group z-20 focus:outline-none transition-all duration-500 ease-out 
-                  ${isSelected ? 'z-50' : 'hover:z-40'}`}
-                                    style={{
-                                        left: `${event.x}%`,
-                                        top: `${event.y}%`,
-                                        transform: `translate(-50%, -50%) ${isSelected ? 'scale(1.2)' : 'scale(1)'}`
-                                    }}
-                                >
-
-                                    {/* Floating Date Badge (Top left of orb) */}
-                                    <div className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-80 group-hover:opacity-100 transition-all duration-300 ${isSelected ? 'opacity-100 -translate-y-2' : ''}`}>
-                                        <p className={`text-xs md:text-sm font-extrabold tracking-[0.2em] uppercase ${theme === 'light' ? 'text-cyan-700 font-extrabold' : cat.text} drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]`}>
-                                            {event.month}
-                                        </p>
-                                    </div>
-
-                                    {/* Main Orb */}
-                                    <div className="relative">
-                                        {/* Outer glowing ring */}
-                                        <div className={`absolute inset-[-10px] rounded-full border border-white/20 transition-all duration-500 
-                    ${isSelected ? `opacity-100 rotate-180 scale-100 ${cat.borderOp} shadow-[0_0_30px_rgba(255,255,255,0.1)]` : 'opacity-0 scale-90 group-hover:scale-95 group-hover:opacity-50'}`}
-                                        />
-
-                                        {/* Inner glowing bubble */}
-                                        <div className={`relative w-16 h-16 md:w-24 md:h-24 rounded-full border-2 flex items-center justify-center 
-                    backdrop-blur-md transition-all duration-500 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.6)]
-                    ${cat.border} ${cat.bgOp} 
-                    ${isSelected ? `${cat.glow} bg-opacity-40` : 'group-hover:bg-opacity-30 group-hover:scale-[1.05] group-hover:border-white'}`}
-                                        >
-                                            {/* Glass reflection effect */}
-                                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent opacity-60 rounded-full" />
-
-                                            {/* Pulsing inner glow for selected */}
-                                            {isSelected && (
-                                                <div className={`absolute inset-0 rounded-full ${cat.bg} opacity-40 animate-ping shadow-[0_0_20px_inset]`} style={{ animationDuration: '2.5s' }} />
-                                            )}
-
-                                            <event.icon className={`relative z-10 w-7 h-7 md:w-10 md:h-10 ${theme === 'light' ? 'text-cyan-700' : cat.text} drop-shadow-[0_2px_6px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_2px_6px_rgba(0,0,0,1)] transition-transform duration-300 ${isSelected ? 'scale-110 drop-shadow-[0_0_15px_currentColor]' : ''}`} />
-                                        </div>
-
-                                        {/* Small connection dot on the orb edge */}
-                                        <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full ${cat.bg} ring-[3px] ${theme === 'light' ? 'ring-[#f0f2f5]' : 'ring-[#050A15]'} z-20 shadow-[0_0_10px_currentColor] ${isSelected ? 'animate-pulse scale-125' : ''}`} />
-                                    </div>
-
-                                    {/* Event Title Label */}
-                                    <div className={`absolute left-1/2 -translate-x-1/2 mt-4 whitespace-nowrap transition-all duration-500 
-                  ${isSelected ? 'translate-y-2' : '-translate-y-1 group-hover:translate-y-0'}
-                `}>
-                                        <p className={`text-xs md:text-sm font-extrabold px-4 py-2 rounded-full backdrop-blur-xl border 
-                    ${theme === 'light'
-                        ? (isSelected ? `bg-white/95 ${cat.border} text-gray-900 shadow-[0_0_20px_rgba(0,0,0,0.15)]` : 'bg-white/70 border-gray-300 text-gray-700 group-hover:border-gray-400 group-hover:bg-white/90')
-                        : (isSelected ? `bg-slate-900/95 ${cat.border} text-white shadow-[0_0_20px_rgba(0,0,0,0.8)]` : 'bg-slate-900/70 border-white/20 text-white group-hover:border-white/40 group-hover:bg-slate-800/90')
-                    } 
-                    shadow-xl leading-none`}>
-                                            {event.title}
-                                        </p>
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
+      {/* ─── Hero Header ───────────────────────────────────────────── */}
+      <div className={`relative overflow-hidden border-b ${isLight ? 'border-gray-200' : 'border-white/5'}`}>
+        {/* Grid background */}
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(rgba(56,189,248,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.5) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px'
+          }} />
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 relative">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className={`inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest mb-4 px-3 py-1.5 rounded-full border ${isLight ? 'text-cyan-700 bg-cyan-50 border-cyan-300' : 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20'}`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                Academic Year 2024-2025
+              </div>
+              <h1 className={`text-4xl md:text-6xl font-black tracking-tight leading-none ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                Event <span className="text-cyan-500">Timeline</span>
+              </h1>
+              <p className={`mt-3 text-sm md:text-base max-w-xl ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+                Explore the year&aposs key moments — from freshman orientation to the spring music festival.
+              </p>
             </div>
 
-            {/* Floating Detailed Overlay Card (Right Side, absolute to screen) */}
-            <div
-                className={`fixed top-[55%] right-4 md:right-10 -translate-y-1/2 w-[340px] md:w-[400px] backdrop-blur-3xl rounded-[2rem] p-1.5 z-[100] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]
-          ${theme === 'light'
-            ? 'bg-white/90 border border-gray-200 shadow-[0_20px_60px_rgba(0,0,0,0.15)] text-gray-950'
-            : 'bg-[#0A1122]/90 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.9)] text-white'
-          }
-          ${selectedEvent ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-full opacity-0 scale-95 pointer-events-none'}
-        `}
-            >
-                {selectedEvent && (
-                    <div className={`rounded-[1.75rem] p-6 h-full relative overflow-hidden ring-1 ring-inset ${
-                        theme === 'light'
-                          ? 'bg-gradient-to-b from-gray-50/50 to-transparent ring-gray-200/50'
-                          : 'bg-gradient-to-b from-white/[0.04] to-transparent ring-white/10'
-                      }`}>
-                        {/* Ambient inner glow matching category */}
-                        <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-25 pointer-events-none transition-colors duration-500" style={{ background: getCatColor(selectedEvent.category).hex }} />
+            {/* Legend */}
+            <div className={`flex gap-5 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+              {(Object.entries(CAT_COLORS) as [Category, typeof CAT_COLORS[Category]][]).map(([key, c]) => (
+                <div key={key} className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                  <div className={`w-2.5 h-2.5 rounded-full ${c.bg}`} />
+                  {key}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
-                        <div className="relative z-10">
-                            {/* Card Header */}
-                            <div className={`mb-6 border-b pb-5 ${theme === 'light' ? 'border-gray-200' : 'border-white/10'}`}>
-                                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-wider leading-none mb-4 flex items-start justify-between gap-3 text-gray-900 dark:text-white">
-                                    <span style={theme === 'dark' ? { textShadow: '0 4px 15px rgba(0,0,0,0.8)' } : undefined}>{selectedEvent.title}</span>
-                                    <Sparkles className={`w-6 h-6 flex-shrink-0 mt-1 ${theme === 'light' ? 'text-cyan-700' : getCatColor(selectedEvent.category).text} animate-pulse`} />
-                                </h3>
+      {/* ─── Timeline Tree ─────────────────────────────────────────── */}
+      <div className="max-w-5xl mx-auto px-4 py-12 md:py-20 relative">
 
-                                <div className="space-y-2.5">
-                                    <p className="text-xs md:text-sm font-bold text-gray-750 dark:text-slate-300 flex items-center gap-3 uppercase tracking-wider">
-                                        <div className={`p-1.5 rounded-md ${getCatColor(selectedEvent.category).bgOp}`}><Calendar className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-cyan-700' : getCatColor(selectedEvent.category).text}`} /></div>
-                                        {selectedEvent.shortDate}
-                                    </p>
-                                    <p className="text-xs md:text-sm font-bold text-gray-600 dark:text-slate-400 flex items-center gap-3 uppercase tracking-wider">
-                                        <div className={`p-1.5 rounded-md ${getCatColor(selectedEvent.category).bgOp}`}><MapPin className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-cyan-700' : getCatColor(selectedEvent.category).text}`} /></div>
-                                        {selectedEvent.location}
-                                    </p>
-                                </div>
+        {/* Centre line (tree trunk) - hidden on mobile, use left line instead */}
+        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2">
+          <div className={`h-full w-full ${isLight ? 'bg-gradient-to-b from-cyan-300/50 via-gray-300 to-cyan-300/50' : 'bg-gradient-to-b from-cyan-500/30 via-white/10 to-cyan-500/30'}`} />
+          {/* Glow on line */}
+          <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full blur-sm ${isLight ? 'bg-cyan-300/20' : 'bg-cyan-500/20'}`} />
+        </div>
+
+        {/* Mobile: left-aligned trunk */}
+        <div className="md:hidden absolute left-[18px] top-0 bottom-0 w-px">
+          <div className={`h-full w-full ${isLight ? 'bg-gradient-to-b from-cyan-300/70 via-gray-300 to-cyan-300/70' : 'bg-gradient-to-b from-cyan-500/40 via-white/10 to-cyan-500/40'}`} />
+        </div>
+
+        <div className="relative space-y-8 md:space-y-16">
+
+          {EVENTS.map((event, i) => {
+            const cat = CAT_COLORS[event.category];
+            const isExpanded = expandedId === event.id;
+            const isLeft = i % 2 === 0;
+
+            return (
+              <div key={event.id} className="relative">
+
+                {/* Mobile layout */}
+                <div className="md:hidden">
+                  <div className="flex items-start gap-4 pl-10">
+                    {/* Node circle */}
+                    <button
+                      onClick={() => toggle(event.id)}
+                      className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                        ${isExpanded
+                          ? `${cat.bg} ${isLight ? 'border-gray-700' : 'border-white'} scale-110 ${cat.glow} shadow-lg`
+                          : `${cat.bgLight} ${cat.border} hover:scale-110`
+                        }`}
+                    >
+                      <event.icon className={`w-4 h-4 ${isExpanded ? 'text-white' : cat.text}`} />
+                    </button>
+
+                    {/* Title + date */}
+                    <div className="flex-1 min-w-0 pt-1">
+                      <button
+                        onClick={() => toggle(event.id)}
+                        className={`text-left w-full font-bold text-sm leading-tight tracking-tight ${isLight ? 'text-gray-900' : 'text-white'} hover:text-cyan-500 transition-colors`}
+                      >
+                        {event.title}
+                      </button>
+                      <p className={`text-[11px] font-semibold mt-0.5 tracking-wider ${cat.text}`}>
+                        {event.month}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Expanded detail */}
+                  <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isExpanded ? 'max-h-[800px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
+                    {isExpanded && (
+                      <div className={`ml-[58px] rounded-2xl overflow-hidden border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A1122]/80 border-white/10'} shadow-xl`}>
+                        <div className="relative h-40 overflow-hidden">
+                          <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                          <div className={`absolute inset-0 bg-gradient-to-t ${isLight ? 'from-white via-white/30 to-transparent' : 'from-[#0A1122] via-[#0A1122]/30 to-transparent'}`} />
+                          <div className="absolute bottom-3 left-3 right-3">
+                            <div className="flex items-center gap-2 text-xs font-semibold tracking-wider">
+                              <Calendar className="w-3 h-3" />
+                              {event.shortDate}
+                              <span className="mx-1">·</span>
+                              <MapPin className="w-3 h-3" />
+                              {event.location}
                             </div>
-
-                            {/* Card Image */}
-                            <div className={`w-full h-52 md:h-60 rounded-2xl overflow-hidden mb-6 relative group ring-1 shadow-[0_0_20px_inset_rgba(0,0,0,0.15)] dark:shadow-[0_0_20px_inset_rgba(0,0,0,0.5)] ${theme === 'light' ? 'ring-gray-200/50' : 'ring-white/10'}`}>
-                                <img
-                                    key={selectedEvent.id} // Forces re-render/animation on change
-                                    src={selectedEvent.image}
-                                    alt={selectedEvent.title}
-                                    className="w-full h-full object-cover transform scale-100 group-hover:scale-110 transition-transform duration-[1.5s] ease-out image-fade-in"
-                                />
-
-                                {/* Image Overlay Gradient */}
-                                <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none ${
-                                    theme === 'light'
-                                      ? 'from-white/95 via-white/30 to-transparent'
-                                      : 'from-[#0A1122]/95 via-[#0A1122]/30 to-transparent'
-                                  }`} />
-
-                                {/* Read More fading text over image */}
-                                <div className="absolute bottom-4 left-4 right-4 text-sm font-medium leading-relaxed text-gray-800 dark:text-slate-200" style={theme === 'dark' ? { textShadow: '0 2px 8px rgba(0,0,0,1)' } : undefined}>
-                                    {selectedEvent.description}
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-3">
-                                <button className={`w-full py-4 rounded-xl text-sm font-black text-[#050A15] tracking-[0.2em] uppercase transition-all shadow-xl flex items-center justify-center gap-2 
-                                    ${getCatColor(selectedEvent.category).bg} hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] hover:scale-[1.03] active:scale-[0.97] group`}>
-                                    RSVP
-                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
-                                </button>
-                            </div>
+                          </div>
                         </div>
+                        <div className="p-4">
+                          <p className={`text-sm leading-relaxed ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>{event.description}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Desktop layout: alternating tree branches */}
+                <div className="hidden md:block">
+                  {/* Branch line from trunk to node */}
+                  <svg className={`absolute top-[26px] h-px overflow-visible transition-all duration-500 ${isExpanded ? 'opacity-100' : 'opacity-40'}`}
+                    style={{
+                      left: isLeft ? '50%' : '0',
+                      right: isLeft ? '0' : '50%',
+                      width: '50%',
+                      zIndex: 1,
+                    }}>
+                    <line x1={isLeft ? '0' : '100%'} y1="0" x2={isLeft ? '100%' : '0'} y2="0"
+                      stroke={cat.hex}
+                      strokeWidth="1.5"
+                      strokeDasharray={isExpanded ? 'none' : '4 4'}
+                      className="transition-all duration-500"
+                      opacity={isExpanded ? '0.6' : '0.3'}
+                    />
+                  </svg>
+
+                  <div className={`flex items-start gap-6 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                    {/* Content side (text) */}
+                    <div className={`flex-1 ${isLeft ? 'text-right pr-8' : 'text-left pl-8'} pt-2`}>
+                      <button
+                        onClick={() => toggle(event.id)}
+                        className="text-left w-full"
+                      >
+                        <p className={`text-[11px] font-bold tracking-[0.2em] uppercase mb-1 ${cat.text}`}>
+                          {event.month}
+                        </p>
+                        <h3 className={`text-lg font-bold leading-tight transition-colors ${isLight ? 'text-gray-900' : 'text-white'} hover:text-cyan-500`}>
+                          {event.title}
+                        </h3>
+                        <div className={`flex items-center gap-2 mt-1 text-xs ${isLight ? 'text-gray-500' : 'text-gray-400'} ${isLeft ? 'justify-end' : 'justify-start'}`}>
+                          <Calendar className="w-3 h-3" />
+                          {event.shortDate}
+                          <span className="mx-0.5">·</span>
+                          <MapPin className="w-3 h-3" />
+                          {event.location}
+                        </div>
+                      </button>
+
+                      {/* Expanded card */}
+                      <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isExpanded ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
+                        {isExpanded && (
+                          <div className={`rounded-2xl overflow-hidden border ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-[#0A1122]/90 border-white/10 shadow-2xl'} ${isLeft ? 'text-right' : 'text-left'}`}>
+                            <div className="relative h-44 overflow-hidden">
+                              <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                              <div className={`absolute inset-0 bg-gradient-to-t ${isLight ? 'from-white via-white/20 to-transparent' : 'from-[#0A1122] via-[#0A1122]/20 to-transparent'}`} />
+                            </div>
+                            <div className="p-5">
+                              <p className={`text-sm leading-relaxed ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>{event.description}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                )}
+
+                    {/* Node circle */}
+                    <button
+                      onClick={() => toggle(event.id)}
+                      className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 cursor-pointer
+                        ${isExpanded
+                          ? `${cat.bg} ${isLight ? 'border-gray-700' : 'border-white'} scale-110 ${cat.glow} shadow-2xl`
+                          : `${cat.bgLight} ${cat.border} hover:scale-110 hover:shadow-lg`
+                        }`}
+                    >
+                      <event.icon className={`w-5 h-5 ${isExpanded ? 'text-white' : cat.text}`} />
+                      {/* Ping ring on expand */}
+                      {isExpanded && (
+                        <span className={`absolute inset-0 rounded-full animate-ping opacity-30 ${cat.bg}`} style={{ animationDuration: '2s' }} />
+                      )}
+                    </button>
+
+                    {/* Spacer side (opposite of content) */}
+                    <div className="flex-1" />
+                  </div>
+                </div>
+
+              </div>
+            );
+          })}
+
+          {/* End node */}
+          <div className="hidden md:flex justify-center pt-4">
+            <div className={`flex items-center gap-3 px-5 py-3 rounded-full border backdrop-blur-sm ${isLight ? 'bg-white/70 border-gray-200' : 'bg-[#0A1122]/70 border-white/10'}`}>
+              <Sparkles className={`w-4 h-4 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
+              <span className={`text-xs font-bold tracking-wider ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>End of Academic Year</span>
             </div>
+          </div>
 
-            <style>{`
-        /* Hide scrollbar completely but allow scrolling */
-        .custom-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .custom-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-        }
-        
-        @keyframes flowPath {
-          from { stroke-dashoffset: 120; }
-          to { stroke-dashoffset: 0; }
-        }
-        
-        .path-animate {
-          animation: flowPath 3s linear infinite;
-        }
-        
-        @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(1.05); filter: blur(4px); }
-          to { opacity: 1; transform: scale(1); filter: blur(0px); }
-        }
+        </div>
+      </div>
 
-        .image-fade-in {
-          animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .timeline-enter {
+          animation: fadeSlideUp 0.5s ease-out forwards;
         }
       `}</style>
-        </div >
-    );
+    </div>
+  );
 };
 
 export default EventsGallery;
