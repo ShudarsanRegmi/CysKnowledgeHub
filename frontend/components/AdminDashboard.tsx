@@ -3,7 +3,7 @@ import {
   Users, Hash, FileText, ShieldCheck, Loader2, AlertCircle,
   Plus, Trash2, Edit2, Check, X, ChevronUp, ChevronDown,
   RefreshCw, Eye, BookOpen, UserCog, Search, Layers,
-  Flag, Trophy, Tag as TagIcon, GraduationCap
+  Flag, Trophy, Tag as TagIcon, GraduationCap, BookOpenText
 } from 'lucide-react';
 import {
   adminGetUsers, adminSetUserRole,
@@ -21,6 +21,10 @@ import {
   getFaculty, FacultyMember as FacultyMemberType,
 } from '../services/facultyApi';
 import { uploadArticleImage } from '../services/storage';
+import {
+  adminGetPublications, adminCreatePublication, adminUpdatePublication, adminDeletePublication,
+} from '../services/publicationsApi';
+import { Publication } from '../types';
 import NovelRenderer from './NovelRenderer';
 import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -1092,9 +1096,190 @@ const AchievementsPanel: React.FC = () => {
   );
 };
 
+// ─── Panel: Publications ────────────────────────────────────────────────────────
+
+const PUBLICATION_KINDS = ['Paper', 'Patent', 'Book Chapter', 'Poster'];
+const VENUE_TYPES = ['Conference', 'Journal', 'Workshop', 'Symposium', 'Other'];
+
+const PublicationsPanel: React.FC = () => {
+  const toast = useToast();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Publication | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [form, setForm] = useState({
+    title: '', kind: 'Paper' as Publication['kind'], publicationDate: '',
+    venue: '', publisher: '', venueType: 'Conference' as Publication['venueType'],
+    isInternational: true, abstract: '', authors: '', keywords: '', link: '',
+  });
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { publications } = await adminGetPublications();
+      setPublications(publications);
+    } catch (err: any) { toast.error(err.message); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openCreate = () => {
+    setForm({
+      title: '', kind: 'Paper', publicationDate: '', venue: '', publisher: '',
+      venueType: 'Conference', isInternational: true, abstract: '', authors: '',
+      keywords: '', link: '',
+    });
+    setEditing(null);
+    setShowForm(true);
+  };
+
+  const openEdit = (p: Publication) => {
+    setForm({
+      title: p.title, kind: p.kind, publicationDate: p.publicationDate,
+      venue: p.venue, publisher: p.publisher, venueType: p.venueType,
+      isInternational: p.isInternational, abstract: p.abstract ?? '',
+      authors: p.authors.join(', '), keywords: (p.keywords ?? []).join(', '),
+      link: p.link ?? '',
+    });
+    setEditing(p);
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim() || !form.kind || !form.venueType) {
+      toast.error('Title, kind, and venue type are required.');
+      return;
+    }
+    setSaving(true);
+    const body = {
+      title: form.title.trim(),
+      kind: form.kind,
+      publicationDate: form.publicationDate.trim(),
+      venue: form.venue.trim(),
+      publisher: form.publisher.trim(),
+      venueType: form.venueType,
+      isInternational: form.isInternational,
+      abstract: form.abstract.trim() || undefined,
+      authors: form.authors.split(',').map(s => s.trim()).filter(Boolean),
+      keywords: form.keywords.split(',').map(s => s.trim()).filter(Boolean),
+      link: form.link.trim() || undefined,
+    };
+    try {
+      if (editing) {
+        await adminUpdatePublication(editing._id!, body);
+        toast.success('Publication updated.');
+      } else {
+        await adminCreatePublication(body);
+        toast.success('Publication created.');
+      }
+      setShowForm(false);
+      await load();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this publication?')) return;
+    setDeletingId(id);
+    try {
+      await adminDeletePublication(id);
+      toast.success('Publication deleted.');
+      await load();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setDeletingId(null); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <BookOpenText className="w-5 h-5 text-cyan-500" /> Publication Management
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Add, edit, or remove student publications</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={load} className="p-2.5 transition-all rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800"><RefreshCw className="w-4 h-4" /></button>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors"><Plus className="w-4 h-4" /> New Publication</button>
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="border rounded-2xl p-5 space-y-3 bg-gray-900 border-cyan-500/30">
+          <h3 className="font-semibold text-white">{editing ? 'Edit Publication' : 'New Publication'}</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as Publication['kind'] })} className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white">
+              {PUBLICATION_KINDS.map(k => <option key={k} value={k}>{k}</option>)}
+            </select>
+            <input value={form.publicationDate} onChange={(e) => setForm({ ...form, publicationDate: e.target.value })} placeholder="Date (YYYY-MM-DD) *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <select value={form.venueType} onChange={(e) => setForm({ ...form, venueType: e.target.value as Publication['venueType'] })} className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white">
+              {VENUE_TYPES.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+            <input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} placeholder="Venue *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.publisher} onChange={(e) => setForm({ ...form, publisher: e.target.value })} placeholder="Publisher *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-gray-400">International:</label>
+              <select value={form.isInternational ? 'yes' : 'no'} onChange={(e) => setForm({ ...form, isInternational: e.target.value === 'yes' })} className="rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="Link (optional)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+          </div>
+          <input value={form.authors} onChange={(e) => setForm({ ...form, authors: e.target.value })} placeholder="Authors (comma-separated)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+          <input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} placeholder="Keywords (comma-separated, optional)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+          <textarea value={form.abstract} onChange={(e) => setForm({ ...form, abstract: e.target.value })} placeholder="Abstract" rows={3} className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white resize-none" />
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
+            </button>
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 rounded-xl text-sm bg-gray-800 border border-gray-700 text-white">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {loading ? <LoadingSpinner /> : publications.length === 0 ? (
+        <div className="text-center py-16 opacity-50"><p>No publications yet.</p></div>
+      ) : (
+        <div className="rounded-2xl border border-gray-800 overflow-hidden overflow-x-auto">
+          <div className="min-w-[900px]">
+            <div className="grid grid-cols-[1fr_100px_120px_120px_120px_100px] gap-4 px-5 py-2.5 border-b bg-gray-900/80 border-gray-800 text-xs font-semibold uppercase tracking-widest text-gray-500">
+              <span>Title</span><span>Kind</span><span>Venue Type</span><span>Publisher</span><span>Date</span><span className="text-right">Actions</span>
+            </div>
+            {publications.map((p, idx) => (
+              <div key={p._id ?? p.id} className={`grid grid-cols-[1fr_100px_120px_120px_120px_100px] gap-4 items-center px-5 py-3.5 transition-colors ${idx % 2 === 0 ? 'bg-gray-900/40' : 'bg-gray-900/20'} hover:bg-gray-800/40`}>
+                <p className="font-medium text-white truncate">{p.title}</p>
+                <div><Badge label={p.kind} color={getTypeColors('blog', false)} /></div>
+                <p className="text-xs text-gray-400 truncate">{p.venueType}</p>
+                <p className="text-xs text-gray-400 truncate">{p.publisher}</p>
+                <p className="text-xs text-gray-500 truncate">{p.publicationDate}</p>
+                <div className="flex items-center gap-1 justify-end">
+                  <button onClick={() => openEdit(p)} className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-gray-800"><Edit2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleDelete(p._id ?? p.id)} disabled={deletingId === (p._id ?? p.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-900/20">
+                    {deletingId === (p._id ?? p.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Main AdminDashboard ──────────────────────────────────────────────────────
 
-type AdminTab = 'users' | 'topics' | 'content' | 'faculty' | 'achievements';
+type AdminTab = 'users' | 'topics' | 'content' | 'faculty' | 'achievements' | 'publications';
 
 const AdminDashboard: React.FC = () => {
   const { theme } = useTheme();
@@ -1110,6 +1295,7 @@ const AdminDashboard: React.FC = () => {
       <div className="border-b border-gray-800 flex gap-1">
         {[
           { id: 'content', label: 'Content', icon: Layers },
+          { id: 'publications', label: 'Publications', icon: BookOpenText },
           { id: 'achievements', label: 'Achievements', icon: Trophy },
           { id: 'topics', label: 'Topics', icon: Hash },
           { id: 'users', label: 'Users', icon: Users },
@@ -1127,6 +1313,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'content' && <ContentPanel />}
         {tab === 'faculty' && <FacultyPanel />}
         {tab === 'achievements' && <AchievementsPanel />}
+        {tab === 'publications' && <PublicationsPanel />}
       </div>
     </div>
   );

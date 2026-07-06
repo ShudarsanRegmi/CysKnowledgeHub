@@ -20,6 +20,7 @@ import roadmapsRoutes      from './routes/roadmaps';
 import blogRoutes          from './routes/blog';
 import writeupsRoutes      from './routes/writeups';
 import facultyRoutes       from './routes/faculty';
+import publicationsRoutes  from './routes/publications';
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use('/api/roadmaps',      roadmapsRoutes);
 app.use('/api/blog',          blogRoutes);
 app.use('/api/writeups',      writeupsRoutes);
 app.use('/api/faculty',       facultyRoutes);
+app.use('/api/publications',  publicationsRoutes);
 
 // ─── API 404 Fallback (must be before SPA catch-all) ─────────────────────────
 app.use('/api/*', (_req, res) => {

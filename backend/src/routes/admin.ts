@@ -7,6 +7,7 @@ import { Topic } from '../models/Topic';
 import { Article } from '../models/Article';
 import { CTFWriteup } from '../models/CTFWriteup';
 import { Achievement } from '../models/Achievement';
+import { Publication as PublicationModel } from '../models/Publication';
 
 const router = Router();
 
@@ -281,6 +282,69 @@ router.delete('/writeups/:id', async (req, res: Response): Promise<void> => {
     res.json({ message: 'Writeup deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete writeup', error: String(err) });
+  }
+});
+
+// ─── Publication management ────────────────────────────────────────────────────
+
+const PUBLICATION_KINDS = ['Paper', 'Patent', 'Book Chapter', 'Poster'];
+const VENUE_TYPES = ['Conference', 'Journal', 'Workshop', 'Symposium', 'Other'];
+
+/** GET /api/admin/publications — list all publications */
+router.get('/publications', async (_req, res: Response): Promise<void> => {
+  try {
+    const publications = await PublicationModel.find().sort({ publicationDate: -1 });
+    res.json({ publications });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch publications', error: String(err) });
+  }
+});
+
+/** POST /api/admin/publications — create a publication */
+router.post('/publications', async (req: AuthRequest, res: Response): Promise<void> => {
+  const { title, kind, venueType } = req.body;
+  if (!title?.trim()) {
+    res.status(400).json({ message: 'Title is required' });
+    return;
+  }
+  if (!kind || !PUBLICATION_KINDS.includes(kind)) {
+    res.status(400).json({ message: `Kind must be one of: ${PUBLICATION_KINDS.join(', ')}` });
+    return;
+  }
+  if (!venueType || !VENUE_TYPES.includes(venueType)) {
+    res.status(400).json({ message: `Venue type must be one of: ${VENUE_TYPES.join(', ')}` });
+    return;
+  }
+  try {
+    const publication = await PublicationModel.create(req.body);
+    res.status(201).json({ publication });
+  } catch (err: any) {
+    res.status(500).json({ message: 'Failed to create publication', error: String(err) });
+  }
+});
+
+/** PATCH /api/admin/publications/:id — update a publication */
+router.patch('/publications/:id', async (req, res: Response): Promise<void> => {
+  try {
+    const publication = await PublicationModel.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!publication) { res.status(404).json({ message: 'Publication not found' }); return; }
+    res.json({ publication });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update publication', error: String(err) });
+  }
+});
+
+/** DELETE /api/admin/publications/:id — delete a publication */
+router.delete('/publications/:id', async (req, res: Response): Promise<void> => {
+  try {
+    const publication = await PublicationModel.findByIdAndDelete(req.params.id);
+    if (!publication) { res.status(404).json({ message: 'Publication not found' }); return; }
+    res.json({ message: 'Publication deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete publication', error: String(err) });
   }
 });
 

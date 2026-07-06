@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { BookOpenText } from 'lucide-react';
-import { PUBLICATIONS } from '../publicationsData';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BookOpenText, Loader2 } from 'lucide-react';
 import { Publication } from '../types';
+import { getPublications } from '../services/publicationsApi';
 import PublicationCard from './PublicationCard';
 import PublicationDetailModal from './PublicationDetailModal';
 import PublicationsFilter, { FilterState } from './PublicationsFilter';
+import PublisherShowcase from './PublisherShowcase';
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -16,28 +17,37 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 const PublicationsPage: React.FC = () => {
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const handleCloseModal = useCallback(() => setSelectedPublication(null), []);
+  const handleCloseModal = React.useCallback(() => setSelectedPublication(null), []);
 
-  // Derive option lists from all data (not filtered) for the filter panel
+  useEffect(() => {
+    getPublications()
+      .then(setPublications)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Derive option lists from all data (not filtered)
   const publisherOptions = useMemo(
-    () => [...new Set(PUBLICATIONS.map((p) => p.publisher))].sort(),
-    []
+    () => [...new Set(publications.map((p) => p.publisher))].sort(),
+    [publications]
   );
   const yearOptions = useMemo(
     () =>
-      [...new Set(PUBLICATIONS.map((p) => Number(p.publicationDate.slice(0, 4))))].sort(
+      [...new Set(publications.map((p) => Number(p.publicationDate.slice(0, 4))))].sort(
         (a, b) => b - a
       ),
-    []
+    [publications]
   );
 
   // Apply all active filters
   const filteredPublications = useMemo(() => {
     const searchLower = filters.search.toLowerCase().trim();
 
-    return [...PUBLICATIONS]
+    return [...publications]
       .filter((p) => {
         if (searchLower) {
           const haystack = [p.title, ...p.authors, ...(p.keywords ?? []), p.venue, p.publisher]
@@ -58,7 +68,7 @@ const PublicationsPage: React.FC = () => {
         return true;
       })
       .sort((a, b) => b.publicationDate.localeCompare(a.publicationDate));
-  }, [filters]);
+  }, [filters, publications]);
 
   // Group filtered results by year for the timeline view
   const publicationsByYear = useMemo(() => {
@@ -85,56 +95,71 @@ const PublicationsPage: React.FC = () => {
         </p>
       </header>
 
-      {/* Filter Panel */}
-      <PublicationsFilter
-        filters={filters}
-        onChange={setFilters}
-        publisherOptions={publisherOptions}
-        yearOptions={yearOptions}
-        totalResults={filteredPublications.length}
-      />
-
-      {/* Results */}
-      {filteredPublications.length === 0 ? (
-        <div className="text-center py-20 text-gray-500 space-y-2">
-          <p className="text-lg font-semibold text-gray-400">No publications match your filters.</p>
-          <p className="text-sm">Try adjusting or clearing the active filters.</p>
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
         </div>
       ) : (
-        <div className="relative pl-0 md:pl-10">
-          <div className="hidden md:block absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-cyan-500/30 to-transparent" />
+        <>
+          {/* Publisher Showcase */}
+          <PublisherShowcase
+            publications={publications}
+            filters={filters}
+            onFilterChange={setFilters}
+          />
 
-          <div className="space-y-10">
-            {years.map((year) => {
-              const publications = publicationsByYear[year];
+          {/* Filter Panel */}
+          <PublicationsFilter
+            filters={filters}
+            onChange={setFilters}
+            publisherOptions={publisherOptions}
+            yearOptions={yearOptions}
+            totalResults={filteredPublications.length}
+          />
 
-              return (
-                <section key={year} className="relative">
-                  <div className="md:absolute md:left-0 md:top-1.5 hidden md:flex w-8 h-8 rounded-full border border-cyan-500/40 bg-white dark:bg-gray-950 items-center justify-center">
-                    <BookOpenText className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  </div>
+          {/* Results */}
+          {filteredPublications.length === 0 ? (
+            <div className="text-center py-20 text-gray-500 space-y-2">
+              <p className="text-lg font-semibold text-gray-400">No publications match your filters.</p>
+              <p className="text-sm">Try adjusting or clearing the active filters.</p>
+            </div>
+          ) : (
+            <div className="relative pl-0 md:pl-10">
+              <div className="hidden md:block absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-cyan-500/30 to-transparent" />
 
-                  <div className="md:ml-12 mb-4 flex items-end justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-2">
-                    <h2 className="text-2xl font-bold text-cyan-700 dark:text-cyan-300">{year}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {publications.length} publication{publications.length > 1 ? 's' : ''}
-                    </p>
-                  </div>
+              <div className="space-y-10">
+                {years.map((year) => {
+                  const pubs = publicationsByYear[year];
 
-                  <div className="md:ml-12 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {publications.map((publication) => (
-                      <PublicationCard
-                        key={publication.id}
-                        publication={publication}
-                        onClick={setSelectedPublication}
-                      />
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        </div>
+                  return (
+                    <section key={year} className="relative">
+                      <div className="md:absolute md:left-0 md:top-1.5 hidden md:flex w-8 h-8 rounded-full border border-cyan-500/40 bg-white dark:bg-gray-950 items-center justify-center">
+                        <BookOpenText className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                      </div>
+
+                      <div className="md:ml-12 mb-4 flex items-end justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-2">
+                        <h2 className="text-2xl font-bold text-cyan-700 dark:text-cyan-300">{year}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {pubs.length} publication{pubs.length > 1 ? 's' : ''}
+                        </p>
+                      </div>
+
+                      <div className="md:ml-12 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {pubs.map((publication) => (
+                          <PublicationCard
+                            key={publication.id ?? publication._id}
+                            publication={publication}
+                            onClick={setSelectedPublication}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <PublicationDetailModal publication={selectedPublication} onClose={handleCloseModal} />

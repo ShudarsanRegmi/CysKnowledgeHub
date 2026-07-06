@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, X, SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { PublicationKind, VenueType } from '../types';
 
 export interface FilterState {
@@ -75,6 +75,8 @@ const PublicationsFilter: React.FC<PublicationsFilterProps> = ({
   yearOptions,
   totalResults,
 }) => {
+  const [collapsed, setCollapsed] = useState(true);
+
   function toggle<T>(array: T[], value: T): T[] {
     return array.includes(value) ? array.filter((v) => v !== value) : [...array, value];
   }
@@ -95,15 +97,20 @@ const PublicationsFilter: React.FC<PublicationsFilterProps> = ({
     <div className="bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-5 backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
           <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
           <span className="font-semibold text-sm">Filters</span>
+          {collapsed ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronUp className="w-4 h-4 text-gray-500" />}
           {hasActiveFilters && (
             <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
               active
             </span>
           )}
-        </div>
+        </button>
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-500">{totalResults} result{totalResults !== 1 ? 's' : ''}</span>
           {hasActiveFilters && (
@@ -119,7 +126,7 @@ const PublicationsFilter: React.FC<PublicationsFilterProps> = ({
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search (always visible) */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
         <input
@@ -131,70 +138,79 @@ const PublicationsFilter: React.FC<PublicationsFilterProps> = ({
         />
       </div>
 
-      {/* Publisher */}
-      <FilterSection title="Publisher">
-        {publisherOptions.map((pub) => (
-          <ToggleChip
-            key={pub}
-            label={pub}
-            active={filters.publishers.includes(pub)}
-            onClick={() => onChange({ ...filters, publishers: toggle(filters.publishers, pub) })}
-            color="cyan"
-          />
-        ))}
-      </FilterSection>
+      {/* Collapsible sections */}
+      {!collapsed && (
+        <div className="space-y-5 animate-in slide-in-from-top-2 fade-in duration-200">
+          {/* Publisher */}
+          {publisherOptions.length > 0 && (
+            <FilterSection title="Publisher">
+              {publisherOptions.map((pub) => (
+                <ToggleChip
+                  key={pub}
+                  label={pub}
+                  active={filters.publishers.includes(pub)}
+                  onClick={() => onChange({ ...filters, publishers: toggle(filters.publishers, pub) })}
+                  color="cyan"
+                />
+              ))}
+            </FilterSection>
+          )}
 
-      {/* Venue Type */}
-      <FilterSection title="Venue Type">
-        {VENUE_TYPES.map((vt) => (
-          <ToggleChip
-            key={vt}
-            label={vt}
-            active={filters.venueTypes.includes(vt)}
-            onClick={() => onChange({ ...filters, venueTypes: toggle(filters.venueTypes, vt) })}
-            color="violet"
-          />
-        ))}
-      </FilterSection>
+          {/* Venue Type */}
+          <FilterSection title="Venue Type">
+            {VENUE_TYPES.map((vt) => (
+              <ToggleChip
+                key={vt}
+                label={vt}
+                active={filters.venueTypes.includes(vt)}
+                onClick={() => onChange({ ...filters, venueTypes: toggle(filters.venueTypes, vt) })}
+                color="violet"
+              />
+            ))}
+          </FilterSection>
 
-      {/* Publication Kind */}
-      <FilterSection title="Type">
-        {KINDS.map((k) => (
-          <ToggleChip
-            key={k}
-            label={k}
-            active={filters.kinds.includes(k)}
-            onClick={() => onChange({ ...filters, kinds: toggle(filters.kinds, k) })}
-            color="emerald"
-          />
-        ))}
-      </FilterSection>
+          {/* Publication Kind */}
+          <FilterSection title="Type">
+            {KINDS.map((k) => (
+              <ToggleChip
+                key={k}
+                label={k}
+                active={filters.kinds.includes(k)}
+                onClick={() => onChange({ ...filters, kinds: toggle(filters.kinds, k) })}
+                color="emerald"
+              />
+            ))}
+          </FilterSection>
 
-      {/* International */}
-      <FilterSection title="International">
-        {(['all', 'yes', 'no'] as const).map((val) => (
-          <ToggleChip
-            key={val}
-            label={val === 'all' ? 'All' : val === 'yes' ? 'Yes' : 'No'}
-            active={filters.international === val}
-            onClick={() => onChange({ ...filters, international: val })}
-            color="amber"
-          />
-        ))}
-      </FilterSection>
+          {/* International */}
+          <FilterSection title="International">
+            {(['all', 'yes', 'no'] as const).map((val) => (
+              <ToggleChip
+                key={val}
+                label={val === 'all' ? 'All' : val === 'yes' ? 'Yes' : 'No'}
+                active={filters.international === val}
+                onClick={() => onChange({ ...filters, international: val })}
+                color="amber"
+              />
+            ))}
+          </FilterSection>
 
-      {/* Year */}
-      <FilterSection title="Year">
-        {yearOptions.map((year) => (
-          <ToggleChip
-            key={year}
-            label={String(year)}
-            active={filters.years.includes(year)}
-            onClick={() => onChange({ ...filters, years: toggle(filters.years, year) })}
-            color="cyan"
-          />
-        ))}
-      </FilterSection>
+          {/* Year */}
+          {yearOptions.length > 0 && (
+            <FilterSection title="Year">
+              {yearOptions.map((year) => (
+                <ToggleChip
+                  key={year}
+                  label={String(year)}
+                  active={filters.years.includes(year)}
+                  onClick={() => onChange({ ...filters, years: toggle(filters.years, year) })}
+                  color="cyan"
+                />
+              ))}
+            </FilterSection>
+          )}
+        </div>
+      )}
     </div>
   );
 };

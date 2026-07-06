@@ -150,6 +150,7 @@ export type PublicationKind = 'Paper' | 'Patent' | 'Book Chapter' | 'Poster';
 export type VenueType = 'Conference' | 'Journal' | 'Workshop' | 'Symposium' | 'Other';
 
 export interface Publication {
+  _id?: string;
   id: string;
   title: string;
   kind: PublicationKind;
