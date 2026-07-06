@@ -1,9 +1,16 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X, Github, UserCircle, LogOut, Cpu, Building2, ChevronDown, FileBadge, MessageSquare, Users, PenLine, ShieldCheck, Sun, Moon } from 'lucide-react';
+import {
+  Shield, BookOpen, Map, Award, Terminal, Briefcase, Menu, X,
+  Github, UserCircle, LogOut, Cpu, Building2, ChevronDown,
+  FileBadge, MessageSquare, Users, PenLine, ShieldCheck,
+  Sun, Moon, UserCog, AlertTriangle,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import AuthModal from './AuthModal';
+import StudentProfileForm from './StudentProfileForm';
+
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
@@ -14,9 +21,15 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const { user, signOut, role } = useAuth();
+  const { user, dbUser, signOut, role } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  // Show nudge banner for logged-in students who haven't completed their profile
+  const showProfileBanner =
+    user && dbUser && !dbUser.profileComplete && !bannerDismissed;
 
   // Close user-menu on outside click
   useEffect(() => {
@@ -29,80 +42,87 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Keep a concise top-level nav and expose category subsections to avoid duplicate flat items
   const navItems = [
     { id: 'home', label: 'Home', icon: Shield },
     {
       id: 'learn', label: 'Learn', icon: BookOpen,
       subItems: [
-        { id: 'blogs', label: 'Blogs', icon: BookOpen, path: '/blogs' },
-        { id: 'ctf', label: 'CTF', icon: Terminal, path: '/ctf' },
-        { id: 'roadmaps', label: 'Roadmaps', icon: Map, path: '/roadmaps' },
-      ]
+        { id: 'blogs',    label: 'Blogs',    icon: BookOpen, path: '/blogs' },
+        { id: 'ctf',      label: 'CTF',      icon: Terminal, path: '/ctf' },
+        { id: 'roadmaps', label: 'Roadmaps', icon: Map,      path: '/roadmaps' },
+      ],
     },
     {
       id: 'showcase', label: 'Showcase', icon: Github,
       subItems: [
-        { id: 'projects', label: 'Projects', icon: Github },
-        { id: 'achievements', label: 'Achievements', icon: Award },
-        { id: 'publications', label: 'Publications', icon: BookOpen },
-        { id: 'experiments', label: 'Experiments', icon: Cpu },
+        { id: 'projects',       label: 'Projects',       icon: Github },
+        { id: 'achievements',   label: 'Achievements',   icon: Award },
+        { id: 'publications',   label: 'Publications',   icon: BookOpen },
+        { id: 'experiments',    label: 'Experiments',    icon: Cpu },
         { id: 'certifications', label: 'Certifications', icon: FileBadge },
-      ]
+      ],
     },
     {
       id: 'directory', label: 'Directory', icon: Users,
       subItems: [
-        // The Constellation (Students list)
-        { id: 'students', label: 'The Constellation', icon: Users },
-        // Placeholder entries for future pages (faculty)
-        { id: 'faculty', label: 'Faculty', icon: UserCircle },
-        { id: 'research-labs', label: 'Research Labs', icon: Map },
-      ]
+        { id: 'students',      label: 'Our Students', icon: Users },
+        { id: 'faculty',       label: 'Faculty',           icon: UserCircle },
+        { id: 'research-labs', label: 'Research Labs',     icon: Map },
+      ],
     },
     {
       id: 'gallery_main', label: 'Gallery', icon: Map,
       subItems: [
         { id: 'gallery-department', label: 'Department Gallery', icon: Map },
-        { id: 'gallery-events', label: 'Events Gallery', icon: Map },
-      ]
+        { id: 'gallery-events',     label: 'Events Gallery',     icon: Map },
+      ],
     },
     {
       id: 'career_hub', label: 'Career Hub', icon: Briefcase,
       subItems: [
-        { id: 'career', label: 'Preparation', icon: Briefcase },
+        { id: 'career',     label: 'Preparation', icon: Briefcase },
         { id: 'interviews', label: 'Experiences', icon: MessageSquare },
-        { id: 'companies', label: 'Companies', icon: Building2 },
-      ]
-    }
+        { id: 'companies',  label: 'Companies',   icon: Building2 },
+      ],
+    },
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      {/* Header */}
+
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+
+          {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
             <Shield className="w-8 h-8 text-cyan-500" />
-            <span className="text-xl font-bold tracking-tight mono">CYBER<span className="text-cyan-500">SHIELD</span></span>
+            <span className="text-xl font-bold tracking-tight mono">
+              CYBER<span className="text-cyan-500">SHIELD</span>
+            </span>
           </div>
 
           {/* Desktop Nav */}
-
           <nav className="hidden lg:flex items-center gap-6">
-            {navItems.map((item) => (
+            {navItems.map((item) =>
               item.subItems ? (
                 <div key={item.id} className="relative group">
-                  <button className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-gray-100 dark:hover:bg-gray-800/50`}>
-                    {item.label} <ChevronDown className="w-3.5 h-3.5 opacity-70 group-hover:rotate-180 transition-transform" />
+                  <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
+                    {item.label}
+                    <ChevronDown className="w-3.5 h-3.5 opacity-70 group-hover:rotate-180 transition-transform" />
                   </button>
                   <div className="absolute top-full left-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl overflow-hidden translate-y-2 group-hover:translate-y-0 transition-all">
-                      {item.subItems.map(sub => (
+                      {item.subItems.map((sub) => (
                         <button
                           key={sub.id}
                           onClick={() => setActiveTab(sub.id)}
-                          className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-cyan-600 dark:hover:text-cyan-400 ${activeTab === sub.id ? 'text-cyan-600 dark:text-cyan-500 bg-gray-100 dark:bg-gray-800/50' : 'text-gray-500 dark:text-gray-400'}`}
+                          className={`w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-left transition-colors
+                            hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-cyan-600 dark:hover:text-cyan-400
+                            ${activeTab === sub.id
+                              ? 'text-cyan-600 dark:text-cyan-500 bg-gray-100 dark:bg-gray-800/50'
+                              : 'text-gray-500 dark:text-gray-400'
+                            }`}
                         >
                           <sub.icon className="w-4 h-4" />
                           {sub.label}
@@ -115,15 +135,17 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`px-3 py-2 text-sm font-medium rounded-xl transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-cyan-600 dark:hover:text-cyan-400 ${activeTab === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-gray-500 dark:text-gray-400'}`}
+                  className={`px-3 py-2 text-sm font-medium rounded-xl transition-colors
+                    hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-cyan-600 dark:hover:text-cyan-400
+                    ${activeTab === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-gray-500 dark:text-gray-400'}`}
                 >
                   {item.label}
                 </button>
               )
-            ))}
+            )}
           </nav>
 
-           <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -133,7 +155,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {/* Profile / Auth button */}
+            {/* Profile / Auth */}
             {user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
@@ -141,23 +163,48 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 border border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 transition-colors text-gray-800 dark:text-gray-200"
                 >
                   {user.photoURL ? (
-                    <img src={user.photoURL} alt={user.displayName ?? 'avatar'} className="w-6 h-6 rounded-full object-cover" referrerPolicy="no-referrer" />
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName ?? 'avatar'}
+                      className="w-6 h-6 rounded-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
                   ) : (
                     <UserCircle className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
                   )}
                   <span className="hidden sm:block text-sm font-medium text-gray-750 dark:text-gray-200 max-w-[120px] truncate">
                     {user.displayName ?? user.email}
                   </span>
+                  {/* Amber dot when profile incomplete */}
+                  {dbUser && !dbUser.profileComplete && (
+                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Profile incomplete" />
+                  )}
                   <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown */}
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.displayName ?? 'User'}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {user.displayName ?? 'User'}
+                      </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
                     </div>
+
+                    {/* Edit Profile — available to everyone */}
+                    <button
+                      onClick={() => { setShowUserMenu(false); setActiveTab('profile'); }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <UserCog className="w-4 h-4" />
+                      My Profile
+                      {dbUser && !dbUser.profileComplete && (
+                        <span className="ml-auto text-[10px] font-bold text-amber-400 bg-amber-900/30 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                          Incomplete
+                        </span>
+                      )}
+                    </button>
+
                     {(role === 'author' || role === 'admin') && (
                       <button
                         onClick={() => { setShowUserMenu(false); setActiveTab('author-dashboard'); }}
@@ -176,6 +223,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                         Admin Dashboard
                       </button>
                     )}
+
                     <div className="border-t border-gray-100 dark:border-gray-800" />
                     <button
                       onClick={async () => { setShowUserMenu(false); await signOut(); }}
@@ -208,7 +256,41 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* ── Profile-incomplete banner ────────────────────────────────────────── */}
+      {showProfileBanner && (
+        <div className="bg-amber-950/60 border-b border-amber-500/30 px-4 py-2.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <p className="text-sm text-amber-200 truncate">
+              Complete your student profile to appear on{' '}
+              <button
+                onClick={() => setActiveTab('students')}
+                className="underline underline-offset-2 hover:text-amber-100 transition-colors"
+              >
+                Our Students
+              </button>
+              .
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => { setBannerDismissed(true); setActiveTab('profile'); }}
+              className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-colors"
+            >
+              Set up now
+            </button>
+            <button
+              onClick={() => setBannerDismissed(true)}
+              className="p-1 text-amber-400/60 hover:text-amber-300 transition-colors"
+              aria-label="Dismiss banner"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Mobile Menu ─────────────────────────────────────────────────────── */}
       {isMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-white/95 dark:bg-gray-950/95 pt-20 overflow-y-auto pb-10">
           <nav className="flex flex-col items-center gap-8">
@@ -216,14 +298,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
               <div key={item.id} className="w-full flex flex-col items-center gap-5">
                 {item.subItems ? (
                   <>
-                    <div className="text-gray-550 dark:text-gray-600 text-[10px] font-bold uppercase tracking-widest">{item.label}</div>
-                    {item.subItems.map(sub => (
+                    <div className="text-gray-550 dark:text-gray-600 text-[10px] font-bold uppercase tracking-widest">
+                      {item.label}
+                    </div>
+                    {item.subItems.map((sub) => (
                       <button
                         key={sub.id}
-                        onClick={() => {
-                          setActiveTab(sub.id);
-                          setIsMenuOpen(false);
-                        }}
+                        onClick={() => { setActiveTab(sub.id); setIsMenuOpen(false); }}
                         className={`text-xl font-bold flex items-center gap-3 ${activeTab === sub.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-gray-500 dark:text-gray-400'}`}
                       >
                         <sub.icon className="w-5 h-5" />
@@ -233,10 +314,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                   </>
                 ) : (
                   <button
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setIsMenuOpen(false);
-                    }}
+                    onClick={() => { setActiveTab(item.id); setIsMenuOpen(false); }}
                     className={`text-2xl font-bold flex items-center gap-3 ${activeTab === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-gray-500 dark:text-gray-400'}`}
                   >
                     <item.icon className="w-6 h-6" />
@@ -249,10 +327,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </div>
       )}
 
+      {/* ── Page content ────────────────────────────────────────────────────── */}
       <main className={`flex-1 w-full flex flex-col ${activeTab === 'gallery-events' ? 'min-h-[calc(100vh-64px)]' : 'max-w-7xl mx-auto px-4 py-8'}`}>
         {children}
       </main>
 
+      {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <footer className="bg-gray-55 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-12">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
@@ -287,8 +367,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </div>
       </footer>
 
-      {/* Auth Modal */}
+      {/* ── Modals ──────────────────────────────────────────────────────────── */}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      {showProfileForm && <StudentProfileForm onClose={() => setShowProfileForm(false)} />}
+
     </div>
   );
 };

@@ -18,6 +18,7 @@ import CTFPage from './components/CTFPage';
 import ResearchLabsPage from './components/ResearchLabsPage';
 import AuthorDashboard from './components/AuthorDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import ProfilePage from './components/ProfilePage';
 import { useAuth } from './contexts/AuthContext';
 import {
   Terminal, Shield, BookOpen, Map, Award, Briefcase,
@@ -457,6 +458,9 @@ const App: React.FC = () => {
 
       case 'certifications':
         return <CertificationsPage />;
+      case 'profile':
+        return <ProfilePage />;
+
       case 'students':
         return <StudentsPage />;
 

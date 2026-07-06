@@ -6,6 +6,7 @@ import path from 'path';
 dotenv.config();
 
 import authRoutes         from './routes/auth';
+import profileRoutes       from './routes/profile';
 import healthRoutes        from './routes/health';
 import adminRoutes         from './routes/admin';
 import topicsRoutes        from './routes/topics';
@@ -36,12 +37,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ─── Static uploads (article images) ─────────────────────────────────────────
+// ─── Static uploads (article images + avatars) ────────────────────────────────
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use('/health',            healthRoutes);
 app.use('/api/auth',          authRoutes);
+app.use('/api/profile',       profileRoutes);
 app.use('/api/admin',         adminRoutes);
 app.use('/api/topics',        topicsRoutes);
 app.use('/api/articles',      articlesRoutes);

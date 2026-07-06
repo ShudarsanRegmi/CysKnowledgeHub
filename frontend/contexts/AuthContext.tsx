@@ -16,12 +16,27 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 
 export type UserRole = 'student' | 'author' | 'admin';
 
+export interface StudentLink {
+  type: 'linkedin' | 'github' | 'portfolio' | 'twitter' | 'other';
+  url: string;
+  label?: string;
+}
+
 export interface DbUser {
   uid: string;
   email: string;
   displayName?: string;
   photoURL?: string;
   role: UserRole;
+
+  // Student profile fields
+  rollNumber?: string;
+  batch?: string;
+  section?: string;
+  campusMail?: string;
+  bio?: string;
+  links?: StudentLink[];
+  profileComplete?: boolean;
 }
 
 export interface AuthContextValue {

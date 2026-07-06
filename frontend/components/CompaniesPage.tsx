@@ -126,7 +126,7 @@ const CompaniesPage: React.FC = () => {
                             <div className="space-y-2 max-h-[160px] overflow-y-auto scrollbar-hide">
                                 {industries.map(ind => (
                                     <label key={ind} className="flex items-center gap-3 cursor-pointer group">
-                                        <input type="checkbox" className="hidden" checked={selectedTarget => selectedIndustries.includes(ind)} onChange={() => toggleFilter(setSelectedIndustries, ind)} />
+                                        <input type="checkbox" className="hidden" checked={selectedIndustries.includes(ind)} onChange={() => toggleFilter(setSelectedIndustries, ind)} />
                                         <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedIndustries.includes(ind) ? 'bg-cyan-500 border-cyan-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-cyan-400'}`}>
                                             {selectedIndustries.includes(ind) && <Check size={12} className="text-white" />}
                                         </div>
