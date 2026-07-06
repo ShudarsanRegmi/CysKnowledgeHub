@@ -6,6 +6,7 @@ import { User } from '../models/User';
 import { Topic } from '../models/Topic';
 import { Article } from '../models/Article';
 import { CTFWriteup } from '../models/CTFWriteup';
+import { Achievement } from '../models/Achievement';
 
 const router = Router();
 
@@ -280,6 +281,68 @@ router.delete('/writeups/:id', async (req, res: Response): Promise<void> => {
     res.json({ message: 'Writeup deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete writeup', error: String(err) });
+  }
+});
+
+// ─── Achievement management ────────────────────────────────────────────────────
+
+const ACHIEVEMENT_TYPES = ['Hackathon', 'CTF', 'Coding', 'Other'];
+
+/** GET /api/admin/achievements — list all achievements */
+router.get('/achievements', async (_req, res: Response): Promise<void> => {
+  try {
+    const achievements = await Achievement.find().sort({ date: -1, createdAt: -1 });
+    res.json({ achievements });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch achievements', error: String(err) });
+  }
+});
+
+/** POST /api/admin/achievements — create an achievement */
+router.post('/achievements', async (req: AuthRequest, res: Response): Promise<void> => {
+  const { title, type, eventName } = req.body;
+  if (!title?.trim()) {
+    res.status(400).json({ message: 'Title is required' });
+    return;
+  }
+  if (!type || !ACHIEVEMENT_TYPES.includes(type)) {
+    res.status(400).json({ message: `Type must be one of: ${ACHIEVEMENT_TYPES.join(', ')}` });
+    return;
+  }
+  if (!eventName?.trim()) {
+    res.status(400).json({ message: 'Event name is required' });
+    return;
+  }
+  try {
+    const achievement = await Achievement.create(req.body);
+    res.status(201).json({ achievement });
+  } catch (err: any) {
+    res.status(500).json({ message: 'Failed to create achievement', error: String(err) });
+  }
+});
+
+/** PATCH /api/admin/achievements/:id — update an achievement */
+router.patch('/achievements/:id', async (req, res: Response): Promise<void> => {
+  try {
+    const achievement = await Achievement.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!achievement) { res.status(404).json({ message: 'Achievement not found' }); return; }
+    res.json({ achievement });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update achievement', error: String(err) });
+  }
+});
+
+/** DELETE /api/admin/achievements/:id — delete an achievement */
+router.delete('/achievements/:id', async (req, res: Response): Promise<void> => {
+  try {
+    const achievement = await Achievement.findByIdAndDelete(req.params.id);
+    if (!achievement) { res.status(404).json({ message: 'Achievement not found' }); return; }
+    res.json({ message: 'Achievement deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete achievement', error: String(err) });
   }
 });
 

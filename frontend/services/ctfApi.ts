@@ -254,7 +254,7 @@ export interface ApiAchievement {
   imageUrl?: string;
   rank?: string;
   category?: string;
-  eventName?: string;
+  eventName: string;
   link?: string;
   createdAt: string;
   updatedAt: string;
@@ -380,6 +380,22 @@ export const getAchievements = (params?: { type?: string }) => {
   const qs = params?.type ? `?type=${encodeURIComponent(params.type)}` : '';
   return fetch(`${BASE}/api/achievements${qs}`).then((r) => json<ApiAchievement[]>(r));
 };
+
+export const adminCreateAchievement = (body: Record<string, any>) =>
+  authFetch(`${BASE}/api/admin/achievements`, { method: 'POST', body: JSON.stringify(body) }).then((r) =>
+    json<{ achievement: ApiAchievement }>(r)
+  );
+
+export const adminUpdateAchievement = (id: string, body: Record<string, any>) =>
+  authFetch(`${BASE}/api/admin/achievements/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  }).then((r) => json<{ achievement: ApiAchievement }>(r));
+
+export const adminDeleteAchievement = (id: string) =>
+  authFetch(`${BASE}/api/admin/achievements/${id}`, { method: 'DELETE' }).then((r) =>
+    json<{ message: string }>(r)
+  );
 
 export const getInterviews = (params?: { company?: string; domain?: string; result?: string; limit?: number }) => {
   const filtered = Object.fromEntries(

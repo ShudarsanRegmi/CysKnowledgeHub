@@ -29,7 +29,7 @@ const AchievementSchema = new Schema<IAchievement>(
     imageUrl:    { type: String },
     rank:        { type: String },
     category:    { type: String },
-    eventName:   { type: String },
+    eventName:   { type: String, required: true, trim: true },
     link:        { type: String },
   },
   { timestamps: true }

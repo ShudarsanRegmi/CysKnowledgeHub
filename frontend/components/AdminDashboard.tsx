@@ -9,7 +9,9 @@ import {
   adminGetUsers, adminSetUserRole,
   adminGetTopics, adminCreateTopic, adminUpdateTopic, adminDeleteTopic,
   adminGetArticles, adminSetArticleStatus, adminSetArticleOrder, adminUpdateArticleTopic,
-  DbUser, Topic, Article,
+  adminCreateAchievement, adminUpdateAchievement, adminDeleteAchievement,
+  getAchievements,
+  DbUser, Topic, Article, ApiAchievement,
 } from '../services/ctfApi';
 import {
   adminGetWriteups, adminSetWriteupStatus, adminDeleteWriteup, Writeup
@@ -872,9 +874,227 @@ const FacultyPanel: React.FC = () => {
   );
 };
 
+// ─── Panel: Achievements ────────────────────────────────────────────────────────
+
+const ACHIEVEMENT_TYPE_OPTIONS = ['Hackathon', 'CTF', 'Coding', 'Other'];
+
+const AchievementsPanel: React.FC = () => {
+  const toast = useToast();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const [achievements, setAchievements] = useState<ApiAchievement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<ApiAchievement | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const [form, setForm] = useState({
+    title: '', type: 'Hackathon' as ApiAchievement['type'], result: '',
+    date: '', description: '', students: '', link: '', rank: '', category: '', eventName: '',
+  });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getAchievements();
+      setAchievements(data);
+    } catch (err: any) { toast.error(err.message); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openCreate = () => {
+    setForm({ title: '', type: 'Hackathon', result: '', date: '', description: '', students: '', link: '', rank: '', category: '', eventName: '' });
+    setImageUrls([]);
+    setEditing(null);
+    setShowForm(true);
+  };
+
+  const openEdit = (a: ApiAchievement) => {
+    setForm({
+      title: a.title, type: a.type, result: a.result ?? '',
+      date: a.date ?? '', description: a.description ?? '',
+      students: a.students.join(', '), link: a.link ?? '',
+      rank: a.rank ?? '', category: a.category ?? '', eventName: a.eventName ?? '',
+    });
+    setImageUrls(a.images ?? []);
+    setEditing(a);
+    setShowForm(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      const urls = await Promise.all(
+        Array.from(files).map((file) => uploadArticleImage(file, undefined, 'achievement'))
+      );
+      setImageUrls((prev) => [...prev, ...urls]);
+      toast.success(`${urls.length} image(s) uploaded.`);
+    } catch (err: any) { toast.error(err.message); }
+    finally { setUploading(false); }
+  };
+
+  const removeImage = (index: number) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim() || !form.type) {
+      toast.error('Title and type are required.');
+      return;
+    }
+    if (!form.eventName.trim()) {
+      toast.error('Event name is required.');
+      return;
+    }
+    setSaving(true);
+    const body = {
+      title: form.title.trim(),
+      type: form.type,
+      result: form.result.trim() || undefined,
+      date: form.date.trim() || undefined,
+      description: form.description.trim() || undefined,
+      students: form.students.split(',').map(s => s.trim()).filter(Boolean),
+      images: imageUrls,
+      link: form.link.trim() || undefined,
+      rank: form.rank.trim() || undefined,
+      category: form.category.trim() || undefined,
+      eventName: form.eventName.trim(),
+    };
+    try {
+      if (editing) {
+        await adminUpdateAchievement(editing._id, body);
+        toast.success('Achievement updated.');
+      } else {
+        await adminCreateAchievement(body);
+        toast.success('Achievement created.');
+      }
+      setShowForm(false);
+      await load();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this achievement?')) return;
+    setDeletingId(id);
+    try {
+      await adminDeleteAchievement(id);
+      toast.success('Achievement deleted.');
+      await load();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setDeletingId(null); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-cyan-500" /> Achievement Management
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Add, edit, or remove achievements</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={load} className="p-2.5 transition-all rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800"><RefreshCw className="w-4 h-4" /></button>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors"><Plus className="w-4 h-4" /> New Achievement</button>
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="border rounded-2xl p-5 space-y-3 bg-gray-900 border-cyan-500/30">
+          <h3 className="font-semibold text-white">{editing ? 'Edit Achievement' : 'New Achievement'}</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as ApiAchievement['type'] })} className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white">
+              {ACHIEVEMENT_TYPE_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <input value={form.result} onChange={(e) => setForm({ ...form, result: e.target.value })} placeholder="Result (e.g. 1st Place)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} placeholder="Date (e.g. March 2025)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="Link (optional)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.rank} onChange={(e) => setForm({ ...form, rank: e.target.value })} placeholder="Rank (optional)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Category (optional)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.eventName} onChange={(e) => setForm({ ...form, eventName: e.target.value })} placeholder="Event Name *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+          </div>
+          <input value={form.students} onChange={(e) => setForm({ ...form, students: e.target.value })} placeholder="Students (comma-separated)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" rows={3} className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white resize-none" />
+
+          {/* Image upload */}
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Images</label>
+            <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium cursor-pointer transition-colors ${isLight ? 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200' : 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white hover:bg-gray-700'}`}>
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              {uploading ? 'Uploading...' : 'Upload Images'}
+              <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
+            </label>
+            {imageUrls.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {imageUrls.map((url, i) => (
+                  <div key={i} className="relative group">
+                    <img src={url} alt={`Upload ${i + 1}`} className="w-20 h-20 rounded-lg object-cover border border-gray-700" />
+                    <button onClick={() => removeImage(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
+            </button>
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 rounded-xl text-sm bg-gray-800 border border-gray-700 text-white">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {loading ? <LoadingSpinner /> : achievements.length === 0 ? (
+        <div className="text-center py-16 opacity-50"><p>No achievements yet.</p></div>
+      ) : (
+        <div className="rounded-2xl border border-gray-800 overflow-hidden overflow-x-auto">
+          <div className="min-w-[900px]">
+            <div className="grid grid-cols-[80px_1fr_140px_120px_120px_100px] gap-4 px-5 py-2.5 border-b bg-gray-900/80 border-gray-800 text-xs font-semibold uppercase tracking-widest text-gray-500">
+              <span>Image</span><span>Title</span><span>Type</span><span>Result</span><span>Date</span><span className="text-right">Actions</span>
+            </div>
+            {achievements.map((a, idx) => (
+              <div key={a._id} className={`grid grid-cols-[80px_1fr_140px_120px_120px_100px] gap-4 items-center px-5 py-3.5 transition-colors ${idx % 2 === 0 ? 'bg-gray-900/40' : 'bg-gray-900/20'} hover:bg-gray-800/40`}>
+                <div>
+                  {a.images && a.images.length > 0 ? (
+                    <img src={a.images[0]} alt={a.title} className="w-10 h-10 rounded-lg object-cover border border-gray-700" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center text-xs font-bold text-gray-500">—</div>
+                  )}
+                </div>
+                <p className="font-medium text-white truncate">{a.title}</p>
+                <div><Badge label={a.type} color={getTypeColors(a.type === 'Hackathon' ? 'blog' : a.type === 'CTF' ? 'ctf' : 'experiment', false)} /></div>
+                <p className="text-xs text-gray-400 truncate">{a.result || '—'}</p>
+                <p className="text-xs text-gray-500 truncate">{a.date || '—'}</p>
+                <div className="flex items-center gap-1 justify-end">
+                  <button onClick={() => openEdit(a)} className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-gray-800"><Edit2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleDelete(a._id)} disabled={deletingId === a._id} className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-900/20">
+                    {deletingId === a._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Main AdminDashboard ──────────────────────────────────────────────────────
 
-type AdminTab = 'users' | 'topics' | 'content' | 'faculty';
+type AdminTab = 'users' | 'topics' | 'content' | 'faculty' | 'achievements';
 
 const AdminDashboard: React.FC = () => {
   const { theme } = useTheme();
@@ -890,6 +1110,7 @@ const AdminDashboard: React.FC = () => {
       <div className="border-b border-gray-800 flex gap-1">
         {[
           { id: 'content', label: 'Content', icon: Layers },
+          { id: 'achievements', label: 'Achievements', icon: Trophy },
           { id: 'topics', label: 'Topics', icon: Hash },
           { id: 'users', label: 'Users', icon: Users },
           { id: 'faculty', label: 'Faculty', icon: GraduationCap },
@@ -905,6 +1126,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'topics' && <TopicsPanel />}
         {tab === 'content' && <ContentPanel />}
         {tab === 'faculty' && <FacultyPanel />}
+        {tab === 'achievements' && <AchievementsPanel />}
       </div>
     </div>
   );

@@ -14,7 +14,8 @@ const router = Router();
 function localUploadDir(type: string): string {
   const sub = type === 'blog' ? 'blog-images' : 
               type === 'writeups' ? 'writeup-images' :
-              type === 'faculty' ? 'faculty-images' : 'ctf-images';
+              type === 'faculty' ? 'faculty-images' :
+              type === 'achievement' ? 'achievement-images' : 'ctf-images';
   const dir = path.resolve(process.cwd(), 'uploads', sub);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
@@ -70,10 +71,11 @@ router.post(
     }
 
     const typeQuery = req.query?.type as string;
-    const uploadType = ['blog', 'ctf', 'writeups', 'faculty'].includes(typeQuery) ? typeQuery : 'ctf';
+    const uploadType = ['blog', 'ctf', 'writeups', 'faculty', 'achievement'].includes(typeQuery) ? typeQuery : 'ctf';
     const folder = uploadType === 'blog' ? '/blog-images' : 
                    uploadType === 'writeups' ? '/writeup-images' :
-                   uploadType === 'faculty' ? '/faculty-images' : '/ctf-images';
+                   uploadType === 'faculty' ? '/faculty-images' :
+                   uploadType === 'achievement' ? '/achievement-images' : '/ctf-images';
 
     // ── ImageKit path ─────────────────────────────────────────────────────────
     if (isImageKitConfigured()) {
@@ -108,7 +110,8 @@ router.post(
 
       const subDir = uploadType === 'blog' ? 'blog-images' : 
                      uploadType === 'writeups' ? 'writeup-images' : 
-                     uploadType === 'faculty' ? 'faculty-images' : 'ctf-images';
+                     uploadType === 'faculty' ? 'faculty-images' :
+                     uploadType === 'achievement' ? 'achievement-images' : 'ctf-images';
       const baseUrl = process.env.SERVER_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
       const url = `${baseUrl}/uploads/${subDir}/${fileName}`;
 
