@@ -3,7 +3,7 @@ import {
   Users, Hash, FileText, ShieldCheck, Loader2, AlertCircle,
   Plus, Trash2, Edit2, Check, X, ChevronUp, ChevronDown,
   RefreshCw, Eye, BookOpen, UserCog, Search, Layers,
-  Flag, Trophy, Tag as TagIcon
+  Flag, Trophy, Tag as TagIcon, GraduationCap
 } from 'lucide-react';
 import {
   adminGetUsers, adminSetUserRole,
@@ -14,6 +14,11 @@ import {
 import {
   adminGetWriteups, adminSetWriteupStatus, adminDeleteWriteup, Writeup
 } from '../services/writeupApi';
+import {
+  adminCreateFaculty, adminUpdateFaculty, adminDeleteFaculty,
+  getFaculty, FacultyMember as FacultyMemberType,
+} from '../services/facultyApi';
+import { uploadArticleImage } from '../services/storage';
 import NovelRenderer from './NovelRenderer';
 import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -659,9 +664,217 @@ const ContentPanel: React.FC = () => {
   );
 };
 
+// ─── Panel: Faculty ────────────────────────────────────────────────────────────
+
+const FacultyPanel: React.FC = () => {
+  const toast = useToast();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const [faculty, setFaculty] = useState<FacultyMemberType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<FacultyMemberType | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const [form, setForm] = useState({
+    name: '', designation: '', email: '', bio: '',
+    linkedinUrl: '', scholarUrl: '',
+    subjects: '', researchInterests: '',
+  });
+  const [photoUrl, setPhotoUrl] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try { const { faculty } = await getFaculty(); setFaculty(faculty); }
+    catch (err: any) { setError(err.message); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openCreate = () => {
+    setForm({ name: '', designation: '', email: '', bio: '', linkedinUrl: '', scholarUrl: '', subjects: '', researchInterests: '' });
+    setPhotoUrl('');
+    setEditing(null);
+    setShowForm(true);
+  };
+
+  const openEdit = (f: FacultyMemberType) => {
+    setForm({
+      name: f.name, designation: f.designation, email: f.email, bio: f.bio,
+      linkedinUrl: f.linkedinUrl ?? '', scholarUrl: f.scholarUrl ?? '',
+      subjects: f.subjects.join(', '), researchInterests: f.researchInterests.join(', '),
+    });
+    setPhotoUrl(f.photoUrl ?? '');
+    setEditing(f);
+    setShowForm(true);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadArticleImage(file, undefined, 'faculty');
+      setPhotoUrl(url);
+      toast.success('Photo uploaded.');
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    finally { setUploading(false); }
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.designation.trim() || !form.email.trim() || !form.bio.trim()) {
+      toast.error('Name, designation, email, and bio are required.');
+      return;
+    }
+    setSaving(true);
+    const body = {
+      name: form.name.trim(),
+      designation: form.designation.trim(),
+      email: form.email.trim(),
+      bio: form.bio.trim(),
+      linkedinUrl: form.linkedinUrl.trim() || undefined,
+      scholarUrl: form.scholarUrl.trim() || undefined,
+      photoUrl: photoUrl || undefined,
+      subjects: form.subjects.split(',').map(s => s.trim()).filter(Boolean),
+      researchInterests: form.researchInterests.split(',').map(s => s.trim()).filter(Boolean),
+    };
+    try {
+      if (editing) {
+        await adminUpdateFaculty(editing._id, body);
+        toast.success('Faculty updated.');
+      } else {
+        await adminCreateFaculty(body);
+        toast.success('Faculty created.');
+      }
+      setShowForm(false);
+      await load();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this faculty member?')) return;
+    setDeletingId(id);
+    try {
+      await adminDeleteFaculty(id);
+      toast.success('Faculty deleted.');
+      await load();
+    } catch (err: any) { toast.error(err.message); }
+    finally { setDeletingId(null); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Users className="w-5 h-5 text-cyan-500" /> Faculty Management
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">Add, edit, or remove faculty members</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={load} className="p-2.5 transition-all rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800"><RefreshCw className="w-4 h-4" /></button>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors"><Plus className="w-4 h-4" /> New Faculty</button>
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="border rounded-2xl p-5 space-y-3 bg-gray-900 border-cyan-500/30">
+          <h3 className="font-semibold text-white">{editing ? 'Edit Faculty' : 'New Faculty Member'}</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full Name *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} placeholder="Designation * (e.g. Assistant Professor)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email *" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <div className="flex gap-2 items-center">
+              <input value={form.linkedinUrl} onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })} placeholder="LinkedIn URL" className="flex-1 rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+              <input value={form.scholarUrl} onChange={(e) => setForm({ ...form, scholarUrl: e.target.value })} placeholder="Scholar URL" className="flex-1 rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            </div>
+          </div>
+
+          <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Bio *" rows={3} className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white resize-none" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input value={form.subjects} onChange={(e) => setForm({ ...form, subjects: e.target.value })} placeholder="Subjects (comma-separated)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+            <input value={form.researchInterests} onChange={(e) => setForm({ ...form, researchInterests: e.target.value })} placeholder="Research Interests (comma-separated)" className="w-full rounded-xl px-4 py-2.5 text-sm bg-gray-800 border border-gray-700 text-white" />
+          </div>
+
+          {/* Photo upload */}
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Photo</label>
+            <div className="flex items-center gap-3">
+              <label className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium cursor-pointer transition-colors ${isLight ? 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200' : 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white hover:bg-gray-700'}`}>
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                {uploading ? 'Uploading...' : 'Upload Photo'}
+                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" disabled={uploading} />
+              </label>
+              {photoUrl && (
+                <>
+                  <img src={photoUrl} alt="Preview" className="w-10 h-10 rounded-lg object-cover border border-gray-700" />
+                  <button onClick={() => setPhotoUrl('')} className="text-xs text-red-400 hover:text-red-300">Remove</button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-50 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
+            </button>
+            <button onClick={() => setShowForm(false)} className="px-4 py-2 rounded-xl text-sm bg-gray-800 border border-gray-700 text-white">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {loading ? <LoadingSpinner /> : error ? (
+        <div className="text-center py-10 text-red-400"><p>{error}</p></div>
+      ) : faculty.length === 0 ? (
+        <div className="text-center py-16 opacity-50"><p>No faculty members yet.</p></div>
+      ) : (
+        <div className="rounded-2xl border border-gray-800 overflow-hidden overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-[80px_1fr_1fr_1fr_100px] gap-4 px-5 py-2.5 border-b bg-gray-900/80 border-gray-800 text-xs font-semibold uppercase tracking-widest text-gray-500">
+              <span>Photo</span><span>Name</span><span>Designation</span><span>Email</span><span className="text-right">Actions</span>
+            </div>
+            {faculty.map((f, idx) => (
+              <div key={f._id} className={`grid grid-cols-[80px_1fr_1fr_1fr_100px] gap-4 items-center px-5 py-3.5 transition-colors ${idx % 2 === 0 ? 'bg-gray-900/40' : 'bg-gray-900/20'} hover:bg-gray-800/40`}>
+                <div>
+                  {f.photoUrl ? (
+                    <img src={f.photoUrl} alt={f.name} className="w-10 h-10 rounded-lg object-cover border border-gray-700" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center text-xs font-bold text-gray-500">
+                      {f.name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <p className="font-medium text-white truncate">{f.name}</p>
+                <p className="text-xs text-gray-400 truncate">{f.designation}</p>
+                <p className="text-xs text-gray-500 truncate">{f.email}</p>
+                <div className="flex items-center gap-1 justify-end">
+                  <button onClick={() => openEdit(f)} className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-gray-800"><Edit2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleDelete(f._id)} disabled={deletingId === f._id} className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-900/20">
+                    {deletingId === f._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Main AdminDashboard ──────────────────────────────────────────────────────
 
-type AdminTab = 'users' | 'topics' | 'content';
+type AdminTab = 'users' | 'topics' | 'content' | 'faculty';
 
 const AdminDashboard: React.FC = () => {
   const { theme } = useTheme();
@@ -679,6 +892,7 @@ const AdminDashboard: React.FC = () => {
           { id: 'content', label: 'Content', icon: Layers },
           { id: 'topics', label: 'Topics', icon: Hash },
           { id: 'users', label: 'Users', icon: Users },
+          { id: 'faculty', label: 'Faculty', icon: GraduationCap },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id as AdminTab)} className={`relative flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all ${tab === t.id ? 'text-cyan-400' : 'text-gray-500 hover:text-white'}`}>
             <t.icon className="w-4 h-4" /> {t.label}
@@ -690,6 +904,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'users' && <UsersPanel />}
         {tab === 'topics' && <TopicsPanel />}
         {tab === 'content' && <ContentPanel />}
+        {tab === 'faculty' && <FacultyPanel />}
       </div>
     </div>
   );

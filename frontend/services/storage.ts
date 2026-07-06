@@ -18,7 +18,7 @@ const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 export async function uploadArticleImage(
   file: File,
   onProgress?: (pct: number) => void,
-  type: 'ctf' | 'blog' | 'writeups' = 'ctf',
+  type: 'ctf' | 'blog' | 'writeups' | 'faculty' = 'ctf',
 ): Promise<string> {
   return _uploadImage(file, type, onProgress);
 }
@@ -38,7 +38,7 @@ export async function uploadArticleImage(
  */
 export async function uploadInlineImage(
   file: File,
-  type: 'ctf' | 'blog' | 'writeups' = 'ctf',
+  type: 'ctf' | 'blog' | 'writeups' | 'faculty' = 'ctf',
 ): Promise<string> {
   return _uploadImage(file, type);
 }
@@ -47,7 +47,7 @@ export async function uploadInlineImage(
 
 async function _uploadImage(
   file: File,
-  type: 'ctf' | 'blog' | 'writeups',
+  type: 'ctf' | 'blog' | 'writeups' | 'faculty',
   onProgress?: (pct: number) => void,
 ): Promise<string> {
   const user = auth.currentUser;

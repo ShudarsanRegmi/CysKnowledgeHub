@@ -1,22 +1,23 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search, Linkedin, ExternalLink, Mail, BookOpen,
-    ChevronDown, ChevronUp, GraduationCap, FlaskConical, X
+    ChevronDown, ChevronUp, GraduationCap, FlaskConical, X, Loader2
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { getFaculty, FacultyMember as ApiFacultyMember } from '../services/facultyApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface FacultyMember {
     id: string;
     name: string;
-    designation: string;           // e.g. "Professor", "Associate Professor"
+    designation: string;
     email: string;
     linkedinUrl?: string;
     scholarUrl?: string;
     bio: string;
-    photoUrl?: string;             // leave undefined → initials avatar
-    subjects: string[];            // courses taught
-    researchInterests?: string[];  // optional research tags
+    photoUrl?: string;
+    subjects: string[];
+    researchInterests?: string[];
 }
 
 // ─── Helper: deterministic hue from name ─────────────────────────────────────
@@ -28,103 +29,6 @@ const nameToHue = (name: string) => {
 
 const getInitials = (name: string) =>
     name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
-
-// ─── Faculty Data ─────────────────────────────────────────────────────────────
-// Real entries (sourced from Amrita faculty directory) ↓
-const FACULTY: FacultyMember[] = [
-    {
-        id: 'f06',
-        name: 'Dr. S. Udhaya Kumar',
-        designation: 'Associate Professor',
-        email: 'udhayakumar.s@ch.amrita.edu',
-        scholarUrl: 'https://scholar.google.com/citations?user=s_udhayakumar',
-        bio: 'Associate Professor in the Department of Cyber Security, Amrita School of Engineering, Chennai. His research spans Network Security, Intrusion Detection Systems, and Cloud Computing Security. He has published in several IEEE and Springer journals and actively mentors students on network defence and cloud-based security projects.',
-        researchInterests: ['Network Security', 'Intrusion Detection Systems', 'Cloud Computing Security', 'Anomaly Detection'],
-        subjects: ['Network Security', 'Cloud Computing', 'Data Communication & Networking', 'Cyber Security Fundamentals'],
-    },
-    {
-        id: 'f07',
-        name: 'S. Saravanan',
-        designation: 'Assistant Professor (Senior Grade)',
-        email: 's_saravanan@ch.amrita.edu',
-        bio: 'Assistant Professor (Senior Grade) in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. Holds a BE and M.E. His research focuses on large-scale cybersecurity analytics, design and development of Big Data technology-based applications, and streaming data analytics.',
-        researchInterests: ['Cybersecurity Analytics', 'Big Data Technology', 'Streaming Data Analytics'],
-        subjects: ['Big Data Analytics', 'Cyber Security', 'Data Streaming', 'Database Systems'],
-    },
-    {
-        id: 'f08',
-        name: 'Dr. K. Venkatesan',
-        designation: 'Assistant Professor',
-        email: 'k_venkatesan@ch.amrita.edu',
-        bio: 'Assistant Professor in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. His research spans machine learning, AI-based DWDM design, optical system design, embedded and IoT systems, blockchain security, consensus algorithms, and cybersecurity for IoT devices.',
-        researchInterests: ['Machine Learning', 'Blockchain Security', 'IoT Cybersecurity', 'Consensus Algorithms', 'Embedded Systems'],
-        subjects: ['Machine Learning', 'IoT Systems', 'Blockchain Technology', 'Embedded Systems Security'],
-    },
-    {
-        id: 'f09',
-        name: 'Dr. Deepak K.',
-        designation: 'Assistant Professor',
-        email: 'k_deepak@ch.amrita.edu',
-        scholarUrl: 'https://scholar.google.com/citations?user=k_deepak_amrita',
-        bio: 'Assistant Professor in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. His research spans machine learning, deep learning, computer vision, video anomaly detection, human activity detection, and vision-based heart rate estimation.',
-        researchInterests: ['Machine Learning', 'Deep Learning', 'Computer Vision', 'Video Anomaly Detection', 'Human Activity Detection'],
-        subjects: ['Machine Learning', 'Deep Learning', 'Computer Vision', 'Pattern Recognition'],
-    },
-    {
-        id: 'f10',
-        name: 'Dr. G. Saranya',
-        designation: 'Assistant Professor',
-        email: 'g_saranya@ch.amrita.edu',
-        bio: 'Assistant Professor in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. Holds BSc, MCA, MSc, and Ph.D. Her research interests include software engineering, database management systems, evolutionary algorithms, machine learning, and secure coding.',
-        researchInterests: ['Software Engineering', 'Database Management Systems', 'Evolutionary Algorithms', 'Secure Coding'],
-        subjects: ['Software Engineering', 'Database Management Systems', 'Machine Learning', 'Secure Coding'],
-    },
-    {
-        id: 'f11',
-        name: 'Dr. M. Chandralekha',
-        designation: 'Assistant Professor',
-        email: 'm_chandralekha@ch.amrita.edu',
-        bio: 'Assistant Professor in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. Her research covers data analytics, data mining, data science, information retrieval techniques, and machine learning.',
-        researchInterests: ['Data Analytics', 'Data Mining', 'Data Science', 'Information Retrieval', 'Machine Learning'],
-        subjects: ['Data Analytics', 'Data Mining', 'Data Science', 'Machine Learning'],
-    },
-    {
-        id: 'f12',
-        name: 'K. Geetha',
-        designation: 'Assistant Professor',
-        email: 'k_geetha@ch.amrita.edu',
-        bio: 'Assistant Professor (OC) in the Department of Cybersecurity, Amrita School of Computing, Chennai. Holds M.Tech., MCA, and Ph.D qualifications.',
-        researchInterests: ['Cyber Security'],
-        subjects: ['Cyber Security Foundations'],
-    },
-    {
-        id: 'f13',
-        name: 'M. Rithani',
-        designation: 'Assistant Professor',
-        email: 'm_rithani@ch.amrita.edu',
-        bio: 'Assistant Professor (OC) in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. Her research covers big data, cloud computing, security practices, information storage and management, and information forensics and security.',
-        researchInterests: ['Big Data', 'Cloud Computing', 'Security Practices', 'Information Forensics & Security'],
-        subjects: ['Big Data', 'Cloud Computing Security', 'Information Storage & Management', 'Security Analytics'],
-    },
-    {
-        id: 'f14',
-        name: 'D. Sasikala',
-        designation: 'Assistant Professor',
-        email: 'd_sasikala@ch.amrita.edu',
-        bio: 'Assistant Professor in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. Holds BE, M.E, and Ph.D. Her research interests include machine learning, speech processing, computer architecture, data mining, and data analytics.',
-        researchInterests: ['Machine Learning', 'Speech Processing', 'Computer Architecture', 'Data Mining', 'Data Analytics'],
-        subjects: ['Machine Learning', 'Data Mining', 'Computer Architecture', 'Data Analytics'],
-    },
-    {
-        id: 'f15',
-        name: 'Dr. G. Anitha',
-        designation: 'Assistant Professor',
-        email: 'g_anitha@ch.amrita.edu',
-        bio: 'Assistant Professor in the Department of Computer Science and Engineering, Amrita School of Computing, Chennai. Her research areas include artificial intelligence, machine learning, deep learning, video processing, computer vision, and data science.',
-        researchInterests: ['Artificial Intelligence', 'Machine Learning', 'Deep Learning', 'Computer Vision', 'Data Science'],
-        subjects: ['Artificial Intelligence', 'Machine Learning', 'Deep Learning', 'Computer Vision'],
-    },
-];
 
 // ─── Designation rankings (for filter pills) ─────────────────────────────────
 const ALL_DESIGNATIONS = [
@@ -456,15 +360,40 @@ const FacultyModal: React.FC<{ faculty: FacultyMember; onClose: () => void }> = 
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const FacultyPage: React.FC = () => {
+    const [facultyList, setFacultyList] = useState<FacultyMember[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState('');
     const [desgFilter, setDesgFilter] = useState('All');
     const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(null);
     const { theme } = useTheme();
     const isLight = theme === 'light';
 
+    useEffect(() => {
+        getFaculty()
+            .then(({ faculty }) => {
+                setFacultyList(
+                    faculty.map((f: ApiFacultyMember) => ({
+                        id: f._id,
+                        name: f.name,
+                        designation: f.designation,
+                        email: f.email,
+                        linkedinUrl: f.linkedinUrl,
+                        scholarUrl: f.scholarUrl,
+                        bio: f.bio,
+                        photoUrl: f.photoUrl,
+                        subjects: f.subjects,
+                        researchInterests: f.researchInterests,
+                    }))
+                );
+            })
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
+    }, []);
+
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
-        return FACULTY.filter(f => {
+        return facultyList.filter(f => {
             if (desgFilter !== 'All' && !f.designation.startsWith(desgFilter)) return false;
             if (!q) return true;
             return (
@@ -474,18 +403,34 @@ const FacultyPage: React.FC = () => {
                 (f.researchInterests ?? []).some(r => r.toLowerCase().includes(q))
             );
         });
-    }, [query, desgFilter]);
+    }, [query, desgFilter, facultyList]);
 
-    // Unique designations present in data (prefix-match)
     const activeDesignations = useMemo(() => {
-        const set = new Set(FACULTY.map(f => {
+        const set = new Set(facultyList.map(f => {
             for (const d of ALL_DESIGNATIONS.slice(1)) {
                 if (f.designation.startsWith(d)) return d;
             }
             return f.designation;
         }));
         return ['All', ...ALL_DESIGNATIONS.slice(1).filter(d => set.has(d))];
-    }, []);
+    }, [facultyList]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="py-20 text-center border border-gray-200 dark:border-gray-800 rounded-3xl bg-gray-50 dark:bg-gray-900/40">
+                <p className="text-red-500 font-medium">Failed to load faculty data.</p>
+                <p className="text-gray-400 text-sm mt-1">{error}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-10">
@@ -519,9 +464,9 @@ const FacultyPage: React.FC = () => {
                     {/* Stats */}
                     <div className="flex gap-4 flex-shrink-0">
                         {[
-                            { label: 'Faculty', value: FACULTY.length },
-                            { label: 'Assoc. Prof.', value: FACULTY.filter(f => f.designation.startsWith('Associate')).length },
-                            { label: 'Asst. Prof.', value: FACULTY.filter(f => f.designation.startsWith('Assistant')).length },
+                            { label: 'Faculty', value: facultyList.length },
+                            { label: 'Assoc. Prof.', value: facultyList.filter(f => f.designation.startsWith('Associate')).length },
+                            { label: 'Asst. Prof.', value: facultyList.filter(f => f.designation.startsWith('Assistant')).length },
                         ].map(stat => (
                             <div key={stat.label} className={`border rounded-2xl px-5 py-4 text-center min-w-[80px] ${isLight ? 'bg-white border-indigo-200 shadow-sm' : 'bg-gray-900/70 border-gray-700/50'}`}>
                                 <div className={`text-2xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{stat.value}</div>

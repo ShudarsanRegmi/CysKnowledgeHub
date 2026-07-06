@@ -11,7 +11,8 @@
     "seed:user": "ts-node-dev --transpile-only scripts/seed-test-users.ts",
     "clear:test-users": "ts-node-dev --transpile-only scripts/clear-test-users.ts",
     "seed:content": "ts-node-dev --transpile-only scripts/seed-content.ts",
-    "fix:admin-role": "ts-node-dev --transpile-only scripts/fix-admin-role.ts"
+    "fix:admin-role": "ts-node-dev --transpile-only scripts/fix-admin-role.ts",
+    "seed:faculty": "ts-node-dev --transpile-only scripts/seed-faculty.ts"
   },
   "dependencies": {
     "@imagekit/nodejs": "^7.3.0",
