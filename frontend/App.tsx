@@ -293,17 +293,17 @@ const App: React.FC = () => {
         return (
           <div className="space-y-16">
             {/* Hero */}
-            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border border-cyan-200 dark:border-cyan-500/20 p-8 md:p-16 text-center">
+            <section className="relative overflow-hidden rounded-3xl border border-cyan-200 dark:border-cyan-500/20 p-8 md:p-16 text-center">
 
-              <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #06b6d4 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-                CyberSecurity <span className="text-cyan-500 underline decoration-cyan-500/30">Department Amrita</span>
+              <div className="absolute inset-0 bg-[url('/images/classcoverpage.jpeg')] bg-cover bg-center" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+              <h1 className="relative z-10 text-4xl md:text-6xl font-bold mb-6 tracking-tight text-white">
+                CyberSecurity <span className="text-cyan-400 underline decoration-cyan-400/30">Department Amrita</span>
               </h1>
-              <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+              <p className="relative z-10 text-xl text-gray-200 max-w-2xl mx-auto mb-10">
                 The complete department knowledge hub — student & faculty profiles, placements, events, galleries, projects, achievements, certifications, CTF challenges, interview experiences, and more from Amrita's Cybersecurity Department.
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="relative z-10 flex flex-wrap justify-center gap-4">
                 <button onClick={() => setActiveTab('roadmaps')} className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-full font-semibold transition-all flex items-center gap-2">
                   Get Started <ArrowRight className="w-5 h-5" />
                 </button>
