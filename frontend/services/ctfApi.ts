@@ -409,7 +409,7 @@ export const getInterviews = (params?: { company?: string; domain?: string; resu
   );
 };
 
-export const getCompanies = (params?: { industry?: string; opportunityType?: string }) => {
+export const getCompanies = (params?: { search?: string; industry?: string; opportunityType?: string; page?: number; limit?: number }) => {
   const filtered = Object.fromEntries(
     Object.entries(params ?? {})
       .filter(([, v]) => v !== undefined && v !== '')
@@ -417,9 +417,14 @@ export const getCompanies = (params?: { industry?: string; opportunityType?: str
   );
   const qs = new URLSearchParams(filtered).toString();
   return fetch(`${BASE}/api/companies${qs ? `?${qs}` : ''}`).then((r) =>
-    json<ApiCompany[]>(r)
+    json<{ companies: ApiCompany[]; total: number; page: number; totalPages: number }>(r)
   );
 };
+
+export const getCompanyFilters = () =>
+  fetch(`${BASE}/api/companies/filters`).then((r) =>
+    json<{ industries: string[]; opportunityTypes: string[] }>(r)
+  );
 
 export const getRoadmaps = () =>
   fetch(`${BASE}/api/roadmaps`).then((r) =>
