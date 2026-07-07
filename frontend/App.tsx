@@ -298,10 +298,10 @@ const App: React.FC = () => {
               <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
                 style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #06b6d4 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-                Master the Art of <span className="text-cyan-500 underline decoration-cyan-500/30">Cyber Defense</span>
+                CyberSecurity <span className="text-cyan-500 underline decoration-cyan-500/30">Department Amrita</span>
               </h1>
               <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-                A knowledge vault for cybersecurity enthusiasts. Roadmaps, research, writeups, and experiences from the community.
+                The complete department knowledge hub — student & faculty profiles, placements, events, galleries, projects, achievements, certifications, CTF challenges, interview experiences, and more from Amrita's Cybersecurity Department.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <button onClick={() => setActiveTab('roadmaps')} className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-full font-semibold transition-all flex items-center gap-2">
